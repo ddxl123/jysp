@@ -1,0 +1,13 @@
+.dart_tool
+.idea
+.vscode
+android
+build
+ios
+test
+.metadata
+.packages
+jysp.iml
+pubspec.lock
+pubspec.yaml
+README.md
