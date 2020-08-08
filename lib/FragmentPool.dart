@@ -14,7 +14,7 @@ class _FragmentPoolState extends State<FragmentPool> {
   List<Map<dynamic, dynamic>> fragmentPoolDateList = [];
   Map<String, Map<dynamic, dynamic>> fragmentPoolDateMap = {};
   Map<String, int> tailMap = {};
-  Function initFreeBoxPosition;
+  Function({Offset initPosition}) initFreeBoxPosition;
 
   @override
   void initState() {
@@ -164,9 +164,6 @@ class _FragmentPoolState extends State<FragmentPool> {
           )
         else
           EndIndex(
-            s: () {
-              setState(() {});
-            },
             frameCallback: () {
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                 /// 清空
@@ -300,7 +297,7 @@ class _FragmentPoolState extends State<FragmentPool> {
                 Offset zeroCorrectOffset = Offset(fragmentPoolDateMap["0"]["layout_left"], -fragmentPoolDateMap["0"]["layout_top"]);
                 Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
                 Offset zeroCenter = -Offset(fragmentPoolDateMap["0"]["layout_width"] / 2, fragmentPoolDateMap["0"]["layout_height"] / 2);
-                initFreeBoxPosition(zeroCorrectOffset + mediaCenter + zeroCenter);
+                initFreeBoxPosition(initPosition: zeroCorrectOffset + mediaCenter + zeroCenter);
               });
             },
           ),
@@ -309,26 +306,36 @@ class _FragmentPoolState extends State<FragmentPool> {
 
   @override
   Widget build(BuildContext context) {
-    return FreeBox(
-      boxWidth: double.maxFinite,
-      boxHeight: double.maxFinite,
-      eventWidth: double.maxFinite,
-      eventHeight: double.maxFinite,
-      backgroundColor: Colors.green,
-      initPosition: (rebuild) {
-        initFreeBoxPosition = rebuild;
-      },
-
-      /// [FreeBox] 被 [rebuild] , [childrenWidget] 并不会被 [rebuild] ， [FragmentPool] 被 [rebuild] , [childrenWidget] 才会被 [rebuild]
-      children: childrenWidget(),
+    return Stack(
+      children: <Widget>[
+        FreeBox(
+          boxWidth: double.maxFinite,
+          boxHeight: double.maxFinite,
+          eventWidth: double.maxFinite,
+          eventHeight: double.maxFinite,
+          backgroundColor: Colors.green,
+          initPosition: (Function({Offset initPosition}) rebuild) {
+            initFreeBoxPosition = rebuild;
+          },
+          children: childrenWidget(),
+        ),
+        Positioned(
+          bottom: 50,
+          child: FlatButton(
+            onPressed: () {
+              this.initFreeBoxPosition();
+            },
+            child: Icon(Icons.adjust),
+          ),
+        ),
+      ],
     );
   }
 }
 
 class EndIndex extends StatefulWidget {
-  EndIndex({Key key, @required this.frameCallback, @required this.s}) : super(key: key);
+  EndIndex({Key key, @required this.frameCallback}) : super(key: key);
   final Function frameCallback;
-  final Function s;
 
   @override
   _EndIndexState createState() => _EndIndexState();
@@ -356,13 +363,6 @@ class _EndIndexState extends State<EndIndex> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: FlatButton(
-        onPressed: () {
-          widget.s();
-        },
-        child: Text("data"),
-      ),
-    );
+    return Container();
   }
 }

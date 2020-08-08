@@ -19,6 +19,8 @@ class SingleNode extends StatefulWidget {
 }
 
 class SingleNodeState extends State<SingleNode> {
+  String _thisRoute;
+
   /// 获取 [布局大小]
   void reGetLayoutSize() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -46,18 +48,54 @@ class SingleNodeState extends State<SingleNode> {
 
   @override
   Widget build(BuildContext context) {
+    _thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
     return Positioned(
-      left: widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]]["layout_left"] ?? 0.0,
-      top: widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]]["layout_top"] ?? 0.0,
-      child: Container(
-        color: Colors.yellow,
-        child: FlatButton(
-          onPressed: () {
-            setState(() {});
-          },
-          child: Text(widget.fragmentPoolDateList[widget.index]["out_display_name"]),
+      left: widget.fragmentPoolDateMap[_thisRoute]["layout_left"] ?? 0.0,
+      top: widget.fragmentPoolDateMap[_thisRoute]["layout_top"] ?? 0.0,
+      child: CustomPaint(
+        painter: SingleNodeLine(
+          path: () {
+            /// 以下皆相对 path
+            Path path = Path();
+            if (_thisRoute != "0") {
+              path.moveTo(0, widget.fragmentPoolDateMap[_thisRoute]["layout_height"] / 2);
+              path.lineTo(-40, widget.fragmentPoolDateMap[_thisRoute]["layout_height"] / 2);
+              double fatherCenterTop = widget.fragmentPoolDateMap[_thisRoute.substring(0, _thisRoute.length - 2)]["layout_top"] +
+                  (widget.fragmentPoolDateMap[_thisRoute.substring(0, _thisRoute.length - 2)]["layout_height"] / 2);
+              double thisCenterTop = widget.fragmentPoolDateMap[_thisRoute]["layout_top"];
+
+              path.lineTo(-40, fatherCenterTop - thisCenterTop);
+              path.lineTo(-80, fatherCenterTop - thisCenterTop);
+            }
+            return path;
+          }(),
+        ),
+        child: Container(
+          color: Colors.yellow,
+          child: FlatButton(
+            onPressed: () {
+              setState(() {});
+            },
+            child: Text(widget.fragmentPoolDateList[widget.index]["out_display_name"]),
+          ),
         ),
       ),
     );
   }
+}
+
+class SingleNodeLine extends CustomPainter {
+  SingleNodeLine({@required this.path});
+  final Path path;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint();
+    paint.color = Colors.blue;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 4.0;
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

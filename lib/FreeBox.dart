@@ -16,7 +16,7 @@ class FreeBox extends StatefulWidget {
   final double boxHeight;
   final double eventWidth;
   final double eventHeight;
-  final Function(Function(Offset) rebuild) initPosition;
+  final Function(Function({Offset initPosition}) rebuild) initPosition;
 
   @override
   State<StatefulWidget> createState() {
@@ -31,15 +31,24 @@ class _FreeBox extends State<FreeBox> {
   Offset _offset = Offset(0, 0);
   Offset _lastOffset = Offset(0, 0);
 
-  void rebuild(Offset ip) {
-    _offset += ip;
+  Offset initPosition = Offset.zero;
+
+  void initFreeBoxPositon({Offset initPosition}) {
+    if (initPosition != null) {
+      this._offset = initPosition;
+      this.initPosition = initPosition;
+      this._scale = 1;
+    } else {
+      this._offset = this.initPosition;
+      this._scale = 1;
+    }
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    widget.initPosition(rebuild);
+    widget.initPosition(initFreeBoxPositon);
   }
 
   @override
