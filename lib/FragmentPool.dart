@@ -142,6 +142,9 @@ class _FragmentPoolState extends State<FragmentPool> {
           SingleNode(
             fragmentPoolDateList: fragmentPoolDateList,
             index: childrenIndex,
+            reSet: () {
+              setState(() {});
+            },
             fragmentPoolDateMap: (() {
               if (fragmentPoolDateMap[fragmentPoolDateList[childrenIndex]["route"]] == null) {
                 fragmentPoolDateMap[fragmentPoolDateList[childrenIndex]["route"]] = {
@@ -290,6 +293,7 @@ class _FragmentPoolState extends State<FragmentPool> {
 
                 fragmentPoolDateMap.forEach((key, value) {
                   fragmentPoolDateMap[key]["layout_top"] += fragmentPoolDateMap[key]["vertical_center_offset"];
+                  print(fragmentPoolDateMap[key]["this"]);
                   (value["this"] as SingleNodeState).setState(() {});
                 });
 
@@ -297,7 +301,7 @@ class _FragmentPoolState extends State<FragmentPool> {
                 Offset zeroCorrectOffset = Offset(fragmentPoolDateMap["0"]["layout_left"], -fragmentPoolDateMap["0"]["layout_top"]);
                 Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
                 Offset zeroCenter = -Offset(fragmentPoolDateMap["0"]["layout_width"] / 2, fragmentPoolDateMap["0"]["layout_height"] / 2);
-                initFreeBoxPosition(initPosition: zeroCorrectOffset + mediaCenter + zeroCenter);
+                // initFreeBoxPosition(initPosition: zeroCorrectOffset + mediaCenter + zeroCenter);
               });
             },
           ),
@@ -324,6 +328,16 @@ class _FragmentPoolState extends State<FragmentPool> {
           child: FlatButton(
             onPressed: () {
               this.initFreeBoxPosition();
+            },
+            child: Icon(Icons.adjust),
+          ),
+        ),
+        Positioned(
+          bottom: 50,
+          right: 0,
+          child: FlatButton(
+            onPressed: () {
+              setState(() {});
             },
             child: Icon(Icons.adjust),
           ),

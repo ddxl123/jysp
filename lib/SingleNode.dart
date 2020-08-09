@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 class SingleNode extends StatefulWidget {
@@ -8,11 +6,13 @@ class SingleNode extends StatefulWidget {
     @required this.fragmentPoolDateList,
     @required this.fragmentPoolDateMap,
     @required this.index,
+    @required this.reSet,
   }) : super(key: key);
 
   final List<Map<dynamic, dynamic>> fragmentPoolDateList;
   final Map<String, dynamic> fragmentPoolDateMap;
   final int index;
+  final Function reSet;
 
   @override
   SingleNodeState createState() => SingleNodeState();
@@ -74,7 +74,50 @@ class SingleNodeState extends State<SingleNode> {
           color: Colors.yellow,
           child: FlatButton(
             onPressed: () {
-              setState(() {});
+              showBottomSheet(
+                  context: context,
+                  builder: (_) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            FlatButton(
+                              onPressed: () {
+                                widget.fragmentPoolDateList.add({
+                                  "route": () {
+                                    int childCount = 0;
+                                    for (int i = 0; i < widget.fragmentPoolDateList.length; i++) {
+                                      if (widget.fragmentPoolDateMap.containsKey(_thisRoute + "-$i")) {
+                                        childCount++;
+                                      } else {
+                                        break;
+                                      }
+                                    }
+                                    return _thisRoute + "-$childCount";
+                                  }(),
+                                  "type": 1,
+                                  "out_display_name": "$_thisRoute,hhhhh",
+                                });
+                                widget.reSet();
+                              },
+                              child: Text("添加子级"),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            FlatButton(
+                              onPressed: () {},
+                              child: Text("添加父级"),
+                            ),
+                          ],
+                        )
+                      ],
+                    );
+                  });
             },
             child: Text(widget.fragmentPoolDateList[widget.index]["out_display_name"]),
           ),
@@ -90,7 +133,7 @@ class SingleNodeLine extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
-    paint.color = Colors.blue;
+    paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 4.0;
     canvas.drawPath(path, paint);

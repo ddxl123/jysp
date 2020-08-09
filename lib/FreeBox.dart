@@ -34,6 +34,7 @@ class _FreeBox extends State<FreeBox> {
   Offset initPosition = Offset.zero;
 
   void initFreeBoxPositon({Offset initPosition}) {
+    // print("object");
     if (initPosition != null) {
       this._offset = initPosition;
       this.initPosition = initPosition;
@@ -69,7 +70,7 @@ class _FreeBox extends State<FreeBox> {
         Offset deltaOffset = details.localFocalPoint - _lastOffset;
         _offset += deltaOffset;
         _lastOffset = details.localFocalPoint;
-        print(_offset);
+        // print(_offset);
         setState(() {});
       },
       child: Container(
