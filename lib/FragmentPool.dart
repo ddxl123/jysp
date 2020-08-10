@@ -174,7 +174,6 @@ class _FragmentPoolState extends State<FragmentPool> {
                     fragmentPoolDateMap[fatherRoute]["child_count"]++;
                   }
                 });
-                print(fragmentPoolDateMap);
 
                 ///
                 /// 2、从 [tail_route] 开始,依次向左迭代获取 [container_height]
@@ -254,15 +253,38 @@ class _FragmentPoolState extends State<FragmentPool> {
                         /// 2、这里不能用"1、"的方法,因为需要把整个 [children] 进行调整;
                         double finalchild0Top = (fatherHeight / 2 - childrenUDHeight / 2) + fatherUp; // 可以为负值
                         double delta = finalchild0Top - childrenUp; // 可以为负值
-                        void func(String route) {
+                        void func(String route, double del) {
                           for (int i = 0; i < fragmentPoolDateMap[route]["child_count"]; i++) {
                             String childRoute = route + "-$i";
-                            fragmentPoolDateMap[childRoute]["vertical_center_offset"] = delta;
-                            func(childRoute);
+                            fragmentPoolDateMap[childRoute]["vertical_center_offset"] = del;
+                            func(childRoute, del);
                           }
                         }
 
-                        func(fatherRoute);
+                        if (delta >= 0) {
+                          func(fatherRoute, delta.abs());
+                        } else {
+                          //// 因为 [delta >= 0] 时，其 ["vertical_center_offset"] 还残留着非0值,因此需要把他们的值赋为0
+                          func(fatherRoute, 0);
+                          List<String> keyNums = fatherRoute.split("-");
+                          for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
+                            //// [fatherRoute] 假设为 0-1-2-3 ,结果为: 0, 0-1, 0-1-2, 0-1-2-3
+                            String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
+                            //// 自身: 0, 0-1, 0-1-2, 0-1-2-3
+                            fragmentPoolDateMap[partRoute]["vertical_center_offset"] = delta.abs();
+                            for (int brotherIndex = int.parse(keyNums[partIndex]) + 1; brotherIndex < fragmentPoolDateList.length; brotherIndex++) {
+                              //// 递增: (1+), 0-(2+), 0-1-(3+), 0-1-2-(4+)
+                              String partIncRoute = keyNums.sublist(0, partIndex).join("-") + "-$brotherIndex";
+                              if (fragmentPoolDateMap.containsKey(partIncRoute) == false) {
+                                break;
+                              } else {
+                                /// TODO: 这部分不知为何下移的距离会过大
+                                fragmentPoolDateMap[partIncRoute]["vertical_center_offset"] = delta.abs(); // 自身
+                                func(partIncRoute, delta.abs());
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }

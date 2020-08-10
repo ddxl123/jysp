@@ -126,7 +126,6 @@ class SingleNodeState extends State<SingleNode> {
                                         break;
                                       }
                                     }
-                                    print(_thisRoute + "-$childCount");
                                     return _thisRoute + "-$childCount";
                                   }(),
                                   "type": 1,
