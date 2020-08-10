@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -27,7 +28,8 @@ class _FragmentPoolState extends State<FragmentPool> {
       {
         "route": "0-1",
         "type": 1,
-        "out_display_name": "热污\n染3\n人安\n抚43\n3给热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安抚\n\n433给热\n污\n染3人安抚433给热污\n染3人安抚4\n33给 0-1",
+        "out_display_name":
+            "热污\n染3\n人安\n抚43\n3给热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安抚\n\n433给热\n污\n染3人安抚433给热污\n染3人安抚4\n33给 0-1",
       },
       {
         "route": "0-2",
@@ -164,7 +166,15 @@ class _FragmentPoolState extends State<FragmentPool> {
                   if (!fragmentPoolDateMap.containsKey(key + "-0")) {
                     tailMap[key] = value["index"];
                   }
+
+                  /// 获取每个 [route] 的 [child] 数量
+                  List<String> spl = key.split("-");
+                  String fatherRoute = spl.sublist(0, spl.length - 1).join("-");
+                  if (key != "0" && fragmentPoolDateMap.containsKey(fatherRoute)) {
+                    fragmentPoolDateMap[fatherRoute]["child_count"]++;
+                  }
                 });
+                print(fragmentPoolDateMap);
 
                 ///
                 /// 2、从 [tail_route] 开始,依次向左迭代获取 [container_height]
@@ -172,22 +182,19 @@ class _FragmentPoolState extends State<FragmentPool> {
                 double widthSpace = 80.0;
 
                 tailMap.forEach((key, value) {
-                  /// 向左传递,逐渐减
-                  for (int partIndex = key.length ~/ 2; partIndex >= 0; partIndex--) {
-                    String partRoute = key.substring(0, partIndex * 2 + 1);
+                  List<String> keyNums = key.split("-");
+                  for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
+                    String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
 
                     /// 既然从尾部开始，那么就不处理"0"
                     if (partRoute != "0") {
-                      String fatherRoute = partRoute.substring(0, partRoute.length - 2);
+                      String fatherRoute = keyNums.sublist(0, partIndex).join("-");
                       double childrenContainerHeight = 0.0 - heightSpace; //// 减去 [height_space] 是因为 [container_height] 不包含最底下的 [height_space]
 
                       /// 迭代同层级的 [route]
-                      for (int incIndex = 0; incIndex < fragmentPoolDateMap.length; incIndex++) {
+                      for (int incIndex = 0; incIndex < fragmentPoolDateMap[fatherRoute]["child_count"]; incIndex++) {
                         String incRoute = fatherRoute + "-$incIndex";
                         childrenContainerHeight += fragmentPoolDateMap[incRoute]["container_height"] + heightSpace; //// 需要加上 [heightSpace]
-                        if (fragmentPoolDateMap.containsKey(fatherRoute + "-${incIndex + 1}") == false) {
-                          break;
-                        }
                       }
 
                       /// 比较并赋值
@@ -204,12 +211,13 @@ class _FragmentPoolState extends State<FragmentPool> {
                   double finalLeft = 0.0;
 
                   /// 逐渐减
-                  for (int partIndex = key.length ~/ 2; partIndex >= 0; partIndex--) {
-                    String partRoute = key.substring(0, partIndex * 2 + 1);
+                  List<String> keyNums = key.split("-");
+                  for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
+                    String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
 
                     /// 向上紧贴
-                    for (int upIndex = 0; upIndex < int.parse(partRoute[partRoute.length - 1]); upIndex++) {
-                      topContainerHeight += fragmentPoolDateMap[partRoute.substring(0, partRoute.length - 1) + "$upIndex"]["container_height"] + heightSpace;
+                    for (int upIndex = 0; upIndex < int.parse(keyNums[partIndex]); upIndex++) {
+                      topContainerHeight += fragmentPoolDateMap[keyNums.sublist(0, partIndex).join("-") + "-$upIndex"]["container_height"] + heightSpace;
                     }
 
                     /// 向左对齐
@@ -225,43 +233,32 @@ class _FragmentPoolState extends State<FragmentPool> {
                 /// 4、从 [tail_route] 开始,垂直居中偏移
                 tailMap.forEach((key, value) {
                   /// 向左传递,逐渐减
-                  for (int partIndex = key.length ~/ 2; partIndex >= 0; partIndex--) {
-                    String partRoute = key.substring(0, partIndex * 2 + 1);
+                  List<String> keyNums = key.split("-");
+                  for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
+                    String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
 
                     /// 既然从尾部开始，那么就不处理"0"
                     if (partRoute != "0") {
-                      String fatherRoute = partRoute.substring(0, partRoute.length - 2);
-                      int childCount = 0;
+                      String fatherRoute = keyNums.sublist(0, partIndex).join("-");
 
-                      /// 迭代同层级的 [route]
-                      for (int incIndex = 0; incIndex < fragmentPoolDateMap.length; incIndex++) {
-                        if (fragmentPoolDateMap.containsKey(fatherRoute + "-${incIndex + 1}") == false) {
-                          childCount = incIndex + 1;
-                          break;
-                        }
-                      }
-                      double childrenUp = fragmentPoolDateMap[fatherRoute + "-0"]["layout_top"];
-                      double childrenDown = fragmentPoolDateMap[fatherRoute + "-${childCount - 1}"]["layout_top"] + fragmentPoolDateMap[fatherRoute + "-${childCount - 1}"]["layout_height"];
-                      double childrenUDHeight = (childrenDown - childrenUp).abs();
-                      double fatherUp = fragmentPoolDateMap[fatherRoute]["layout_top"];
-                      double fatherHeight = fragmentPoolDateMap[fatherRoute]["layout_height"];
+                      double childrenUp = fragmentPoolDateMap[fatherRoute + "-0"]["layout_top"]; // 可以为负值
+                      double childrenDown = fragmentPoolDateMap[fatherRoute + "-${fragmentPoolDateMap[fatherRoute]["child_count"] - 1}"]["layout_top"] +
+                          fragmentPoolDateMap[fatherRoute + "-${fragmentPoolDateMap[fatherRoute]["child_count"] - 1}"]["layout_height"]; // 可以为负值
+                      double childrenUDHeight = (childrenDown - childrenUp).abs(); // 不能为负值
+                      double fatherUp = fragmentPoolDateMap[fatherRoute]["layout_top"]; // 可以为负值
+                      double fatherHeight = fragmentPoolDateMap[fatherRoute]["layout_height"]; // 不能为负值
                       if (childrenUDHeight >= fragmentPoolDateMap[fatherRoute]["layout_height"]) {
                         /// 1、这里不能用"2、"的方式,因为 [children] 上方的空无不容易计算;
                         fragmentPoolDateMap[fatherRoute]["layout_top"] = (childrenUDHeight / 2 - fatherHeight / 2) + childrenUp;
                       } else {
                         /// 2、这里不能用"1、"的方法,因为需要把整个 [children] 进行调整;
-                        double finalchild0Top = (fatherHeight / 2 - childrenUDHeight / 2) + fatherUp;
-                        double delta = (finalchild0Top - childrenUp).abs();
+                        double finalchild0Top = (fatherHeight / 2 - childrenUDHeight / 2) + fatherUp; // 可以为负值
+                        double delta = finalchild0Top - childrenUp; // 可以为负值
                         void func(String route) {
-                          for (int i = 0; i < fragmentPoolDateMap.length; i++) {
+                          for (int i = 0; i < fragmentPoolDateMap[route]["child_count"]; i++) {
                             String childRoute = route + "-$i";
-                            Map<dynamic, dynamic> map = fragmentPoolDateMap[childRoute];
-                            if (map != null) {
-                              fragmentPoolDateMap[childRoute]["vertical_center_offset"] = delta;
-                              func(childRoute);
-                            } else {
-                              break;
-                            }
+                            fragmentPoolDateMap[childRoute]["vertical_center_offset"] = delta;
+                            func(childRoute);
                           }
                         }
 
@@ -274,10 +271,16 @@ class _FragmentPoolState extends State<FragmentPool> {
                 ///
                 /// 5、开始第2帧 [rebuild]
                 fragmentPoolDateMapClone.clear();
-                fragmentPoolDateMapClone.addAll(Map.from(fragmentPoolDateMap));
                 fragmentPoolDateMap.forEach((key, value) {
                   fragmentPoolDateMap[key]["layout_top"] += fragmentPoolDateMap[key]["vertical_center_offset"];
-                  fragmentPoolDateMapClone[key]["layout_top"] += fragmentPoolDateMapClone[key]["vertical_center_offset"];
+                  fragmentPoolDateMapClone[key] = {
+                    "child_count": fragmentPoolDateMap[key]["child_count"],
+                    "layout_height": fragmentPoolDateMap[key]["layout_height"],
+                    "layout_width": fragmentPoolDateMap[key]["layout_width"],
+                    "layout_left": fragmentPoolDateMap[key]["layout_left"],
+                    "layout_top": fragmentPoolDateMap[key]["layout_top"],
+                    "container_height": fragmentPoolDateMap[key]["container_height"],
+                  };
                   (value["this"] as SingleNodeState).setState(() {});
                 });
 

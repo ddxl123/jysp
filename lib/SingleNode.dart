@@ -23,11 +23,12 @@ class SingleNode extends StatefulWidget {
 class SingleNodeState extends State<SingleNode> {
   void firstFrame() {
     /// 第一帧开始
-    // 这里的 widget.fragmentPoolDateMap 和 widget.fragmentPoolDateList 都已经被赋初始值为 {} 和 [] 了
+    //// 这里的 [widget.fragmentPoolDateMap] 和 [widget.fragmentPoolDateList] 都已经被赋初始值为 {} 和 [] 了
     if (widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]] == null) {
       widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]] = {
         "index": widget.index,
         "this": this,
+        "child_count": 0,
         "layout_height": 0.0,
         "layout_width": 0.0,
         "layout_left": 0.0,
@@ -40,14 +41,12 @@ class SingleNodeState extends State<SingleNode> {
     /// 若 [widget.fragmentPoolDateMap] 有新的 [key] 而未赋值，则 [rebuild] 时会获取到为 [null] 的值
     if (widget.fragmentPoolDateMapClone[widget.fragmentPoolDateList[widget.index]["route"]] == null) {
       widget.fragmentPoolDateMapClone[widget.fragmentPoolDateList[widget.index]["route"]] = {
-        "index": widget.index,
-        "this": this,
+        "child_count": 0,
         "layout_height": 0.0,
         "layout_width": 0.0,
         "layout_left": 0.0,
         "layout_top": 0.0,
         "container_height": 0.0,
-        "vertical_center_offset": 0.0
       };
     }
 
@@ -76,9 +75,12 @@ class SingleNodeState extends State<SingleNode> {
   }
 
   String _thisRoute;
+  String _thisFatherRoute;
   @override
   Widget build(BuildContext context) {
     _thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
+    List<String> spl = _thisRoute.split("-");
+    _thisFatherRoute = spl.sublist(0, spl.length - 1).join("-");
     return Positioned(
       left: widget.fragmentPoolDateMapClone[_thisRoute]["layout_left"],
       top: widget.fragmentPoolDateMapClone[_thisRoute]["layout_top"],
@@ -90,8 +92,7 @@ class SingleNodeState extends State<SingleNode> {
             if (_thisRoute != "0") {
               path.moveTo(0, widget.fragmentPoolDateMapClone[_thisRoute]["layout_height"] / 2);
               path.lineTo(-40, widget.fragmentPoolDateMapClone[_thisRoute]["layout_height"] / 2);
-              double fatherCenterTop = widget.fragmentPoolDateMapClone[_thisRoute.substring(0, _thisRoute.length - 2)]["layout_top"] +
-                  (widget.fragmentPoolDateMapClone[_thisRoute.substring(0, _thisRoute.length - 2)]["layout_height"] / 2);
+              double fatherCenterTop = widget.fragmentPoolDateMapClone[_thisFatherRoute]["layout_top"] + (widget.fragmentPoolDateMapClone[_thisFatherRoute]["layout_height"] / 2);
               double thisCenterTop = widget.fragmentPoolDateMapClone[_thisRoute]["layout_top"];
 
               path.lineTo(-40, fatherCenterTop - thisCenterTop);
