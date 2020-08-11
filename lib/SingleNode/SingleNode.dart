@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/SingleNode/FolderNode.dart';
 
 class SingleNode extends StatefulWidget {
   SingleNode({
@@ -21,8 +22,8 @@ class SingleNode extends StatefulWidget {
 }
 
 class SingleNodeState extends State<SingleNode> {
-  String _thisRoute;
-  String _thisFatherRoute;
+  String thisRoute;
+  String thisFatherRoute;
 
   void firstFrame() {
     /// 第一帧开始
@@ -79,22 +80,22 @@ class SingleNodeState extends State<SingleNode> {
 
   @override
   Widget build(BuildContext context) {
-    _thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
-    List<String> spl = _thisRoute.split("-");
-    _thisFatherRoute = spl.sublist(0, spl.length - 1).join("-");
+    thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
+    List<String> spl = thisRoute.split("-");
+    thisFatherRoute = spl.sublist(0, spl.length - 1).join("-");
     return Positioned(
-      left: widget.fragmentPoolDateMapClone[_thisRoute]["layout_left"],
-      top: widget.fragmentPoolDateMapClone[_thisRoute]["layout_top"],
+      left: widget.fragmentPoolDateMapClone[thisRoute]["layout_left"],
+      top: widget.fragmentPoolDateMapClone[thisRoute]["layout_top"],
       child: CustomPaint(
         painter: SingleNodeLine(
           path: () {
             /// 以下皆相对 path
             Path path = Path();
-            if (_thisRoute != "0") {
-              path.moveTo(0, widget.fragmentPoolDateMapClone[_thisRoute]["layout_height"] / 2);
-              path.lineTo(-40, widget.fragmentPoolDateMapClone[_thisRoute]["layout_height"] / 2);
-              double fatherCenterTop = widget.fragmentPoolDateMapClone[_thisFatherRoute]["layout_top"] + (widget.fragmentPoolDateMapClone[_thisFatherRoute]["layout_height"] / 2);
-              double thisCenterTop = widget.fragmentPoolDateMapClone[_thisRoute]["layout_top"];
+            if (thisRoute != "0") {
+              path.moveTo(0, widget.fragmentPoolDateMapClone[thisRoute]["layout_height"] / 2);
+              path.lineTo(-40, widget.fragmentPoolDateMapClone[thisRoute]["layout_height"] / 2);
+              double fatherCenterTop = widget.fragmentPoolDateMapClone[thisFatherRoute]["layout_top"] + (widget.fragmentPoolDateMapClone[thisFatherRoute]["layout_height"] / 2);
+              double thisCenterTop = widget.fragmentPoolDateMapClone[thisRoute]["layout_top"];
 
               path.lineTo(-40, fatherCenterTop - thisCenterTop);
               path.lineTo(-80, fatherCenterTop - thisCenterTop);
@@ -102,58 +103,13 @@ class SingleNodeState extends State<SingleNode> {
             return path;
           }(),
         ),
-        child: Container(
-          color: Colors.yellow,
-          child: FlatButton(
-            onPressed: () {
-              showBottomSheet(
-                  context: context,
-                  builder: (_) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            FlatButton(
-                              onPressed: () {
-                                widget.fragmentPoolDateList.add({
-                                  "route": () {
-                                    int childCount = 0;
-                                    for (int i = 0; i < widget.fragmentPoolDateList.length; i++) {
-                                      if (widget.fragmentPoolDateMapClone.containsKey(_thisRoute + "-$i")) {
-                                        childCount++;
-                                      } else {
-                                        break;
-                                      }
-                                    }
-                                    return _thisRoute + "-$childCount";
-                                  }(),
-                                  "type": 1,
-                                  "out_display_name": "$_thisRoute,hhhhh",
-                                });
-                                widget.doChange();
-                              },
-                              child: Text("添加子级"),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            FlatButton(
-                              onPressed: () {},
-                              child: Text("添加父级"),
-                            ),
-                          ],
-                        )
-                      ],
-                    );
-                  });
-            },
-            child: Text(widget.fragmentPoolDateList[widget.index]["out_display_name"]),
-          ),
-        ),
+        child: () {
+          if (widget.fragmentPoolDateList[widget.fragmentPoolDateMap[thisRoute]["index"]]["type"] == 1) {
+            return FolderNode(sn: widget, snState: this);
+          } else {
+            return Text("data");
+          }
+        }(),
       ),
     );
   }
