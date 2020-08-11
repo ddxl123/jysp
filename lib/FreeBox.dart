@@ -8,7 +8,7 @@ class FreeBox extends StatefulWidget {
     @required this.boxHeight,
     @required this.eventWidth,
     @required this.eventHeight,
-    this.initPosition,
+    @required this.freeBoxController,
   });
   final List<Widget> children;
   final Color backgroundColor;
@@ -16,7 +16,7 @@ class FreeBox extends StatefulWidget {
   final double boxHeight;
   final double eventWidth;
   final double eventHeight;
-  final Function(Function({Offset initPosition}) rebuild) initPosition;
+  final FreeBoxController freeBoxController;
 
   @override
   State<StatefulWidget> createState() {
@@ -27,30 +27,8 @@ class FreeBox extends StatefulWidget {
 class _FreeBox extends State<FreeBox> {
   double _scale = 1;
   double _lastScale = 1;
-
   Offset _offset = Offset(0, 0);
   Offset _lastOffset = Offset(0, 0);
-
-  Offset initPosition = Offset.zero;
-
-  void initFreeBoxPositon({Offset initPosition}) {
-    // print("object");
-    if (initPosition != null) {
-      this._offset = initPosition;
-      this.initPosition = initPosition;
-      this._scale = 1;
-    } else {
-      this._offset = this.initPosition;
-      this._scale = 1;
-    }
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.initPosition(initFreeBoxPositon);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +48,7 @@ class _FreeBox extends State<FreeBox> {
         Offset deltaOffset = details.localFocalPoint - _lastOffset;
         _offset += deltaOffset;
         _lastOffset = details.localFocalPoint;
-        // print(_offset);
+
         setState(() {});
       },
       child: Container(
@@ -101,4 +79,21 @@ class _FreeBox extends State<FreeBox> {
       ),
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.freeBoxController.moveTo = this.moveTo;
+  }
+
+  /// [*scale] 是为了获取被缩放后的实际位置
+  void moveTo(Offset choicePosition, Offset toMediaPosition) {
+    _offset = choicePosition * _scale + toMediaPosition;
+    print(_offset.toString() + ":" + _scale.toString());
+    setState(() {});
+  }
+}
+
+class FreeBoxController {
+  Function(Offset position, Offset mediaCenter) moveTo;
 }

@@ -21,6 +21,9 @@ class SingleNode extends StatefulWidget {
 }
 
 class SingleNodeState extends State<SingleNode> {
+  String _thisRoute;
+  String _thisFatherRoute;
+
   void firstFrame() {
     /// 第一帧开始
     //// 这里的 [widget.fragmentPoolDateMap] 和 [widget.fragmentPoolDateList] 都已经被赋初始值为 {} 和 [] 了
@@ -31,8 +34,8 @@ class SingleNodeState extends State<SingleNode> {
         "child_count": 0,
         "layout_height": 0.0,
         "layout_width": 0.0,
-        "layout_left": 0.0,
-        "layout_top": 0.0,
+        "layout_left": -10000.0,
+        "layout_top": -10000.0,
         "container_height": 0.0,
         "vertical_center_offset": 0.0
       };
@@ -44,8 +47,8 @@ class SingleNodeState extends State<SingleNode> {
         "child_count": 0,
         "layout_height": 0.0,
         "layout_width": 0.0,
-        "layout_left": 0.0,
-        "layout_top": 0.0,
+        "layout_left": -10000.0,
+        "layout_top": -10000.0,
         "container_height": 0.0,
       };
     }
@@ -74,8 +77,6 @@ class SingleNodeState extends State<SingleNode> {
     firstFrame();
   }
 
-  String _thisRoute;
-  String _thisFatherRoute;
   @override
   Widget build(BuildContext context) {
     _thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
