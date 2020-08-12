@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/SingleNode/IfNode.dart';
 import 'package:jysp/SingleNode/FolderNode.dart';
 
 class SingleNode extends StatefulWidget {
@@ -103,13 +104,7 @@ class SingleNodeState extends State<SingleNode> {
             return path;
           }(),
         ),
-        child: () {
-          if (widget.fragmentPoolDateList[widget.fragmentPoolDateMap[thisRoute]["index"]]["type"] == 1) {
-            return FolderNode(sn: widget, snState: this);
-          } else {
-            return Text("data");
-          }
-        }(),
+        child: IfNode(sn: widget, snState: this),
       ),
     );
   }
