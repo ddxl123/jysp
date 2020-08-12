@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/SingleNode.dart';
+import 'package:jysp/SingleNode/BaseNode.dart';
+import 'package:jysp/SingleNode/MainNode.dart';
 
-class FolderNode extends StatefulWidget {
-  FolderNode({
-    Key key,
-    @required this.sn,
-    @required this.snState,
-  }) : super(key: key);
-
-  final SingleNode sn;
-  final SingleNodeState snState;
+class FolderNode extends BaseNode {
+  FolderNode(MainNode sn, MainNodeState snState) : super(sn, snState);
 
   @override
-  _FolderNodeState createState() => _FolderNodeState();
+  State<StatefulWidget> createState() => _FolderNodeState();
 }
 
 class _FolderNodeState extends State<FolderNode> {

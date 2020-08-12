@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/IfNode.dart';
-import 'package:jysp/SingleNode/FolderNode.dart';
+import 'package:jysp/SingleNode/BaseNode.dart';
 
-class SingleNode extends StatefulWidget {
-  SingleNode({
+class MainNode extends StatefulWidget {
+  MainNode({
     Key key,
     @required this.fragmentPoolDateList,
     @required this.index,
@@ -19,10 +18,10 @@ class SingleNode extends StatefulWidget {
   final Function doChange;
 
   @override
-  SingleNodeState createState() => SingleNodeState();
+  MainNodeState createState() => MainNodeState();
 }
 
-class SingleNodeState extends State<SingleNode> {
+class MainNodeState extends State<MainNode> {
   String thisRoute;
   String thisFatherRoute;
 
@@ -74,7 +73,7 @@ class SingleNodeState extends State<SingleNode> {
   }
 
   @override
-  void didUpdateWidget(SingleNode oldWidget) {
+  void didUpdateWidget(MainNode oldWidget) {
     super.didUpdateWidget(oldWidget);
     firstFrame();
   }
@@ -104,7 +103,7 @@ class SingleNodeState extends State<SingleNode> {
             return path;
           }(),
         ),
-        child: IfNode(sn: widget, snState: this),
+        child: IfNode(widget, this),
       ),
     );
   }

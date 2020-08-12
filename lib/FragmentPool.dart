@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/FreeBox.dart';
-import 'package:jysp/SingleNode/SingleNode.dart';
+import 'package:jysp/SingleNode/MainNode.dart';
 
 /// 第一帧：获取全部 [layout_size]
 /// 第二帧：
@@ -182,7 +182,7 @@ class _FragmentPoolState extends State<FragmentPool> {
     return <Widget>[
       for (int childrenIndex = 0; childrenIndex < fragmentPoolDateList.length + 1; childrenIndex++)
         if (childrenIndex != fragmentPoolDateList.length)
-          SingleNode(
+          MainNode(
             fragmentPoolDateList: fragmentPoolDateList,
             index: childrenIndex,
             fragmentPoolDateMap: fragmentPoolDateMap,
@@ -352,7 +352,7 @@ class _FragmentPoolState extends State<FragmentPool> {
         "layout_top": fragmentPoolDateMap[key]["layout_top"],
         "container_height": fragmentPoolDateMap[key]["container_height"],
       };
-      (value["this"] as SingleNodeState).setState(() {});
+      (value["this"] as MainNodeState).setState(() {});
     });
   }
 

@@ -71,21 +71,18 @@ class BBB extends StatefulWidget {
 class _BBBState extends State<BBB> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     print("init");
   }
 
   @override
   void didUpdateWidget(BBB oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     print("duw");
   }
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     print("dcd");
   }
