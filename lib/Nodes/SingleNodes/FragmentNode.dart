@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/BaseNode.dart';
-import 'package:jysp/SingleNode/MainNode.dart';
+import 'package:jysp/Nodes/BaseNode.dart';
+import 'package:jysp/Nodes/MainNode.dart';
 
 class FragmentNode extends BaseNode {
   FragmentNode(MainNode sn, MainNodeState snState) : super(sn, snState);

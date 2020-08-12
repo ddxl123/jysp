@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/FreeBox.dart';
-import 'package:jysp/SingleNode/MainNode.dart';
+import 'package:jysp/Nodes/MainNode.dart';
 
 /// 第一帧：获取全部 [layout_size]
 /// 第二帧：
@@ -361,7 +361,7 @@ class _FragmentPoolState extends State<FragmentPool> {
     Offset zeroCorrectOffset = Offset(fragmentPoolDateMap["0"]["layout_left"], -fragmentPoolDateMap["0"]["layout_top"]);
     Offset zeroCenter = -Offset(fragmentPoolDateMap["0"]["layout_width"] / 2, fragmentPoolDateMap["0"]["layout_height"] / 2);
     Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
-    freeBoxController.moveTo(zeroCorrectOffset + zeroCenter, mediaCenter);
+    // freeBoxController.moveTo(zeroCorrectOffset + zeroCenter, mediaCenter);
   }
 }
 

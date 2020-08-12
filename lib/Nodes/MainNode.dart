@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/BaseNode.dart';
+import 'package:jysp/Nodes/BaseNode.dart';
 
 class MainNode extends StatefulWidget {
   MainNode({

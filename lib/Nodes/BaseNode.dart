@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/FolderNode.dart';
-import 'package:jysp/SingleNode/FragmentNode.dart';
-import 'package:jysp/SingleNode/MainNode.dart';
+import 'package:jysp/Nodes/SingleNodes/FolderNode.dart';
+import 'package:jysp/Nodes/SingleNodes/FragmentNode.dart';
+import 'package:jysp/Nodes/MainNode.dart';
 
 abstract class BaseNode extends StatefulWidget {
   BaseNode(

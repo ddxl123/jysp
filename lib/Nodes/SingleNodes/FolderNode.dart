@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/SingleNode/BaseNode.dart';
-import 'package:jysp/SingleNode/MainNode.dart';
+import 'package:jysp/Nodes/BaseNode.dart';
+import 'package:jysp/Nodes/MainNode.dart';
+import 'package:jysp/Nodes/NodeMixins.dart';
 
 class FolderNode extends BaseNode {
   FolderNode(MainNode sn, MainNodeState snState) : super(sn, snState);
@@ -9,7 +10,7 @@ class FolderNode extends BaseNode {
   State<StatefulWidget> createState() => _FolderNodeState();
 }
 
-class _FolderNodeState extends State<FolderNode> {
+class _FolderNodeState extends State<FolderNode> with NodeMixins {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,24 +28,9 @@ class _FolderNodeState extends State<FolderNode> {
                       children: <Widget>[
                         FlatButton(
                           onPressed: () {
-                            widget.sn.fragmentPoolDateList.add({
-                              "route": () {
-                                int childCount = 0;
-                                for (int i = 0; i < widget.sn.fragmentPoolDateList.length; i++) {
-                                  if (widget.sn.fragmentPoolDateMapClone.containsKey(widget.snState.thisRoute + "-$i")) {
-                                    childCount++;
-                                  } else {
-                                    break;
-                                  }
-                                }
-                                return widget.snState.thisRoute + "-$childCount";
-                              }(),
-                              "type": 1,
-                              "out_display_name": "${widget.snState.thisRoute},hhhhh",
-                            });
-                            widget.sn.doChange();
+                            addFragment(widget);
                           },
-                          child: Text("添加子级"),
+                          child: Text("添加碎片"),
                         ),
                       ],
                     ),
