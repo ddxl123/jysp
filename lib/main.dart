@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool.dart';
+import 'package:jysp/FragmentPool/FragmentPool.dart';
 import 'package:jysp/MyTest.dart';
 
 void main() {
-  runApp(MyTest());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -37,8 +37,7 @@ class _MyApp extends State<MyApp> {
                       Radius.circular(100),
                     ),
                   ),
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                   child: Text("我的"),
                 ),
               ),

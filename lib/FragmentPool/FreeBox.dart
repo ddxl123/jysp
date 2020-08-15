@@ -36,6 +36,7 @@ class _FreeBox extends State<FreeBox> {
       onScaleStart: (details) {
         _lastScale = 1;
         _lastOffset = details.localFocalPoint;
+        onScaleStartOther();
       },
       onScaleUpdate: (details) {
         double deltaScale = details.scale - _lastScale;
@@ -49,7 +50,11 @@ class _FreeBox extends State<FreeBox> {
         _offset += deltaOffset;
         _lastOffset = details.localFocalPoint;
 
+        onScaleUpdateOther();
         setState(() {});
+      },
+      onScaleEnd: (details) {
+        onScaleEndOther();
       },
       child: Container(
         alignment: Alignment.center,
@@ -80,6 +85,27 @@ class _FreeBox extends State<FreeBox> {
     );
   }
 
+  void onScaleStartOther() {
+    widget.freeBoxController.onScaleStartEventBindOnce.forEach((key, value) {
+      value();
+    });
+    widget.freeBoxController.onScaleStartEventBindOnce.clear();
+  }
+
+  void onScaleUpdateOther() {
+    widget.freeBoxController.onScaleUpdateEventBindOnce.forEach((key, value) {
+      value();
+    });
+    widget.freeBoxController.onScaleUpdateEventBindOnce.clear();
+  }
+
+  void onScaleEndOther() {
+    widget.freeBoxController.onScaleEndEventBindOnce.forEach((key, value) {
+      value();
+    });
+    widget.freeBoxController.onScaleEndEventBindOnce.clear();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,4 +122,19 @@ class _FreeBox extends State<FreeBox> {
 
 class FreeBoxController {
   Function(Offset position, Offset mediaCenter) moveTo;
+
+  Map<String, Function> onScaleStartEventBindOnce = {};
+  Map<String, Function> onScaleUpdateEventBindOnce = {};
+  Map<String, Function> onScaleEndEventBindOnce = {};
+  void eventBindOnce({String startBindKey, Function startBindOnce, String updateBindKey, Function updateBindOnce, String endBindKey, Function endBindOnce}) {
+    if (startBindOnce != null) {
+      onScaleStartEventBindOnce[startBindKey ?? startBindOnce.hashCode.toString()] = startBindOnce;
+    }
+    if (updateBindOnce != null) {
+      onScaleUpdateEventBindOnce[updateBindKey ?? updateBindOnce.hashCode.toString()] = updateBindOnce;
+    }
+    if (endBindOnce != null) {
+      onScaleEndEventBindOnce[endBindKey ?? endBindOnce.hashCode.toString()] = endBindOnce;
+    }
+  }
 }

@@ -1,0 +1,52 @@
+{
+  "route data": {
+    model: [
+      {
+        route: "0",
+        type: 0,
+        pool_display_name: "",
+        // type==0 的里面没有 fragment_id
+      },
+      {
+        route: "",
+        type: 1,
+        pool_display_name: "",
+        // type==1 的里面没有 fragment_id
+      },
+      {
+        route: "",
+        type: 2,
+        pool_display_name: "",
+        fragment_id: "", // 能连接上对应的 fragment
+      },
+      {
+        route: "",
+        type: 3,
+        pool_display_name: "",
+        // type==3 的里面没有 fragment_id
+      },
+    ],
+    "route data type": {
+      "说 明": "下面的数字key都是int类型",
+      "0": {
+        "说 明": "root route(根路由,也是碎片集)",
+        "点 击": {
+          "无 子级": "显示无子级的界面",
+          "有 子级": "显示全部子层级。",
+        },
+      },
+      "1": {
+        "说 明": "fragment collection(碎片集)",
+        "点 击": "",
+      },
+      "2": {
+        "说 明": "fragment(碎片)",
+        "点 击": "",
+      },
+      "3": {
+        "说 明": "three point(三点)",
+        "点 击": "",
+      },
+    },
+  },
+}

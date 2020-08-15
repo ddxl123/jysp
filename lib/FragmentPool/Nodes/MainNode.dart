@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Nodes/BaseNode.dart';
+import 'package:jysp/FragmentPool/FreeBox.dart';
+import 'package:jysp/FragmentPool/Nodes/IfNode.dart';
 
 class MainNode extends StatefulWidget {
   MainNode({
@@ -8,6 +9,7 @@ class MainNode extends StatefulWidget {
     @required this.index,
     @required this.fragmentPoolDateMap,
     @required this.fragmentPoolDateMapClone,
+    @required this.freeBoxController,
     @required this.doChange,
   }) : super(key: key);
 
@@ -15,6 +17,7 @@ class MainNode extends StatefulWidget {
   final int index;
   final Map<String, dynamic> fragmentPoolDateMap;
   final Map<String, dynamic> fragmentPoolDateMapClone;
+  final FreeBoxController freeBoxController;
   final Function doChange;
 
   @override
@@ -83,6 +86,8 @@ class MainNodeState extends State<MainNode> {
     thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
     List<String> spl = thisRoute.split("-");
     thisFatherRoute = spl.sublist(0, spl.length - 1).join("-");
+
+    ///
     return Positioned(
       left: widget.fragmentPoolDateMapClone[thisRoute]["layout_left"],
       top: widget.fragmentPoolDateMapClone[thisRoute]["layout_top"],

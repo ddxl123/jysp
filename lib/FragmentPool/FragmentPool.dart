@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FreeBox.dart';
-import 'package:jysp/Nodes/MainNode.dart';
+import 'package:jysp/FragmentPool/FreeBox.dart';
+import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
 
 /// 第一帧：获取全部 [layout_size]
 /// 第二帧：
@@ -183,10 +183,11 @@ class _FragmentPoolState extends State<FragmentPool> {
       for (int childrenIndex = 0; childrenIndex < fragmentPoolDateList.length + 1; childrenIndex++)
         if (childrenIndex != fragmentPoolDateList.length)
           MainNode(
-            fragmentPoolDateList: fragmentPoolDateList,
+            fragmentPoolDateList: this.fragmentPoolDateList,
             index: childrenIndex,
-            fragmentPoolDateMap: fragmentPoolDateMap,
-            fragmentPoolDateMapClone: fragmentPoolDateMapClone,
+            fragmentPoolDateMap: this.fragmentPoolDateMap,
+            fragmentPoolDateMapClone: this.fragmentPoolDateMapClone,
+            freeBoxController: this.freeBoxController,
             doChange: () {
               setState(() {});
             },
