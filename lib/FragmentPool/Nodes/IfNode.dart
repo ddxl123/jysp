@@ -15,7 +15,7 @@ class IfNode extends BaseNode {
 class _IfNodeState extends State<IfNode> {
   @override
   Widget build(BuildContext context) {
-    switch (widget.mainNode.fragmentPoolDateList[widget.mainNode.fragmentPoolDateMap[widget.mainNodeState.thisRoute]["index"]]["type"]) {
+    switch (widget.mainNode.fragmentPoolDateList[widget.mainNode.fragmentPoolDateMap[widget.mainNodeState.thisRouteName]["index"]]["type"]) {
       case 0:
         return RootNode(widget.mainNode, widget.mainNodeState);
       case 1:

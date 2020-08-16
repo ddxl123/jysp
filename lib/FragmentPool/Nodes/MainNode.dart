@@ -25,8 +25,8 @@ class MainNode extends StatefulWidget {
 }
 
 class MainNodeState extends State<MainNode> {
-  String thisRoute;
-  String thisFatherRoute;
+  String thisRouteName;
+  String thisFatherRouteName;
 
   void firstFrame() {
     /// 第一帧开始
@@ -83,24 +83,24 @@ class MainNodeState extends State<MainNode> {
 
   @override
   Widget build(BuildContext context) {
-    thisRoute = widget.fragmentPoolDateList[widget.index]["route"];
-    List<String> spl = thisRoute.split("-");
-    thisFatherRoute = spl.sublist(0, spl.length - 1).join("-");
+    thisRouteName = widget.fragmentPoolDateList[widget.index]["route"];
+    List<String> spl = thisRouteName.split("-");
+    thisFatherRouteName = spl.sublist(0, spl.length - 1).join("-");
 
     ///
     return Positioned(
-      left: widget.fragmentPoolDateMapClone[thisRoute]["layout_left"],
-      top: widget.fragmentPoolDateMapClone[thisRoute]["layout_top"],
+      left: widget.fragmentPoolDateMapClone[thisRouteName]["layout_left"],
+      top: widget.fragmentPoolDateMapClone[thisRouteName]["layout_top"],
       child: CustomPaint(
         painter: SingleNodeLine(
           path: () {
             /// 以下皆相对 path
             Path path = Path();
-            if (thisRoute != "0") {
-              path.moveTo(0, widget.fragmentPoolDateMapClone[thisRoute]["layout_height"] / 2);
-              path.lineTo(-40, widget.fragmentPoolDateMapClone[thisRoute]["layout_height"] / 2);
-              double fatherCenterTop = widget.fragmentPoolDateMapClone[thisFatherRoute]["layout_top"] + (widget.fragmentPoolDateMapClone[thisFatherRoute]["layout_height"] / 2);
-              double thisCenterTop = widget.fragmentPoolDateMapClone[thisRoute]["layout_top"];
+            if (thisRouteName != "0") {
+              path.moveTo(0, widget.fragmentPoolDateMapClone[thisRouteName]["layout_height"] / 2);
+              path.lineTo(-40, widget.fragmentPoolDateMapClone[thisRouteName]["layout_height"] / 2);
+              double fatherCenterTop = widget.fragmentPoolDateMapClone[thisFatherRouteName]["layout_top"] + (widget.fragmentPoolDateMapClone[thisFatherRouteName]["layout_height"] / 2);
+              double thisCenterTop = widget.fragmentPoolDateMapClone[thisRouteName]["layout_top"];
 
               path.lineTo(-40, fatherCenterTop - thisCenterTop);
               path.lineTo(-80, fatherCenterTop - thisCenterTop);

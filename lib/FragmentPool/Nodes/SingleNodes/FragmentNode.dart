@@ -20,33 +20,11 @@ class _FragmentNode extends State<FragmentNode> with NodeMixin {
           nodeShowBottomSheet(
             context: context,
             mainNode: widget.mainNode,
-            sliverList: (circularRadius, uniformBottomWidget) => sliverList(circularRadius, uniformBottomWidget),
+            mainNodeState: widget.mainNodeState,
           );
         },
-        child: Text(widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["out_display_name"]),
+        child: Text(widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["pool_display_name"]),
       ),
     );
-  }
-
-  @override
-  List<Widget> sliverList(double circularRadius, Widget uniformBottomWidget) {
-    return [
-      SliverToBoxAdapter(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  alignment: Alignment.center,
-                  child: Text("这是FragmentNode"),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ];
   }
 }

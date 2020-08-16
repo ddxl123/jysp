@@ -4,11 +4,11 @@ class FreeBox extends StatefulWidget {
   FreeBox({
     @required this.children,
     @required this.backgroundColor,
-    @required this.boxWidth,
-    @required this.boxHeight,
-    @required this.eventWidth,
-    @required this.eventHeight,
-    @required this.freeBoxController,
+    this.boxWidth = double.maxFinite,
+    this.boxHeight = double.maxFinite,
+    this.eventWidth = double.maxFinite,
+    this.eventHeight = double.maxFinite,
+    this.freeBoxController,
   });
   final List<Widget> children;
   final Color backgroundColor;
@@ -16,10 +16,11 @@ class FreeBox extends StatefulWidget {
   final double boxHeight;
   final double eventWidth;
   final double eventHeight;
-  final FreeBoxController freeBoxController;
+  FreeBoxController freeBoxController;
 
   @override
   State<StatefulWidget> createState() {
+    freeBoxController = freeBoxController ?? FreeBoxController();
     return _FreeBox();
   }
 }

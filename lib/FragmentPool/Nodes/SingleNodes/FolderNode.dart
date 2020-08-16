@@ -27,31 +27,11 @@ class _FolderNodeState extends State<FolderNode> with NodeMixin {
           nodeShowBottomSheet(
             context: context,
             mainNode: widget.mainNode,
-            sliverList: (circularRadius, uniformBottomWidget) => sliverList(circularRadius, uniformBottomWidget),
+            mainNodeState: widget.mainNodeState,
           );
         },
-        child: Text(widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["out_display_name"]),
+        child: Text(widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["pool_display_name"]),
       ),
     );
-  }
-
-  @override
-  List<Widget> sliverList(double circularRadius, Widget uniformBottomWidget) {
-    return [
-      SliverToBoxAdapter(
-        child: Container(
-          height: circularRadius,
-        ),
-      ),
-      SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (_, index) {
-            return Text(index.toString());
-          },
-          childCount: 20,
-        ),
-      ),
-      uniformBottomWidget,
-    ];
   }
 }

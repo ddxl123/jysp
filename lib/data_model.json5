@@ -1,51 +1,75 @@
 {
-  "route data": {
+  "route_data List": {
     model: [
       {
         route: "0",
-        type: 0,
+        type: 0, // root route(根路由,也是碎片集)
         pool_display_name: "",
         // type==0 的里面没有 fragment_id
       },
       {
         route: "",
-        type: 1,
+        type: 1, // fragment collection(碎片集)
         pool_display_name: "",
         // type==1 的里面没有 fragment_id
       },
       {
         route: "",
-        type: 2,
-        pool_display_name: "",
+        type: 2, // fragment(碎片)
+        pool_display_name: "", // route data 里本身就有，而并非从 fragment_id 里获取
         fragment_id: "", // 能连接上对应的 fragment
       },
       {
         route: "",
-        type: 3,
+        type: 3, // three point(三点)
         pool_display_name: "",
         // type==3 的里面没有 fragment_id
       },
     ],
-    "route data type": {
-      "说 明": "下面的数字key都是int类型",
+  },
+  "route_data Map": {
+    model: {
       "0": {
-        "说 明": "root route(根路由,也是碎片集)",
-        "点 击": {
-          "无 子级": "显示无子级的界面",
-          "有 子级": "显示全部子层级。",
-        },
+        index: widget.index,
+        this: this,
+        child_count: 0,
+        layout_height: 0.0,
+        layout_width: 0.0,
+        layout_left: -10000.0,
+        layout_top: -10000.0,
+        container_height: 0.0,
+        vertical_center_offset: 0.0,
       },
-      "1": {
-        "说 明": "fragment collection(碎片集)",
-        "点 击": "",
+      "0-0": {
+        index: widget.index,
+        this: this,
+        child_count: 0,
+        layout_height: 0.0,
+        layout_width: 0.0,
+        layout_left: -10000.0,
+        layout_top: -10000.0,
+        container_height: 0.0,
+        vertical_center_offset: 0.0,
       },
-      "2": {
-        "说 明": "fragment(碎片)",
-        "点 击": "",
+    },
+  },
+  "route_data Map_Clone": {
+    model: {
+      "0": {
+        child_count: 0,
+        layout_height: 0.0,
+        layout_width: 0.0,
+        layout_left: -10000.0,
+        layout_top: -10000.0,
+        container_height: 0.0,
       },
-      "3": {
-        "说 明": "three point(三点)",
-        "点 击": "",
+      "0-0": {
+        child_count: 0,
+        layout_height: 0.0,
+        layout_width: 0.0,
+        layout_left: -10000.0,
+        layout_top: -10000.0,
+        container_height: 0.0,
       },
     },
   },
