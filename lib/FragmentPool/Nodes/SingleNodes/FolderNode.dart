@@ -24,7 +24,7 @@ class _FolderNodeState extends State<FolderNode> with NodeMixin {
       color: Colors.yellow,
       child: FlatButton(
         onPressed: () {
-          nodeShowBottomSheet(
+          showNodeSheet(
             context: context,
             mainNode: widget.mainNode,
             mainNodeState: widget.mainNodeState,

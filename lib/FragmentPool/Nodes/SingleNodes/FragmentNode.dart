@@ -17,7 +17,7 @@ class _FragmentNode extends State<FragmentNode> with NodeMixin {
       color: Colors.blue,
       child: FlatButton(
         onPressed: () {
-          nodeShowBottomSheet(
+          showNodeSheet(
             context: context,
             mainNode: widget.mainNode,
             mainNodeState: widget.mainNodeState,

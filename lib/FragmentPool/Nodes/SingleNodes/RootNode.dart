@@ -22,7 +22,7 @@ class _RootNodeState extends State<RootNode> with NodeMixin {
   }
 
   void onPressed() {
-    nodeShowBottomSheet(
+    showNodeSheet(
       context: context,
       mainNode: widget.mainNode,
       mainNodeState: widget.mainNodeState,

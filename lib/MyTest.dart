@@ -6,12 +6,35 @@ class MyTest extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
             children: [
-              AAA(),
-              AAA(),
-              BBB(),
+              Positioned(
+                bottom: 0,
+                width: 100,
+                height: 100,
+                child: Container(
+                  color: Colors.yellow,
+                  alignment: Alignment.center,
+                  child: DraggableScrollableSheet(
+                    expand: false,
+                    initialChildSize: 0.5,
+                    minChildSize: 0,
+                    maxChildSize: 1,
+                    builder: (_, sc) {
+                      return SingleChildScrollView(
+                        controller: sc,
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.red,
+                          child: Text("data"),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
