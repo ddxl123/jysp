@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
 
 abstract class BaseNode extends StatefulWidget {
   BaseNode(

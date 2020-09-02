@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FreeBox.dart';
-import 'package:jysp/FragmentPool/Nodes/IfNode.dart';
+import 'package:jysp/FragmentPool/Main/FreeBox.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/IfNode.dart';
 
 class MainNode extends StatefulWidget {
   MainNode({
@@ -10,7 +10,6 @@ class MainNode extends StatefulWidget {
     @required this.fragmentPoolDateMap,
     @required this.fragmentPoolDateMapClone,
     @required this.freeBoxController,
-    @required this.doChange,
   }) : super(key: key);
 
   final List<Map<dynamic, dynamic>> fragmentPoolDateList;
@@ -18,7 +17,6 @@ class MainNode extends StatefulWidget {
   final Map<String, dynamic> fragmentPoolDateMap;
   final Map<String, dynamic> fragmentPoolDateMapClone;
   final FreeBoxController freeBoxController;
-  final Function doChange;
 
   @override
   MainNodeState createState() => MainNodeState();
@@ -30,6 +28,9 @@ class MainNodeState extends State<MainNode> {
 
   void firstFrame() {
     /// 第一帧开始
+    /// 目的1：防报null，并让第一帧的位置置于远方
+    /// 目的2：新增node时，让第一帧的位置置于远方
+
     //// 这里的 [widget.fragmentPoolDateMap] 和 [widget.fragmentPoolDateList] 都已经被赋初始值为 {} 和 [] 了
     if (widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]] == null) {
       widget.fragmentPoolDateMap[widget.fragmentPoolDateList[widget.index]["route"]] = {

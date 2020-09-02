@@ -1,9 +1,9 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/Buttons.dart';
-import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Main/FreeBox.dart';
+import 'package:jysp/Tools/Buttons.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
 
 class ShowNodeSheet extends StatefulWidget {
   ShowNodeSheet({
@@ -28,11 +28,6 @@ class ShowNodeSheet extends StatefulWidget {
 }
 
 class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProviderStateMixin {
-  ///
-  ///
-  ///
-  ///
-  ///
   /// 成员
 
   /// 保证唯一性
@@ -60,18 +55,11 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
   /// 是否将被移除
   bool _isWillRemoveOnce = false;
 
-  ///
-  ///
-  ///
-  ///
-  /// 函数
-
   @override
   void initState() {
     super.initState();
 
     /// 保证唯一性
-    print(_lastShowNodeSheetState == this);
     _lastShowNodeSheetState?._remove();
     _lastShowNodeSheetState = this;
 
@@ -91,20 +79,18 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
         _animationController.stop();
       }
 
+      /// 下滑到一定范围内自动 [remove]
       if (_lastDelta > 0 && _animationController.value <= (_circularRadius / _initHeight) * 2) {
         _remove();
       }
     });
 
-    /// 绑定单次事件
-    widget.mainNode.freeBoxController.eventBindOnce(
-      updateBindOnce: () {
+    /// 点击 [FreeBox] 区域后触发 [remove]
+    widget.mainNode.freeBoxController.addListener(() {
+      if (widget.mainNode.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
         _remove();
-      },
-      endBindOnce: () {
-        _remove();
-      },
-    );
+      }
+    });
   }
 
   @override
@@ -139,7 +125,7 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
   }
 
   void _remove() {
-    /// 禁止触发 [_onPointerXXX] 事件
+    /// 禁止触发 [_onPointerXXX] 事件,并防止被多次触发 [remove]
     if (!_isWillRemoveOnce) {
       _isWillRemoveOnce = true;
 
@@ -150,10 +136,6 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     }
   }
 
-  ///
-  ///
-  ///
-  ///
   /// 事件
   void _onPointerDown(event) {
     if (_isWillRemoveOnce) {
@@ -191,27 +173,24 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     }
 
     /// 同理 [onPointerMove]
+    /// 这里 [animateTo] 值是 [0.0-1.0]
     if (_animationController.value != 1.0) {
       _animationController.animateTo(
-        _animationController.value - (_lastDelta / _initHeight) * 10,
-        curve: Curves.easeOutExpo,
-        duration: Duration(milliseconds: 500),
+        _animationController.value - (_lastDelta / _initHeight) * 20,
+        curve: Curves.easeOutQuart,
+        duration: Duration(milliseconds: 1000),
       );
     } else {
       if (_scrollController.offset == 0.0) {
         _animationController.animateTo(
-          _animationController.value - (_lastDelta / _initHeight) * 10,
-          curve: Curves.easeOutExpo,
-          duration: Duration(milliseconds: 500),
+          _animationController.value - (_lastDelta / _initHeight) * 20,
+          curve: Curves.easeOutQuart,
+          duration: Duration(milliseconds: 1000),
         );
       }
     }
   }
 
-  ///
-  ///
-  ///
-  ///
   /// 具体内容 body
   Widget _contentChild() {
     return Material(
@@ -236,12 +215,7 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     );
   }
 
-  ///
-  ///
-  ///
-  ///
   /// 具体内容
-
   /// 顶部
   Widget _uniformTopWidget() {
     return SliverToBoxAdapter(

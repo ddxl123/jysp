@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNode.dart';
-import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
 import 'package:jysp/FragmentPool/Nodes/SingleNodes/FolderNode.dart';
 import 'package:jysp/FragmentPool/Nodes/SingleNodes/FragmentNode.dart';
 import 'package:jysp/FragmentPool/Nodes/SingleNodes/RootNode.dart';

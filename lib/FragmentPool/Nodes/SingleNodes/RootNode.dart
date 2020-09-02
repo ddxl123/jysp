@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/NodeMixin.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNode.dart';
-import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
 
 class RootNode extends BaseNode {
   RootNode(MainNode mainNode, MainNodeState mainNodeState) : super(mainNode, mainNodeState);
@@ -26,7 +26,15 @@ class _RootNodeState extends State<RootNode> with NodeMixin {
       context: context,
       mainNode: widget.mainNode,
       mainNodeState: widget.mainNodeState,
-      sliver1: SliverList(
+      sliver1: SliverToBoxAdapter(
+        child: FlatButton(
+          child: Text("addChildNode"),
+          onPressed: () {
+            nodeAddFragment(widget.mainNode, widget.mainNodeState);
+          },
+        ),
+      ),
+      sliver2: SliverList(
         delegate: SliverChildBuilderDelegate(
           (_, index) {
             return Container(

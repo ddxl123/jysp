@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/MainNode.dart';
-import 'package:jysp/ShowNodeSheet.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheet.dart';
 
 mixin NodeMixin {
   void nodeAddFragment(MainNode mainNode, MainNodeState mainNodeState) {
@@ -17,9 +17,9 @@ mixin NodeMixin {
         return mainNodeState.thisRouteName + "-$childCount";
       }(),
       "type": 1,
-      "out_display_name": "${mainNodeState.thisRouteName},hhhhh",
+      "pool_display_name": "${mainNodeState.thisRouteName},hhhhh",
     });
-    mainNode.doChange();
+    mainNode.freeBoxController.setStateForChildren();
   }
 
   ///
