@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheet.dart';
 
 mixin NodeMixin {
-  void nodeAddFragment(MainNode mainNode, MainNodeState mainNodeState) {
-    mainNode.fragmentPoolDateList.add({
-      "route": () {
-        int childCount = 0;
-        for (int i = 0; i < mainNode.fragmentPoolDateList.length; i++) {
-          if (mainNode.fragmentPoolDateMapClone.containsKey(mainNodeState.thisRouteName + "-$i")) {
-            childCount++;
-          } else {
-            break;
+  void nodeAddFragment({MainSingleNodeData mainSingleNodeData}) {
+    mainSingleNodeData.resetLayout(() {
+      mainSingleNodeData.fragmentPoolDataList.add({
+        "route": () {
+          int childCount = 0;
+          for (int i = 0; i < mainSingleNodeData.fragmentPoolDataList.length; i++) {
+            if (mainSingleNodeData.fragmentPoolLayoutDataMap.containsKey(mainSingleNodeData.thisRouteName + "-$i")) {
+              childCount++;
+            } else {
+              break;
+            }
           }
-        }
-        return mainNodeState.thisRouteName + "-$childCount";
-      }(),
-      "type": 1,
-      "pool_display_name": "${mainNodeState.thisRouteName},hhhhh",
+          return mainSingleNodeData.thisRouteName + "-$childCount";
+        }(),
+        "type": 1,
+        "pool_display_name": "${mainSingleNodeData.thisRouteName},hhhhh",
+      });
     });
-    mainNode.freeBoxController.setStateForChildren();
   }
 
   ///
@@ -27,27 +28,30 @@ mixin NodeMixin {
   ///
   ///
   ///
+  Widget ff(BuildContext context) {
+    return SliverToBoxAdapter();
+  }
+
   void showNodeSheet({
-    @required BuildContext context,
-    @required MainNode mainNode,
-    @required MainNodeState mainNodeState,
-    Widget sliver1 = const SliverToBoxAdapter(),
-    Widget sliver2 = const SliverToBoxAdapter(),
-    Widget sliver3 = const SliverToBoxAdapter(),
-    Widget sliver4 = const SliverToBoxAdapter(),
+    @required BuildContext relyContext,
+    @required MainSingleNodeData mainSingleNodeData,
+    Widget Function(BuildContext) sliver1Builder,
+    Widget Function(BuildContext) sliver2Builder,
+    Widget Function(BuildContext) sliver3Builder,
+    Widget Function(BuildContext) sliver4Builder,
   }) {
-    OverlayState overlayState = Overlay.of(context);
+    OverlayState overlayState = Overlay.of(relyContext);
     OverlayEntry overlayEntry;
     overlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
+      builder: (BuildContext overlayEntryContext) {
         return ShowNodeSheet(
-          mainNode: mainNode,
-          mainNodeState: mainNodeState,
+          relyContext: relyContext,
+          mainSingleNodeData: mainSingleNodeData,
           overlayEntry: overlayEntry,
-          sliver1: sliver1,
-          sliver2: sliver2,
-          sliver3: sliver3,
-          sliver4: sliver4,
+          sliver1Builder: sliver1Builder ?? (_) => SliverToBoxAdapter(),
+          sliver2Builder: sliver2Builder ?? (_) => SliverToBoxAdapter(),
+          sliver3Builder: sliver3Builder ?? (_) => SliverToBoxAdapter(),
+          sliver4Builder: sliver4Builder ?? (_) => SliverToBoxAdapter(),
         );
       },
     );

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class FreeBox extends StatefulWidget {
   FreeBox({
-    @required this.children,
+    @required this.child,
     @required this.backgroundColor,
     this.boxWidth = double.maxFinite,
     this.boxHeight = double.maxFinite,
@@ -12,7 +12,7 @@ class FreeBox extends StatefulWidget {
     this.eventHeight = double.maxFinite,
     this.freeBoxController,
   });
-  final List<Widget> children;
+  final Widget child;
   final Color backgroundColor;
   final double boxWidth;
   final double boxHeight;
@@ -81,9 +81,7 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
         /// 第二, [animation] 并未初始化,而 [AnimationController] 初始化了
         /// 第三, [animation] 的地址会发生变化,而 [AnimationController] 是唯一的
         animation: _slidingAnimationController,
-        child: Stack(
-          children: widget.children,
-        ),
+        child: widget.child,
       ),
     );
   }
@@ -148,8 +146,9 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    super.dispose();
+    /// 必须放在 [super.dispose()] 前执行
     _slidingAnimationController.dispose();
+    super.dispose();
   }
 
   /// 初始化惯性滑动
@@ -197,7 +196,7 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
             ));
         _scaleAnimation = _slidingAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(begin: widget.freeBoxController.scale, end: 1.0));
 
-        _slidingAnimationController.forward(from: 0.0);
+        _slidingAnimationController.forward(from: 0.4);
       },
     );
   }
@@ -206,9 +205,6 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
 enum FreeBoxStatus { none, onScaleStart, onScaleUpdate, onScaleEnd, inertialSliding, zeroSliding }
 
 class FreeBoxController extends ChangeNotifier {
-  FreeBoxController({@required this.widgetState});
-  State<StatefulWidget> widgetState;
-
   /// 缩放值,默认必须1;偏移值,默认必须0
   double scale = 1;
   Offset offset = Offset(0, 0);
@@ -229,9 +225,5 @@ class FreeBoxController extends ChangeNotifier {
 
     /// 不能直接让 [widget] [rebuild]，而只会触发 [addListener]
     notifyListeners();
-  }
-
-  void setStateForChildren() {
-    widgetState.setState(() {});
   }
 }

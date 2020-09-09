@@ -1,27 +1,27 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Main/FreeBox.dart';
-import 'package:jysp/Tools/Buttons.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 
 class ShowNodeSheet extends StatefulWidget {
   ShowNodeSheet({
-    @required this.mainNode,
-    @required this.mainNodeState,
+    @required this.relyContext,
+    @required this.mainSingleNodeData,
     @required this.overlayEntry,
-    this.sliver1,
-    this.sliver2,
-    this.sliver3,
-    this.sliver4,
+    this.sliver1Builder,
+    this.sliver2Builder,
+    this.sliver3Builder,
+    this.sliver4Builder,
   });
-  final MainNode mainNode;
-  final MainNodeState mainNodeState;
+  final BuildContext relyContext;
+  final MainSingleNodeData mainSingleNodeData;
   final OverlayEntry overlayEntry;
-  final Widget sliver1;
-  final Widget sliver2;
-  final Widget sliver3;
-  final Widget sliver4;
+  final Widget Function(BuildContext) sliver1Builder;
+  final Widget Function(BuildContext) sliver2Builder;
+  final Widget Function(BuildContext) sliver3Builder;
+  final Widget Function(BuildContext) sliver4Builder;
 
   @override
   _ShowNodeSheetState createState() => _ShowNodeSheetState();
@@ -42,6 +42,9 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
   /// 内部滑动控制器
   ScrollController _scrollController = ScrollController();
 
+  /// 是否达到 [加载区]
+  bool _isEnterLoadingArea = false;
+
   /// 动画
   Animation _animation;
   AnimationController _animationController;
@@ -54,6 +57,13 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
 
   /// 是否将被移除
   bool _isWillRemoveOnce = false;
+
+  /// 是否把 [Mapping] 隐藏
+  bool _isOffstageMapping = false;
+  Function(Function()) _setStateMappingWidget;
+
+  /// 监听返回键
+  ModalRoute<dynamic> _modalRoute;
 
   @override
   void initState() {
@@ -86,23 +96,54 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     });
 
     /// 点击 [FreeBox] 区域后触发 [remove]
-    widget.mainNode.freeBoxController.addListener(() {
-      if (widget.mainNode.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
+    widget.mainSingleNodeData.freeBoxController.addListener(() {
+      if (widget.mainSingleNodeData.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
         _remove();
+      }
+    });
+
+    /// 是否达到加载区监听
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= (_scrollController.position.maxScrollExtent - MediaQueryData.fromWindow(window).size.height)) {
+        _isEnterLoadingArea = true;
+      } else {
+        _isEnterLoadingArea = false;
       }
     });
   }
 
+  /// 当 [_modalRoute] 关联的 [relyContext] 发生变化时会调用 [didChangeDependencies] , [initState] 时也会被调用
+  /// 因为 [addScopedWillPopCallback] 会把 [willPopCallback对象] 添加到 [List] 中,因此需要赋予同一个 [willPopCallback对象]
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _modalRoute?.removeScopedWillPopCallback(willPopCallback);
+    _modalRoute = ModalRoute.of(widget.relyContext);
+    _modalRoute?.addScopedWillPopCallback(willPopCallback);
+  }
+
+  /// 当第一次点击返回时,调用 [_remove()] ,而调用 [_remove()] 则会调用 [this.dispose()]
+  /// 即第一次点击返回时, [sheet] 会被下降并移除,移除后第二次点击返回时,会返回到上一个 [route]
+  Future<bool> willPopCallback() {
+    _remove();
+    return Future.value(false);
+  }
+
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
     _animationController.dispose();
+
+    _modalRoute?.removeScopedWillPopCallback(willPopCallback);
+    _modalRoute = null;
+
+    super.dispose();
     print("dispose");
   }
 
   @override
   Widget build(BuildContext context) {
+    /// 使用 [AnimatedBuilder] 可以让他维持在屏幕空间范围内
     return AnimatedBuilder(
       animation: _animation,
       builder: (_, animatedBuilderChild) {
@@ -131,6 +172,7 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
 
       /// 这里不能把 [Curves.easeInQuart] 放到 [init] 中,需求是从慢到非常快，而放 [init] 里曲线是会是反向的先快后慢。
       _animationController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInQuart).whenCompleteOrCancel(() {
+        /// [remove] 后,会调用 [dispose] ,以及当中的 [controller.dispose()]
         widget.overlayEntry.remove();
       });
     }
@@ -204,10 +246,10 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
             _uniformTopPaddingWidget(),
             _unifromFixedWidget(),
             _uniformMappingWidget(),
-            widget.sliver1,
-            widget.sliver2,
-            widget.sliver3,
-            widget.sliver4,
+            widget.sliver1Builder(this.context),
+            widget.sliver2Builder(this.context),
+            widget.sliver3Builder(this.context),
+            widget.sliver4Builder(this.context),
             _uniformBottomWidget(),
           ],
         ),
@@ -216,6 +258,7 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
   }
 
   /// 具体内容
+
   /// 顶部
   Widget _uniformTopWidget() {
     return SliverToBoxAdapter(
@@ -285,23 +328,30 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
               color: Colors.pink,
               child: Row(
                 children: [
-                  SizedBox(width: _circularRadius / 2),
                   Expanded(
-                    child: Text(
-                      "池显名称:  " + widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["pool_display_name"].toString(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: CustomButton(
+                      child: Row(
+                        children: [
+                          SizedBox(width: 5),
+                          Icon(Icons.remove_red_eye),
+                          SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              "池显样式:  " + widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"].toString(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        _setStateMappingWidget(() {
+                          _isOffstageMapping = !_isOffstageMapping;
+                        });
+                      },
                     ),
                   ),
-                  SizedBox(width: 10),
-                  MyButton(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: Icon(Icons.remove_red_eye),
-                    ),
-                    onPressed: () {},
-                  ),
-                  MyButton(
+                  CustomButton(
                     child: Container(
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Icon(Icons.more_horiz),
@@ -319,13 +369,18 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
 
   /// [Node] 映射栏
   Widget _uniformMappingWidget() {
-    double layoutWidth = widget.mainNode.fragmentPoolDateMapClone[widget.mainNodeState.thisRouteName]["layout_width"];
-    double layoutHeight = widget.mainNode.fragmentPoolDateMapClone[widget.mainNodeState.thisRouteName]["layout_height"];
-    String poolDisplayName = widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["pool_display_name"].toString();
+    double layoutWidth = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisRouteName]["layout_width"];
+    double layoutHeight = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisRouteName]["layout_height"];
+    String poolDisplayName = widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"].toString();
 
     return StatefulBuilder(
       builder: (_, rebuild) {
+        _setStateMappingWidget = rebuild;
+        if (_isOffstageMapping) {
+          return SliverToBoxAdapter();
+        }
         if (layoutHeight >= MediaQueryData.fromWindow(window).size.height / 2) {
+          /// 不会被固定在顶部
           return SliverToBoxAdapter(
             child:
                 // 设置高度
@@ -335,6 +390,7 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
             ),
           );
         } else {
+          /// 会被固定在顶部
           return SliverPersistentHeader(
             //// 加上 [pinned==true] 会有折叠/吸顶效果
             pinned: true, // 滑到顶时会固定

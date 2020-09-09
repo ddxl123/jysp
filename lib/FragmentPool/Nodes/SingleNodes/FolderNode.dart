@@ -1,12 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainNode.dart';
+import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheet.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 
 class FolderNode extends BaseNode {
-  FolderNode(MainNode mainNode, MainNodeState mainNodeState) : super(mainNode, mainNodeState);
+  FolderNode(MainSingleNodeData singleNodeData) : super(singleNodeData);
 
   @override
   State<StatefulWidget> createState() => _FolderNodeState();
@@ -14,31 +14,26 @@ class FolderNode extends BaseNode {
 
 class _FolderNodeState extends State<FolderNode> with NodeMixin {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.yellow,
-      child: FlatButton(
+      child: CustomButton(
         onPressed: () {
           showNodeSheet(
-            context: context,
-            mainNode: widget.mainNode,
-            mainNodeState: widget.mainNodeState,
-            sliver1: SliverToBoxAdapter(
-              child: FlatButton(
-                child: Text("addChildNode"),
-                onPressed: () {
-                  nodeAddFragment(widget.mainNode, widget.mainNodeState);
-                },
-              ),
-            ),
-          );
+              relyContext: context,
+              mainSingleNodeData: widget.mainSingleNodeData,
+              sliver1Builder: (_) {
+                return SliverToBoxAdapter(
+                  child: FlatButton(
+                    child: Text("addChildNode"),
+                    onPressed: () {
+                      nodeAddFragment(mainSingleNodeData: widget.mainSingleNodeData);
+                    },
+                  ),
+                );
+              });
         },
-        child: Text(widget.mainNode.fragmentPoolDateList[widget.mainNode.index]["pool_display_name"]),
+        child: Text(widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"]),
       ),
     );
   }
