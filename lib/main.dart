@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jysp/Global/Globaler.dart';
 import 'package:jysp/MyTest.dart';
-import 'package:jysp/Pages/HomePage.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,9 +18,30 @@ class _MyApp extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: Globaler.instance.navigatorState,
       home: Scaffold(
-        body: MyTest(),
+        body: MainWidget(),
       ),
     );
+  }
+}
+
+class MainWidget extends StatefulWidget {
+  MainWidget({Key key}) : super(key: key);
+
+  @override
+  _MainWidgetState createState() => _MainWidgetState();
+}
+
+class _MainWidgetState extends State<MainWidget> {
+  @override
+  void initState() {
+    super.initState();
+    Globaler.instance.overlayState = Overlay.of(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MyTest();
   }
 }

@@ -5,74 +5,125 @@ import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 
-class ShowNodeSheet extends StatefulWidget {
-  ShowNodeSheet({
-    @required this.relyContext,
+///
+///
+///
+///
+///
+class NodeSheetRoute extends OverlayRoute {
+  NodeSheetRoute({
     @required this.mainSingleNodeData,
-    @required this.overlayEntry,
     this.sliver1Builder,
     this.sliver2Builder,
     this.sliver3Builder,
     this.sliver4Builder,
   });
-  final BuildContext relyContext;
   final MainSingleNodeData mainSingleNodeData;
-  final OverlayEntry overlayEntry;
   final Widget Function(BuildContext) sliver1Builder;
   final Widget Function(BuildContext) sliver2Builder;
   final Widget Function(BuildContext) sliver3Builder;
   final Widget Function(BuildContext) sliver4Builder;
 
+  Function _removeAnimation = () {};
+
   @override
-  _ShowNodeSheetState createState() => _ShowNodeSheetState();
+  Iterable<OverlayEntry> createOverlayEntries() {
+    return [
+      OverlayEntry(
+        builder: (_) {
+          return Container(
+            alignment: Alignment.center,
+            child: NodeSheetControl(
+                mainSingleNodeData: mainSingleNodeData,
+                sliver1Builder: sliver1Builder,
+                sliver2Builder: sliver2Builder,
+                sliver3Builder: sliver3Builder,
+                sliver4Builder: sliver4Builder,
+
+                ///
+                nodeSheetRoute: this,
+                getRemoveAnimation: (ra) {
+                  this._removeAnimation = ra;
+                }),
+          );
+        },
+      )
+    ];
+  }
+
+  /// 返回键监听
+  @override
+  Future<RoutePopDisposition> willPop() {
+    _removeAnimation();
+    return Future.value(RoutePopDisposition.doNotPop);
+  }
 }
 
-class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProviderStateMixin {
-  /// 成员
+///
+///
+///
+///
+///
+class NodeSheetControl extends StatefulWidget {
+  NodeSheetControl({
+    @required this.mainSingleNodeData,
+    this.sliver1Builder,
+    this.sliver2Builder,
+    this.sliver3Builder,
+    this.sliver4Builder,
 
-  /// 保证唯一性
-  static _ShowNodeSheetState _lastShowNodeSheetState;
+    ///
+    @required this.nodeSheetRoute,
+    @required this.getRemoveAnimation,
+  });
+  final MainSingleNodeData mainSingleNodeData;
+  final Widget Function(BuildContext) sliver1Builder;
+  final Widget Function(BuildContext) sliver2Builder;
+  final Widget Function(BuildContext) sliver3Builder;
+  final Widget Function(BuildContext) sliver4Builder;
 
+  final NodeSheetRoute nodeSheetRoute;
+  final Function getRemoveAnimation;
+
+  @override
+  _NodeSheetControlState createState() => _NodeSheetControlState();
+}
+
+class _NodeSheetControlState extends State<NodeSheetControl> with SingleTickerProviderStateMixin {
   /// 初始高度占满屏幕
   double _initHeight = MediaQueryData.fromWindow(window).size.height;
-
-  /// 圆角半径
-  double _circularRadius = 35.0;
-
-  /// 内部滑动控制器
-  ScrollController _scrollController = ScrollController();
-
-  /// 是否达到 [加载区]
-  bool _isEnterLoadingArea = false;
 
   /// 动画
   Animation _animation;
   AnimationController _animationController;
 
-  /// 初始播放到一半时停止的单次事件
+  /// 内部滑动控制器
+  ScrollController _scrollController = ScrollController();
+
+  /// 初始化时播放到一半时停止的单次事件,防止初始化时滑到满屏
   bool _isOnceHalfDone = false;
 
   /// 惯性滑动，防止之后 [>=0.5] 并有另外动画时被持续 [stop()]，
   double _lastDelta = 0.0;
 
-  /// 是否将被移除
+  /// 是否将被移除，防止 [_remove] 被触发多次
   bool _isWillRemoveOnce = false;
 
-  /// 是否把 [Mapping] 隐藏
-  bool _isOffstageMapping = false;
-  Function(Function()) _setStateMappingWidget;
-
-  /// 监听返回键
-  ModalRoute<dynamic> _modalRoute;
+  /// 是否达到 [加载区]
+  bool _isEnterLoadingArea = false;
 
   @override
   void initState() {
     super.initState();
 
-    /// 保证唯一性
-    _lastShowNodeSheetState?._remove();
-    _lastShowNodeSheetState = this;
+    /// 绑定返回键
+    widget.getRemoveAnimation(_remove);
 
+    ///
+    ///
+    ///
+    ///
+    /// 动画区
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
 
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.linear);
@@ -90,18 +141,22 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
       }
 
       /// 下滑到一定范围内自动 [remove]
-      if (_lastDelta > 0 && _animationController.value <= (_circularRadius / _initHeight) * 2) {
+      if (_lastDelta > 0 && _animationController.value <= (MediaQueryData.fromWindow(window).padding.top * 2 / _initHeight) * 2) {
         _remove();
       }
     });
 
+    ///
+    ///
+    ///
+    /// [freeBoxController] 区
     /// 点击 [FreeBox] 区域后触发 [remove]
-    widget.mainSingleNodeData.freeBoxController.addListener(() {
-      if (widget.mainSingleNodeData.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
-        _remove();
-      }
-    });
+    widget.mainSingleNodeData.freeBoxController.addListener(freeBoxControllerAddListenerCallback);
 
+    ///
+    ///
+    ///
+    /// [ScrollController] 区
     /// 是否达到加载区监听
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= (_scrollController.position.maxScrollExtent - MediaQueryData.fromWindow(window).size.height)) {
@@ -112,30 +167,19 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     });
   }
 
-  /// 当 [_modalRoute] 关联的 [relyContext] 发生变化时会调用 [didChangeDependencies] , [initState] 时也会被调用
-  /// 因为 [addScopedWillPopCallback] 会把 [willPopCallback对象] 添加到 [List] 中,因此需要赋予同一个 [willPopCallback对象]
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _modalRoute?.removeScopedWillPopCallback(willPopCallback);
-    _modalRoute = ModalRoute.of(widget.relyContext);
-    _modalRoute?.addScopedWillPopCallback(willPopCallback);
-  }
-
-  /// 当第一次点击返回时,调用 [_remove()] ,而调用 [_remove()] 则会调用 [this.dispose()]
-  /// 即第一次点击返回时, [sheet] 会被下降并移除,移除后第二次点击返回时,会返回到上一个 [route]
-  Future<bool> willPopCallback() {
-    _remove();
-    return Future.value(false);
+  void freeBoxControllerAddListenerCallback() {
+    if (widget.mainSingleNodeData.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
+      _remove();
+    }
   }
 
   @override
   void dispose() {
+    /// 解除 [freeBoxController.addListener()]
+    widget.mainSingleNodeData.freeBoxController.removeListener(freeBoxControllerAddListenerCallback);
+
     _scrollController.dispose();
     _animationController.dispose();
-
-    _modalRoute?.removeScopedWillPopCallback(willPopCallback);
-    _modalRoute = null;
 
     super.dispose();
     print("dispose");
@@ -147,21 +191,32 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     return AnimatedBuilder(
       animation: _animation,
       builder: (_, animatedBuilderChild) {
-        return Positioned(
-          bottom: 0,
-          height: _animation.value,
-          width: MediaQueryData.fromWindow(window).size.width,
-          child: Listener(
-            onPointerDown: _onPointerDown,
-            onPointerMove: _onPointerMove,
-            onPointerUp: _onPointerUp,
+        return Stack(
+          children: [
+            Positioned(
+              bottom: 0,
+              height: _animation.value,
+              width: MediaQueryData.fromWindow(window).size.width,
+              child: Listener(
+                onPointerDown: _onPointerDown,
+                onPointerMove: _onPointerMove,
+                onPointerUp: _onPointerUp,
 
-            ///如果不把 [child] 提出去会特别卡
-            child: animatedBuilderChild,
-          ),
+                ///如果不把 [child] 提出去会特别卡
+                child: animatedBuilderChild,
+              ),
+            ),
+          ],
         );
       },
-      child: _contentChild(),
+      child: NodeSheetBody(
+        scrollController: _scrollController,
+        mainSingleNodeData: widget.mainSingleNodeData,
+        sliver1Builder: widget.sliver1Builder,
+        sliver2Builder: widget.sliver2Builder,
+        sliver3Builder: widget.sliver3Builder,
+        sliver4Builder: widget.sliver4Builder,
+      ),
     );
   }
 
@@ -172,8 +227,9 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
 
       /// 这里不能把 [Curves.easeInQuart] 放到 [init] 中,需求是从慢到非常快，而放 [init] 里曲线是会是反向的先快后慢。
       _animationController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInQuart).whenCompleteOrCancel(() {
-        /// [remove] 后,会调用 [dispose] ,以及当中的 [controller.dispose()]
-        widget.overlayEntry.remove();
+        /// [removeRoute(currentRoute)] 后,会调用 [dispose] ,以及当中的 [controller.dispose()] [removeListener()]
+        /// 不能使用 [pop] ,因为当 [sheet] 已被打开时，再打开新的 [sheet] 时， [pop] 的话会把新打开的 [sheet] [pop] 了,而并不会把旧 [sheet] 关闭
+        Navigator.of(this.context).removeRoute(widget.nodeSheetRoute);
       });
     }
   }
@@ -232,32 +288,72 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
       }
     }
   }
+}
 
-  /// 具体内容 body
-  Widget _contentChild() {
+///
+///
+///
+///
+///
+class NodeSheetBody extends StatefulWidget {
+  NodeSheetBody({
+    @required this.mainSingleNodeData,
+    this.sliver1Builder,
+    this.sliver2Builder,
+    this.sliver3Builder,
+    this.sliver4Builder,
+
+    ///
+    @required this.scrollController,
+  });
+  final MainSingleNodeData mainSingleNodeData;
+  final Widget Function(BuildContext) sliver1Builder;
+  final Widget Function(BuildContext) sliver2Builder;
+  final Widget Function(BuildContext) sliver3Builder;
+  final Widget Function(BuildContext) sliver4Builder;
+
+  ///
+  final ScrollController scrollController;
+
+  @override
+  _NodeSheetBodyState createState() => _NodeSheetBodyState();
+}
+
+class _NodeSheetBodyState extends State<NodeSheetBody> {
+  /// 圆角半径
+  double _circularRadius = 35.0;
+
+  /// 是否把 [Mapping] 隐藏
+  bool _isOffstageMapping = false;
+  Function(Function()) _setStateMappingWidget;
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
       child: Container(
         alignment: Alignment.center,
         child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            _uniformTopWidget(),
-            _uniformTopPaddingWidget(),
-            _unifromFixedWidget(),
-            _uniformMappingWidget(),
-            widget.sliver1Builder(this.context),
-            widget.sliver2Builder(this.context),
-            widget.sliver3Builder(this.context),
-            widget.sliver4Builder(this.context),
-            _uniformBottomWidget(),
-          ],
+          controller: widget.scrollController,
+          slivers: _sliversList(),
         ),
       ),
     );
   }
 
-  /// 具体内容
+  List<Widget> _sliversList() {
+    return [
+      _uniformTopWidget(),
+      _uniformTopPaddingWidget(),
+      _unifromFixedWidget(),
+      _uniformMappingWidget(),
+      widget.sliver1Builder != null ? widget.sliver1Builder(this.context) : SliverToBoxAdapter(child: Container()),
+      widget.sliver2Builder != null ? widget.sliver2Builder(this.context) : SliverToBoxAdapter(child: Container()),
+      widget.sliver3Builder != null ? widget.sliver3Builder(this.context) : SliverToBoxAdapter(child: Container()),
+      widget.sliver4Builder != null ? widget.sliver4Builder(this.context) : SliverToBoxAdapter(child: Container()),
+      _uniformBottomWidget(),
+    ];
+  }
 
   /// 顶部
   Widget _uniformTopWidget() {
@@ -296,8 +392,8 @@ class _ShowNodeSheetState extends State<ShowNodeSheet> with SingleTickerProvider
     double paddingHeight = 0;
     return StatefulBuilder(
       builder: (_, rebuild) {
-        _scrollController.addListener(() {
-          paddingHeight = _scrollController.offset;
+        widget.scrollController.addListener(() {
+          paddingHeight = widget.scrollController.offset;
           if (paddingHeight >= MediaQueryData.fromWindow(window).padding.top) {
             paddingHeight = MediaQueryData.fromWindow(window).padding.top;
           }

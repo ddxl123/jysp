@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheetRoute.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 
 class FragmentNode extends BaseNode {
@@ -18,20 +19,21 @@ class _FragmentNode extends State<FragmentNode> with NodeMixin {
       color: Colors.blue,
       child: CustomButton(
         onPressed: () {
-          // showNodeSheet(
-          //   relyContext: context,
-          //   mainSingleNodeData: widget.mainSingleNodeData,
-          //   sliver1Builder: (_) {
-          //     return SliverToBoxAdapter(
-          //       child: FlatButton(
-          //         child: Text("addChildNode"),
-          //         onPressed: () {
-          //           nodeAddFragment(mainSingleNodeData: widget.mainSingleNodeData);
-          //         },
-          //       ),
-          //     );
-          //   },
-          // );
+          Navigator.of(context).push(
+            NodeSheetRoute(
+              mainSingleNodeData: widget.mainSingleNodeData,
+              sliver1Builder: (_) {
+                return SliverToBoxAdapter(
+                  child: FlatButton(
+                    child: Text("addChildNode"),
+                    onPressed: () {
+                      nodeAddFragment(mainSingleNodeData: widget.mainSingleNodeData);
+                    },
+                  ),
+                );
+              },
+            ),
+          );
         },
         child: Text(widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"]),
       ),

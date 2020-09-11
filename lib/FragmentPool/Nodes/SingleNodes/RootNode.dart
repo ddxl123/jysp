@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheet.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheetRoute.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/LoadingPage.dart';
 
@@ -26,32 +26,33 @@ class _RootNodeState extends State<RootNode> with NodeMixin {
   }
 
   void onPressed() {
-    showNodeSheet(
-      relyContext: context,
-      mainSingleNodeData: widget.mainSingleNodeData,
-      sliver1Builder: (sheetContext) {
-        return SliverToBoxAdapter(
-          child: FlatButton(
-            onPressed: () {
-              Navigator.of(sheetContext).push(MaterialPageRoute(builder: (_) => LoadingPage()));
-            },
-            child: Text("To loading"),
-          ),
-        );
-      },
-      sliver2Builder: (_) {
-        return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (_, index) {
-              return Container(
-                color: Colors.yellow,
-                child: Text(index.toString()),
-              );
-            },
-            childCount: 50,
-          ),
-        );
-      },
+    Navigator.of(context).push(
+      NodeSheetRoute(
+        mainSingleNodeData: widget.mainSingleNodeData,
+        sliver1Builder: (_) {
+          return SliverToBoxAdapter(
+            child: FlatButton(
+              child: Text("To loading"),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoadingPage()));
+              },
+            ),
+          );
+        },
+        sliver2Builder: (_) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (_, index) {
+                return Container(
+                  color: Colors.yellow,
+                  child: Text(index.toString()),
+                );
+              },
+              childCount: 50,
+            ),
+          );
+        },
+      ),
     );
   }
 }

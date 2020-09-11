@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheet.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheetRoute.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 
 class FolderNode extends BaseNode {
@@ -19,8 +19,8 @@ class _FolderNodeState extends State<FolderNode> with NodeMixin {
       color: Colors.yellow,
       child: CustomButton(
         onPressed: () {
-          showNodeSheet(
-              relyContext: context,
+          Navigator.of(context).push(
+            NodeSheetRoute(
               mainSingleNodeData: widget.mainSingleNodeData,
               sliver1Builder: (_) {
                 return SliverToBoxAdapter(
@@ -31,7 +31,9 @@ class _FolderNodeState extends State<FolderNode> with NodeMixin {
                     },
                   ),
                 );
-              });
+              },
+            ),
+          );
         },
         child: Text(widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"]),
       ),
