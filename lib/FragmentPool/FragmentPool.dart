@@ -5,73 +5,66 @@ import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNode.dart';
 
 class FragmentPool extends StatefulWidget {
-  @override
-  FragmentPoolState createState() => FragmentPoolState();
-}
-
-class FragmentPoolState extends State<FragmentPool> {
-  FreeBoxController freeBoxController = FreeBoxController();
-  @override
-  void dispose() {
-    freeBoxController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        _freeBoxWidget(),
-        _toZeroWidget(),
-      ],
-    );
-  }
-
-  Widget _freeBoxWidget() {
-    return FreeBox(
-      boxWidth: double.maxFinite,
-      boxHeight: double.maxFinite,
-      eventWidth: double.maxFinite,
-      eventHeight: double.maxFinite,
-      backgroundColor: Colors.green,
-      freeBoxController: freeBoxController,
-      child: FragmentNodes(freeBoxController: freeBoxController),
-    );
-  }
-
-  /// 将镜头移至Zero的按钮
-  Widget _toZeroWidget() {
-    return Positioned(
-      bottom: 50,
-      left: 0,
-      child: FlatButton(
-        onPressed: () {
-          freeBoxController.startZeroSliding();
-        },
-        child: Icon(Icons.adjust),
-      ),
-    );
-  }
-}
-
-///
-///
-///
-///
-///
-///
-///
-///
-///
-class FragmentNodes extends StatefulWidget {
-  FragmentNodes({@required this.freeBoxController});
+  FragmentPool({@required this.freeBoxController});
   final FreeBoxController freeBoxController;
 
   @override
-  _FragmentNodesState createState() => _FragmentNodesState();
+  _FragmentPoolState createState() => _FragmentPoolState();
 }
 
-class _FragmentNodesState extends State<FragmentNodes> {
+class _FragmentPoolState extends State<FragmentPool> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Future.delayed(Duration(seconds: 3)).then((value) {
+        // widget.freeBoxController.disableTouch(true);
+        // void listener() {
+        //   print("listener");
+        //   if (widget.freeBoxController.freeBoxSlidingStatus == FreeBoxSlidingStatus.none) {
+        //     print("object");
+        //     widget.freeBoxController.disableTouch(false);
+        //     widget.freeBoxController.removeListener(listener);
+        //   }
+        // }
+
+        // widget.freeBoxController.addListener(listener);
+      }),
+      builder: (_, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  child: Container(
+                    width: MediaQueryData.fromWindow(window).size.width,
+                    height: MediaQueryData.fromWindow(window).size.height,
+                    alignment: Alignment.center,
+                    color: Colors.blue,
+                    child: Text("loading"),
+                  ),
+                ),
+              ],
+            );
+          case ConnectionState.done:
+            return FragmentNode(freeBoxController: widget.freeBoxController);
+          default:
+            return Center(child: Text("err"));
+        }
+      },
+    );
+  }
+}
+
+class FragmentNode extends StatefulWidget {
+  FragmentNode({@required this.freeBoxController});
+  final FreeBoxController freeBoxController;
+
+  @override
+  _FragmentNodeState createState() => _FragmentNodeState();
+}
+
+class _FragmentNodeState extends State<FragmentNode> {
   List<Map<dynamic, dynamic>> fragmentPoolDataList = [];
   Map<String, Map<dynamic, dynamic>> fragmentPoolLayoutDataMap = {};
   Map<String, Map<dynamic, dynamic>> fragmentPoolLayoutDataMapTemp = {};
@@ -200,6 +193,10 @@ class _FragmentNodesState extends State<FragmentNodes> {
 
   @override
   Widget build(BuildContext context) {
+    return nodes();
+  }
+
+  Widget nodes() {
     return Stack(
       children: <Widget>[
         for (int childrenIndex = 0; childrenIndex < fragmentPoolDataList.length; childrenIndex++)

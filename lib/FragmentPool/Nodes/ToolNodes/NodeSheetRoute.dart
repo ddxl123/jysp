@@ -168,7 +168,7 @@ class _NodeSheetControlState extends State<NodeSheetControl> with SingleTickerPr
   }
 
   void freeBoxControllerAddListenerCallback() {
-    if (widget.mainSingleNodeData.freeBoxController.freeBoxStatus == FreeBoxStatus.onScaleStart) {
+    if (widget.mainSingleNodeData.freeBoxController.freeBoxTouchStatus == FreeBoxTouchStatus.onScaleStart) {
       _remove();
     }
   }

@@ -1,135 +1,56 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:jysp/Pages/FragmentPool.dart';
+import 'package:jysp/FragmentPool/FragmentPool.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
-
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
+  FreeBoxController _freeBoxController = FreeBoxController();
+
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _freeBoxController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: <Widget>[
-        FragmentPool(),
-        Positioned(
-          bottom: 50,
-          right: 0,
-          child: FlatButton(
-            onPressed: () {},
-            child: Icon(Icons.adjust),
-          ),
-        ),
-        Positioned(
-          top: MediaQueryData.fromWindow(window).padding.top,
-          left: 0,
-          child: ButtonTheme(
-            minWidth: 0,
-            child: FlatButton(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(100),
-                ),
-              ),
-              onPressed: () {},
-              child: Text("我的"),
-            ),
-          ),
-        ),
-        Positioned(
-          top: MediaQueryData.fromWindow(window).padding.top,
-          child: Row(
-            children: <Widget>[
-              FlatButton(
-                color: Colors.white,
-                onPressed: () {},
-                child: Text("root"),
-              ),
-              ButtonTheme(
-                minWidth: 0,
-                child: FlatButton(
-                  color: Colors.white,
-                  onPressed: () {},
-                  child: Text("🔍"),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          top: MediaQueryData.fromWindow(window).padding.top,
-          right: 0,
-          child: ButtonTheme(
-            minWidth: 0,
-            child: FlatButton(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(100),
-                ),
-              ),
-              onPressed: () {},
-              child: Text("..."),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          width: MediaQueryData.fromWindow(window).size.width,
-          child: Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: ButtonTheme(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: FlatButton(
-                        color: Colors.white,
-                        onPressed: () {},
-                        child: Icon(Icons.ac_unit),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ButtonTheme(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: FlatButton(
-                        color: Colors.white,
-                        onPressed: () {},
-                        child: Icon(Icons.ac_unit),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ButtonTheme(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: FlatButton(
-                        color: Colors.white,
-                        onPressed: () {},
-                        child: Icon(Icons.ac_unit),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
+    return Material(
+      child: Stack(
+        children: <Widget>[
+          _freeBoxWidget(),
+          _toZeroWidget(),
+        ],
+      ),
+    );
+  }
+
+  Widget _freeBoxWidget() {
+    return FreeBox(
+      boxWidth: double.maxFinite,
+      boxHeight: double.maxFinite,
+      eventWidth: double.maxFinite,
+      eventHeight: double.maxFinite,
+      backgroundColor: Colors.green,
+      freeBoxController: _freeBoxController,
+      child: FragmentPool(freeBoxController: _freeBoxController),
+    );
+  }
+
+  /// 将镜头移至Zero的按钮
+  Widget _toZeroWidget() {
+    return Positioned(
+      bottom: 50,
+      left: 0,
+      child: FlatButton(
+        onPressed: () {
+          _freeBoxController.startZeroSliding();
+        },
+        child: Icon(Icons.adjust),
+      ),
     );
   }
 }

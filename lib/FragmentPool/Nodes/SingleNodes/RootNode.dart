@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheetRoute.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeSheetRoute.dart';
 import 'package:jysp/Tools/CustomButton.dart';
-import 'package:jysp/Tools/LoadingPage.dart';
+import 'package:jysp/Pages/LoadingPage.dart';
 
 class RootNode extends BaseNode {
   RootNode(MainSingleNodeData singleNodeData) : super(singleNodeData);
@@ -19,13 +19,13 @@ class _RootNodeState extends State<RootNode> with NodeMixin {
     return Container(
       height: 500,
       child: CustomButton(
-        onPressed: onPressed,
+        onPressed: _onPressed,
         child: Text(widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"]),
       ),
     );
   }
 
-  void onPressed() {
+  void _onPressed() {
     Navigator.of(context).push(
       NodeSheetRoute(
         mainSingleNodeData: widget.mainSingleNodeData,
@@ -34,7 +34,7 @@ class _RootNodeState extends State<RootNode> with NodeMixin {
             child: FlatButton(
               child: Text("To loading"),
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoadingPage()));
+                Navigator.of(context).push(LoadingPage());
               },
             ),
           );

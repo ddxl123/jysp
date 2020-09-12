@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
 import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeMixin.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/ShowNodeSheetRoute.dart';
+import 'package:jysp/FragmentPool/Nodes/ToolNodes/NodeSheetRoute.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 
 class FolderNode extends BaseNode {
