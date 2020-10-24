@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
+import 'package:jysp/FragmentPool/FreeBox.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNode.dart';
+import 'package:jysp/Global/GlobalData.dart';
 
 class FragmentPool extends StatefulWidget {
   FragmentPool({@required this.freeBoxController});
@@ -13,22 +15,24 @@ class FragmentPool extends StatefulWidget {
 }
 
 class _FragmentPoolState extends State<FragmentPool> {
+  Future _future() async {
+    GlobalData.instance.userSelfInitFragmentPools.clear();
+    GlobalData.instance.userSelfInitFragmentPoolNodes.clear();
+
+    await Future.delayed(Duration(seconds: 1));
+    await DefaultAssetBundle.of(context).loadString("assets/get_db/user_self_init_fragment_pool.json").then((value) {
+      Map val = json.decode(value);
+      GlobalData.instance.userSelfInitFragmentPools.addAll(val["pools"]);
+      GlobalData.instance.userSelfInitFragmentPoolNodes.addAll(val["nodes"]);
+    }).catchError((onError) {});
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Future.delayed(Duration(seconds: 3)).then((value) {
-        // widget.freeBoxController.disableTouch(true);
-        // void listener() {
-        //   print("listener");
-        //   if (widget.freeBoxController.freeBoxSlidingStatus == FreeBoxSlidingStatus.none) {
-        //     print("object");
-        //     widget.freeBoxController.disableTouch(false);
-        //     widget.freeBoxController.removeListener(listener);
-        //   }
-        // }
-
-        // widget.freeBoxController.addListener(listener);
-      }),
+      future: _future(),
       builder: (_, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -65,9 +69,10 @@ class FragmentNode extends StatefulWidget {
 }
 
 class _FragmentNodeState extends State<FragmentNode> {
-  List<Map<dynamic, dynamic>> fragmentPoolDataList = [];
-  Map<String, Map<dynamic, dynamic>> fragmentPoolLayoutDataMap = {};
-  Map<String, Map<dynamic, dynamic>> fragmentPoolLayoutDataMapTemp = {};
+  /// 调用父级的 [reLayout] 会清空 [_nodeLayoutMap] ,因此需要 [_nodeLayoutMapTemp]
+  ///  [_nodeLayoutMap] 是一个 [布局Map] ,是需要随时 [reLayout] 的
+  Map<String, Map<dynamic, dynamic>> _nodeLayoutMap = {};
+  Map<String, Map<dynamic, dynamic>> _nodeLayoutMapTemp = {};
 
   Map<String, int> _tailMap = {};
 
@@ -86,141 +91,39 @@ class _FragmentNodeState extends State<FragmentNode> {
   void initState() {
     super.initState();
 
-    fragmentPoolDataList = [
-      {
-        "route": "0",
-        "type": 0,
-        "pool_display_name": "root",
-      },
-      {
-        "route": "0-0",
-        "type": 1,
-        "pool_display_name": "热污染3人安抚43热污染3人安抚433给热污染3人安抚433给 0-0",
-      },
-      {
-        "route": "0-1",
-        "type": 1,
-        "pool_display_name":
-            "热污\n染3\n人安\n抚43\n3给热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安\n\热\n污\n染\n\热\n污\n染\n\热\n污\n染\n\n\n3人安抚\n\n433给热\n污\n染3人安抚433给热污\n染3人安抚4\n33给 0-1",
-      },
-      {
-        "route": "0-2",
-        "type": 1,
-        "pool_display_name": "热污染3人安抚3给 0-2",
-      },
-      {
-        "route": "0-0-0",
-        "type": 1,
-        "pool_display_name": "热污染3人安抚433给热污染3人安抚433给热污\n染3人安抚433给热污\n染3人安抚433给热污\n染3人安抚433安抚433给 0-0-0",
-      },
-      {
-        "route": "0-0-0-0",
-        "type": 1,
-        "pool_display_name": "热污染3给 0-0-0-0",
-      },
-      {
-        "route": "0-0-0-1",
-        "type": 1,
-        "pool_display_name": "热污染给热污染3人安抚433给热污染3人安抚433给 0-0-0-1",
-      },
-      {
-        "route": "0-0-1",
-        "type": 1,
-        "pool_display_name": "热污染3人安抚433给热污染3人安抚433给热污染3人安抚433给 0-0-1",
-      },
-      {
-        "route": "0-0-1-0",
-        "type": 1,
-        "pool_display_name": "热污染3人\n染3人安抚433给热污染3人安抚\n433给热\n污染3人安抚433给 0-0-1-0",
-      },
-      {
-        "route": "0-0-1-1",
-        "type": 1,
-        "pool_display_name": "热污染3人安抚433给热污染33给热污染3人安抚433给热污染33给热污染3人安抚433给热污染33给热污染3人安抚433给热污染33给热污染3人安抚433给热污染33给热污染3人安抚433给热污染33给 0-0-1-1",
-      },
-      {
-        "route": "0-0-1-2",
-        "type": 1,
-        "pool_display_name": " 0-0-1-2",
-      },
-      {
-        "route": "0-0-2",
-        "type": 2,
-        "pool_display_name": "433给热污染3人安抚433给 0-0-2",
-      },
-      {
-        "route": "0-1-0",
-        "type": 2,
-        "pool_display_name": "热污\n染3抚433\n给 0-1-0",
-      },
-      {
-        "route": "0-1-1",
-        "type": 2,
-        "pool_display_name": "热0-1-0",
-      },
-      {
-        "route": "0-1-0-0",
-        "type": 2,
-        "pool_display_name": "热污染3人安抚433给热污污\n安抚433给 0-1-0",
-      },
-      {
-        "route": "0-1-0-1",
-        "type": 2,
-        "pool_display_name": "热污染3人安污\n安抚433给 0-1-0",
-      },
-      {
-        "route": "0-1-0-2",
-        "type": 2,
-        "pool_display_name": "热给 0-1-0",
-      },
-      {
-        "route": "0-2-0",
-        "type": 2,
-        "pool_display_name": "热污染3人安抚433给热污染3人安抚433染3人安抚433给 0-2-0",
-      },
-      {
-        "route": "0-2-1",
-        "type": 2,
-        "pool_display_name": "热污染3人安抚43热污\n染3人安抚433给热污染3人安抚433给热污染3人安抚433给 0-2-1",
-      },
-      {
-        "route": "0-2-2",
-        "type": 2,
-        "pool_display_name": "热污染3人安抚433给热污染3人安抚433给热污\n染3人安抚433给热污染3人安抚433给热污染3人安抚433给 0-2-2",
-      },
-    ];
+    GlobalData.instance.startResetLayout = startResetLayout; // 需按地址传递
   }
 
   @override
   Widget build(BuildContext context) {
-    return nodes();
-  }
-
-  Widget nodes() {
+    print(GlobalData.instance.userSelfInitFragmentPoolNodes);
     return Stack(
       children: <Widget>[
-        for (int childrenIndex = 0; childrenIndex < fragmentPoolDataList.length; childrenIndex++)
+        for (int childrenIndex = 0; childrenIndex < GlobalData.instance.userSelfInitFragmentPoolNodes.length; childrenIndex++)
           MainSingleNode(
-            fragmentPoolDataList: this.fragmentPoolDataList,
             index: childrenIndex,
-            fragmentPoolLayoutDataMap: this.fragmentPoolLayoutDataMap,
-            fragmentPoolLayoutDataMapTemp: this.fragmentPoolLayoutDataMapTemp,
-            freeBoxController: widget.freeBoxController,
-            resetLayout: resetLayout,
+            thisRouteName: GlobalData.instance.userSelfInitFragmentPoolNodes[childrenIndex]["route"],
+            nodeLayoutMap: _nodeLayoutMap,
+            nodeLayoutMapTemp: _nodeLayoutMapTemp,
+
+            /// 之所以用函数获取，是因为如果直接传入 [bool] 值，会按值传递，并不会获取到被修改后的。
+            /// 传入值为 [null] 时，保持原来值。
             isResetingLayout: (bool b) {
-              _isResetingLayout = b;
+              _isResetingLayout = b ?? _isResetingLayout;
+              return _isResetingLayout;
             },
-            isResetingLayoutProperty: () {
-              /// 之所以用函数获取，是因为如果直接传入bool值，会按值传递，并不会获取到被修改后的 [_isReSetLayouting]
+            isResetingLayoutProperty: (bool b) {
+              _isResetingLayoutProperty = b ?? _isResetingLayoutProperty;
               return _isResetingLayoutProperty;
             },
+
+            /// 布局操作
             reLayoutHandle: () {
               _one();
               _two();
               _three();
               _four();
               _five();
-              _six();
             },
           ),
       ],
@@ -230,19 +133,18 @@ class _FragmentNodeState extends State<FragmentNode> {
   /// 已获取完 [全部Node的初始属性],开始进行 [布局]
   ///
   /// 1、获取全部 [tail_route] 的 [map],以及 每个 [route] 数量
-  /// [fragmentPoolLayoutDataMap] 和 [fragmentPoolLayoutDataMapClone] 已被 [SingleNode] 中的 [firstFrameStart] 重置了,因为需要获取 [SingleNode.this] ,因此不能在这里重置 [SingleNode.this]
   void _one() {
-    fragmentPoolLayoutDataMap.forEach((key, value) {
+    _nodeLayoutMapTemp.forEach((key, value) {
       /// 获取 [tail_route]
-      if (!fragmentPoolLayoutDataMap.containsKey(key + "-0")) {
+      if (!_nodeLayoutMapTemp.containsKey(key + "-0")) {
         _tailMap[key] = value["index"];
       }
 
       /// 获取每个 [route] 的 [child] 数量
       List<String> spl = key.split("-");
       String fatherRoute = spl.sublist(0, spl.length - 1).join("-");
-      if (key != "0" && fragmentPoolLayoutDataMap.containsKey(fatherRoute)) {
-        fragmentPoolLayoutDataMap[fatherRoute]["child_count"]++;
+      if (key != "0" && _nodeLayoutMapTemp.containsKey(fatherRoute)) {
+        _nodeLayoutMapTemp[fatherRoute]["child_count"]++;
       }
     });
   }
@@ -260,14 +162,14 @@ class _FragmentNodeState extends State<FragmentNode> {
           double childrenContainerHeight = 0.0 - heightSpace; //// 减去 [height_space] 是因为 [container_height] 不包含最底下的 [height_space]
 
           /// 迭代同层级的 [route]
-          for (int incIndex = 0; incIndex < fragmentPoolLayoutDataMap[fatherRoute]["child_count"]; incIndex++) {
+          for (int incIndex = 0; incIndex < _nodeLayoutMapTemp[fatherRoute]["child_count"]; incIndex++) {
             String incRoute = fatherRoute + "-$incIndex";
-            childrenContainerHeight += fragmentPoolLayoutDataMap[incRoute]["container_height"] + heightSpace; //// 需要加上 [heightSpace]
+            childrenContainerHeight += _nodeLayoutMapTemp[incRoute]["container_height"] + heightSpace; //// 需要加上 [heightSpace]
           }
 
           /// 比较并赋值
-          fragmentPoolLayoutDataMap[fatherRoute]["container_height"] =
-              fragmentPoolLayoutDataMap[fatherRoute]["layout_height"] > childrenContainerHeight ? fragmentPoolLayoutDataMap[fatherRoute]["layout_height"] : childrenContainerHeight;
+          _nodeLayoutMapTemp[fatherRoute]["container_height"] =
+              _nodeLayoutMapTemp[fatherRoute]["layout_height"] > childrenContainerHeight ? _nodeLayoutMapTemp[fatherRoute]["layout_height"] : childrenContainerHeight;
         }
       }
     });
@@ -275,7 +177,7 @@ class _FragmentNodeState extends State<FragmentNode> {
 
   /// 3、从任意 [route] 开始,向上紧贴,并向左对齐
   void _three() {
-    fragmentPoolLayoutDataMap.forEach((key, value) {
+    _nodeLayoutMapTemp.forEach((key, value) {
       double topContainerHeight = 0.0; //// 不减去 [height_space] 是因为 top 时包含最底下的 height_space
       double finalLeft = 0.0;
 
@@ -286,16 +188,16 @@ class _FragmentNodeState extends State<FragmentNode> {
 
         /// 向上紧贴
         for (int upIndex = 0; upIndex < int.parse(keyNums[partIndex]); upIndex++) {
-          topContainerHeight += fragmentPoolLayoutDataMap[keyNums.sublist(0, partIndex).join("-") + "-$upIndex"]["container_height"] + heightSpace;
+          topContainerHeight += _nodeLayoutMapTemp[keyNums.sublist(0, partIndex).join("-") + "-$upIndex"]["container_height"] + heightSpace;
         }
 
         /// 向左对齐
         if (partRoute != key) {
-          finalLeft += fragmentPoolLayoutDataMap[partRoute]["layout_width"] + widthSpace; //// 需要加上 [widthSpace]
+          finalLeft += _nodeLayoutMapTemp[partRoute]["layout_width"] + widthSpace; //// 需要加上 [widthSpace]
         }
       }
-      fragmentPoolLayoutDataMap[key]["layout_top"] = topContainerHeight;
-      fragmentPoolLayoutDataMap[key]["layout_left"] = finalLeft;
+      _nodeLayoutMapTemp[key]["layout_top"] = topContainerHeight;
+      _nodeLayoutMapTemp[key]["layout_left"] = finalLeft;
     });
   }
 
@@ -311,23 +213,23 @@ class _FragmentNodeState extends State<FragmentNode> {
         if (partRoute != "0") {
           String fatherRoute = keyNums.sublist(0, partIndex).join("-");
 
-          double childrenUp = fragmentPoolLayoutDataMap[fatherRoute + "-0"]["layout_top"]; // 可以为负值
-          double childrenDown = fragmentPoolLayoutDataMap[fatherRoute + "-${fragmentPoolLayoutDataMap[fatherRoute]["child_count"] - 1}"]["layout_top"] +
-              fragmentPoolLayoutDataMap[fatherRoute + "-${fragmentPoolLayoutDataMap[fatherRoute]["child_count"] - 1}"]["layout_height"]; // 可以为负值
+          double childrenUp = _nodeLayoutMapTemp[fatherRoute + "-0"]["layout_top"]; // 可以为负值
+          double childrenDown = _nodeLayoutMapTemp[fatherRoute + "-${_nodeLayoutMapTemp[fatherRoute]["child_count"] - 1}"]["layout_top"] +
+              _nodeLayoutMapTemp[fatherRoute + "-${_nodeLayoutMapTemp[fatherRoute]["child_count"] - 1}"]["layout_height"]; // 可以为负值
           double childrenUDHeight = (childrenDown - childrenUp).abs(); // 不能为负值
-          double fatherUp = fragmentPoolLayoutDataMap[fatherRoute]["layout_top"]; // 可以为负值
-          double fatherHeight = fragmentPoolLayoutDataMap[fatherRoute]["layout_height"]; // 不能为负值
-          if (childrenUDHeight >= fragmentPoolLayoutDataMap[fatherRoute]["layout_height"]) {
+          double fatherUp = _nodeLayoutMapTemp[fatherRoute]["layout_top"]; // 可以为负值
+          double fatherHeight = _nodeLayoutMapTemp[fatherRoute]["layout_height"]; // 不能为负值
+          if (childrenUDHeight >= _nodeLayoutMapTemp[fatherRoute]["layout_height"]) {
             /// 1、这里不能用"2、"的方式,因为 [children] 上方的空无不容易计算;
-            fragmentPoolLayoutDataMap[fatherRoute]["layout_top"] = (childrenUDHeight / 2 - fatherHeight / 2) + childrenUp;
+            _nodeLayoutMapTemp[fatherRoute]["layout_top"] = (childrenUDHeight / 2 - fatherHeight / 2) + childrenUp;
           } else {
             /// 2、这里不能用"1、"的方法,因为需要把整个 [children] 进行调整;
             double finalchild0Top = (fatherHeight / 2 - childrenUDHeight / 2) + fatherUp; // 可以为负值
             double delta = finalchild0Top - childrenUp; // 可以为负值
             void func(String route, double del) {
-              for (int i = 0; i < fragmentPoolLayoutDataMap[route]["child_count"]; i++) {
+              for (int i = 0; i < _nodeLayoutMapTemp[route]["child_count"]; i++) {
                 String childRoute = route + "-$i";
-                fragmentPoolLayoutDataMap[childRoute]["vertical_center_offset"] = del;
+                _nodeLayoutMapTemp[childRoute]["vertical_center_offset"] = del;
                 func(childRoute, del);
               }
             }
@@ -342,15 +244,15 @@ class _FragmentNodeState extends State<FragmentNode> {
                 //// [fatherRoute] 假设为 0-1-2-3 ,结果为: 0, 0-1, 0-1-2, 0-1-2-3
                 String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
                 //// 自身: 0, 0-1, 0-1-2, 0-1-2-3
-                fragmentPoolLayoutDataMap[partRoute]["vertical_center_offset"] = delta.abs();
-                for (int brotherIndex = int.parse(keyNums[partIndex]) + 1; brotherIndex < fragmentPoolLayoutDataMap.length; brotherIndex++) {
+                _nodeLayoutMapTemp[partRoute]["vertical_center_offset"] = delta.abs();
+                for (int brotherIndex = int.parse(keyNums[partIndex]) + 1; brotherIndex < _nodeLayoutMapTemp.length; brotherIndex++) {
                   //// 递增: (1+), 0-(2+), 0-1-(3+), 0-1-2-(4+)
                   String partIncRoute = keyNums.sublist(0, partIndex).join("-") + "-$brotherIndex";
-                  if (fragmentPoolLayoutDataMap.containsKey(partIncRoute) == false) {
+                  if (_nodeLayoutMapTemp.containsKey(partIncRoute) == false) {
                     break;
                   } else {
                     /// TODO: 这部分不知为何下移的距离会过大
-                    fragmentPoolLayoutDataMap[partIncRoute]["vertical_center_offset"] = delta.abs(); // 自身
+                    _nodeLayoutMapTemp[partIncRoute]["vertical_center_offset"] = delta.abs(); // 自身
                     func(partIncRoute, delta.abs());
                   }
                 }
@@ -360,27 +262,36 @@ class _FragmentNodeState extends State<FragmentNode> {
         }
       }
     });
+
+    /// 实行垂直居中偏移
+    _nodeLayoutMapTemp.forEach((key, value) {
+      _nodeLayoutMapTemp[key]["layout_top"] += _nodeLayoutMapTemp[key]["vertical_center_offset"];
+    });
   }
 
-  /// 5、开始第2帧 [rebuild]
+  /// 5、完成布局设置，并调用第2帧
   void _five() {
-    fragmentPoolLayoutDataMap.forEach((key, value) {
-      /// 偏移
-      fragmentPoolLayoutDataMap[key]["layout_top"] += fragmentPoolLayoutDataMap[key]["vertical_center_offset"];
-    });
+    _tailMap.clear();
 
-    /// 正式设置布局完成
-    _isResetingLayoutProperty = false;
+    /// 作用：防止残留的 [route] 干扰
+    _nodeLayoutMap.clear();
+
+    /// 伪深拷贝
+    _nodeLayoutMap = Map.of(_nodeLayoutMapTemp);
+
+    _toZero();
     setState(() {});
   }
 
-  /// 6、镜头调至原点
-  void _six() {
-    Offset transformZeroOffset = Offset(fragmentPoolLayoutDataMap["0"]["layout_left"] - fragmentPoolLayoutDataMap["0"]["layout_width"] / 2,
-        -(fragmentPoolLayoutDataMap["0"]["layout_top"] + fragmentPoolLayoutDataMap["0"]["layout_height"] / 2));
+  /// 获取 [route=="0"] 的坐标,并将镜头预调至原点
+  void _toZero() {
+    /// 获取 [route=="0"] 的坐标
+    Offset transformZeroOffset =
+        Offset(_nodeLayoutMapTemp["0"]["layout_left"] - _nodeLayoutMapTemp["0"]["layout_width"] / 2, -(_nodeLayoutMapTemp["0"]["layout_top"] + _nodeLayoutMapTemp["0"]["layout_height"] / 2));
     Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
     widget.freeBoxController.zeroPosition = transformZeroOffset + mediaCenter;
 
+    /// 镜头预调至原点
     /// 因为重新布局会调用 [six()] ,而这里只需 [init] 时调用一次
     if (!_isInitedToZero) {
       _isInitedToZero = true;
@@ -388,8 +299,8 @@ class _FragmentNodeState extends State<FragmentNode> {
     }
   }
 
-  /// 重置布局
-  void resetLayout(Function callback) {
+  /// 开始进行重置布局
+  void startResetLayout(Function callback) {
     if (_isResetingLayout) {
       return;
     }
@@ -402,15 +313,7 @@ class _FragmentNodeState extends State<FragmentNode> {
     _isResetingLayoutProperty = true;
 
     /// 是独立的地址值，没有相关联的，因此放心 [clear]
-    fragmentPoolLayoutDataMapTemp.clear();
-
-    /// 伪深拷贝,因为下面的 [fragmentPoolLayoutDataMap.clear()] 会把同地址的给 [clear] 了
-    /// 作用：保留原数据，防止 [setState] 时闪一下
-    fragmentPoolLayoutDataMapTemp = Map.of(fragmentPoolLayoutDataMap);
-
-    /// 作用：防止残留的 [route] 干扰
-    _tailMap.clear();
-    fragmentPoolLayoutDataMap.clear();
+    _nodeLayoutMapTemp.clear();
 
     setState(() {});
   }

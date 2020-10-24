@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPool.dart';
-import 'package:jysp/FragmentPool/Nodes/ToolNodes/FreeBox.dart';
+import 'package:jysp/FragmentPool/FreeBox.dart';
 
 class HomePage extends StatefulWidget {
   @override

@@ -1,0 +1,31 @@
+{
+  "pools": [
+    {
+      "pool_id": "",
+      "is_public": true
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": null,
+      "type": 0,
+      "route": "0",
+      "text": "root",
+      "background_color": "FFEF5350"
+    },
+    {
+      "node_id": null,
+      "type": 0,
+      "route": "0-0",
+      "text": "aaaaaaaaaa",
+      "background_color": "FFEF5350"
+    },
+    {
+      "node_id": null,
+      "type": 0,
+      "route": "0-1",
+      "text": "root",
+      "background_color": "FFEF5350"
+    }
+  ]
+}

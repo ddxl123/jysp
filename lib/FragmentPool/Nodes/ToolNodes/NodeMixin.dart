@@ -1,22 +1,16 @@
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNodeData.dart';
+import 'package:jysp/Global/GlobalData.dart';
+import 'package:jysp/FragmentPool/FragmentPool.dart';
 
 mixin NodeMixin {
-  void nodeAddFragment({MainSingleNodeData mainSingleNodeData}) {
-    mainSingleNodeData.resetLayout(() {
-      mainSingleNodeData.fragmentPoolDataList.add({
-        "route": () {
-          int childCount = 0;
-          for (int i = 0; i < mainSingleNodeData.fragmentPoolDataList.length; i++) {
-            if (mainSingleNodeData.fragmentPoolLayoutDataMap.containsKey(mainSingleNodeData.thisRouteName + "-$i")) {
-              childCount++;
-            } else {
-              break;
-            }
-          }
-          return mainSingleNodeData.thisRouteName + "-$childCount";
-        }(),
-        "type": 1,
-        "pool_display_name": "${mainSingleNodeData.thisRouteName},hhhhh",
+  void addOrdinalNode(int currentIndex, String thisRouteName, int childCount) {
+    /// TODO: 需要异步操作
+    GlobalData.instance.startResetLayout(() {
+      GlobalData.instance.userSelfInitFragmentPoolNodes.add({
+        "node_type_id": null,
+        "type": 0,
+        "route": thisRouteName + "-$childCount",
+        "text": thisRouteName + "-$childCount",
+        "background_color": "FFEF5350",
       });
     });
   }

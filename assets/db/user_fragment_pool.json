@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "",
+    "name": "pool123",
+    "nodes": [
+      {
+        "node_id": null,
+        "type": 0,
+        "route": "0",
+        "text": "root",
+        "background_color": "FFEF5350"
+      },
+      {
+        "node_id": "type为0时,node_id为null,表示普通节点(ordinary node);type为1时,node_id为id值,表示碎片集节点(collection node)",
+        "type": 1,
+        "route": "0",
+        "text": "root",
+        "background_color": "FFEF5350"
+      }
+    ]
+  }
+]

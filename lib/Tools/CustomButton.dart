@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatefulWidget {
-  CustomButton({@required this.child, @required this.onPressed});
+  CustomButton({
+    @required this.child,
+    @required this.onPressed,
+    @required this.color,
+  });
   final Widget child;
   final Function() onPressed;
+  final Color color;
   @override
   State<StatefulWidget> createState() {
     return _CustomButton();
@@ -11,7 +16,7 @@ class CustomButton extends StatefulWidget {
 }
 
 class _CustomButton extends State<CustomButton> {
-  Color _color = Colors.yellow;
+  Color _color;
   bool _isOnMove = false;
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,7 @@ class _CustomButton extends State<CustomButton> {
       child: Material(
         child: Container(
           alignment: Alignment.center,
-          color: _color,
+          color: _color ?? widget.color,
           child: widget.child,
         ),
       ),
@@ -43,7 +48,7 @@ class _CustomButton extends State<CustomButton> {
   }
 
   void toNormalStatus() {
-    _color = Colors.yellow;
+    _color = widget.color;
     setState(() {});
   }
 
