@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:jysp/Tools/LoadingAnimation.dart';
 
 ///
 ///
@@ -11,8 +12,7 @@ import 'package:flutter/rendering.dart';
 class SheetRoute extends OverlayRoute {
   SheetRoute({@required this.slivers});
 
-  /// [topWidget] [topPaddingWidget] [bottomWidget]
-  final List<Widget> Function(ScrollController) slivers;
+  final List<Widget> Function(SheetPageController) slivers;
 
   Function _removeAnimation = () {};
 
@@ -88,15 +88,17 @@ class SheetControl extends StatefulWidget {
   final SheetRoute sheetRoute;
   final Function getRemoveAnimation;
 
-  final List<Widget> Function(ScrollController) slivers;
+  final List<Widget> Function(SheetPageController) slivers;
 
   @override
   _SheetControlState createState() => _SheetControlState();
 }
 
 class _SheetControlState extends State<SheetControl> with SingleTickerProviderStateMixin {
+  SheetPageController _sheetPageController = SheetPageController();
+
   /// 初始高度占满屏幕
-  double _screenHeight = MediaQueryData.fromWindow(window).size.height;
+  double _maxHeight = MediaQueryData.fromWindow(window).size.height - MediaQueryData.fromWindow(window).padding.top;
 
   /// 动画
   Animation _animation;
@@ -108,14 +110,11 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
   /// [初始化] 时播放到一半时停止的单次事件,防止初始化时滑到满屏
   bool _isOnceHalfDone = false;
 
-  /// 惯性滑动，防止之后 [>=0.5] 并有另外动画时被持续 [stop()]，
-  double _lastDelta = 0.0;
+  /// 触摸方向。如果 [_touchDirection>0.0] 则正在向上滚动,如果 [_touchDirection<0.0] 则正在向下滚动。
+  double _lastTouchDelta = 0.0;
 
   /// 是否将被移除，防止 [_remove] 被触发多次
   bool _isWillRemoveOnce = false;
-
-  /// 是否达到 [加载区]
-  bool _isEnterLoadingArea = false;
 
   @override
   void initState() {
@@ -133,38 +132,45 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
 
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.linear);
 
-    /// 当手指滑动时，最大限度是 [end],因此不能设置成 [_initHeight/2] ，而需设置为 [_initHeight]，且应触发 [once] 单次事件来监听当动画播放到 [_initHeight/2] 时另其 [stop()];
-    _animation = Tween(begin: 0.0, end: _screenHeight).animate(_animation);
+    /// 当手指滑动时，最大限度是 [end],因此不能设置成 [_initHeight/2] ，而需设置为 [_maxHeight]，且应触发 [once] 单次事件来监听当动画播放到 [_initHeight/2] 时另其 [stop()];
+    _animation = Tween(begin: 0.0, end: _maxHeight).animate(_animation);
 
-    /// 初始化上升动作：从 [0.0] 到 [_screenHeight/2]
+    /// 初始化上升动作：从 [0.0] 到 [_maxHeight/2]
     _animationController.forward();
 
     _animationController.addListener(() {
       /// 监听初始播放到一半时停止
-      if (!_isOnceHalfDone && _animation.value >= _screenHeight / 2) {
+      if (!_isOnceHalfDone && _animation.value >= _maxHeight / 3) {
         _isOnceHalfDone = true;
         _animationController.stop();
       }
 
-      /// 下滑到一定范围内自动 [remove]
-      if (_lastDelta > 0 && _animation.value <= MediaQueryData.fromWindow(window).padding.top * 2) {
+      /// 向下滚动到一定范围内自动 [remove]
+      if (_sheetPageController.touchDirection == TouchDirection.forward && _animation.value <= MediaQueryData.fromWindow(window).padding.top * 2) {
         _remove();
+      }
+
+      /// 是否处在 [LoadingArea]
+      if (_animation.value >= _scrollController.position.maxScrollExtent + 50) {
+        _sheetPageController.isInLoadingArea = true;
+        _sheetPageController.doNotifyListener();
+      } else {
+        _sheetPageController.isInLoadingArea = false;
+        _sheetPageController.doNotifyListener();
       }
 
       /// 每次 [_animationController.value] 发生变化时调用,目的是调用 [setState]
       setState(() {});
     });
 
-    ///
-    ///
-    ///
-    /// [ScrollController] 区
-    /// 是否达到加载区监听
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= (_scrollController.position.maxScrollExtent - _screenHeight)) {
-        _isEnterLoadingArea = true;
+      /// 是否处在 [LoadingArea]
+      if (_maxHeight + _scrollController.position.pixels > _scrollController.position.maxScrollExtent + 50) {
+        _sheetPageController.isInLoadingArea = true;
+        _sheetPageController.doNotifyListener();
       } else {
-        _isEnterLoadingArea = false;
+        _sheetPageController.isInLoadingArea = false;
+        _sheetPageController.doNotifyListener();
       }
     });
   }
@@ -192,9 +198,12 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
         ///
         child: Material(
           type: MaterialType.transparency,
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: widget.slivers(_scrollController),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: widget.slivers(_sheetPageController),
+            ),
           ),
         ),
       ),
@@ -230,20 +239,40 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
       return;
     }
 
-    /// 1、未满屏时，即 [jumpTo(0)]
-    /// 2、满屏时，当 [offset==0.0] 时，即向下 [touch_move] 时，回到 [1、] ，当向上 [touch_move] 时，正常滑动。
-    /// [/ _initHeight] 是为了映射为 [0.0-1.0]
-    if (_animation.value != _screenHeight) {
-      _animationController.value -= event.delta.dy / _screenHeight;
+    /// 给 [_onPointerUp] 使用
+    _lastTouchDelta = event.delta.dy;
+
+    /// 监听触摸方向。如果 [touchDirection>0.0] 则正在向上滚动,如果 [touchDirection<0.0] 则正在向下滚动。
+    TouchDirection touchDirection = event.delta.dy > 0.0 ? TouchDirection.forward : (event.delta.dy < 0.0 ? TouchDirection.reverse : TouchDirection.idle);
+    _sheetPageController.touchDirection = touchDirection;
+
+    /// 1、未满屏时，内部不滑动，外部滑动。
+    if (_animation.value != _maxHeight) {
+      _animationController.value -= event.delta.dy / _maxHeight;
       _scrollController.jumpTo(0);
-    } else {
-      if (_scrollController.offset == 0.0) {
-        _animationController.value -= event.delta.dy / _screenHeight;
-      }
+
+      // /// 是否处在 [LoadingArea]
+      // if (_animation.value >= _scrollController.position.maxScrollExtent + 50) {
+      //   _sheetPageController.isInLoadingArea = true;
+      // } else {
+      //   _sheetPageController.isInLoadingArea = false;
+      // }
     }
 
-    /// 惯性动画
-    _lastDelta = event.delta.dy;
+    /// 2、满屏时，内部滑动，外部不滑动。
+    else if (_animation.value == _maxHeight) {
+      /// 当 [offset==0.0] 时，可向下 [touch_move] ，回到 [1、] 。
+      if (_scrollController.offset == 0.0) {
+        _animationController.value -= event.delta.dy / _maxHeight;
+      }
+
+      // /// 是否处在 [LoadingArea]
+      // if (_maxHeight + _scrollController.position.pixels > _scrollController.position.maxScrollExtent + 50) {
+      //   _sheetPageController.isInLoadingArea = true;
+      // } else {
+      //   _sheetPageController.isInLoadingArea = false;
+      // }
+    }
 
     /// 已经在 [addListener] 中 [setState] 了
   }
@@ -253,18 +282,19 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
       return;
     }
 
-    /// 同理 [onPointerMove]
-    /// 这里 [animateTo] 值是 [0.0-1.0]
-    if (_animation.value != _screenHeight) {
+    if (_animation.value != _maxHeight) {
       _animationController.animateTo(
-        _animationController.value - (_lastDelta / _screenHeight) * 20,
+        _animationController.value - (_lastTouchDelta / _maxHeight) * 20,
         curve: Curves.easeOutQuart,
         duration: Duration(milliseconds: 1000),
       );
-    } else {
+    }
+
+    ///
+    else if (_animation.value == _maxHeight) {
       if (_scrollController.offset == 0.0) {
         _animationController.animateTo(
-          _animationController.value - (_lastDelta / _screenHeight) * 20,
+          _animationController.value - (_lastTouchDelta / _maxHeight) * 20,
           curve: Curves.easeOutQuart,
           duration: Duration(milliseconds: 1000),
         );
@@ -278,3 +308,17 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
 ///
 ///
 ///
+enum TouchDirection { idle, forward, reverse }
+
+class SheetPageController extends ChangeNotifier {
+  void doNotifyListener() {
+    notifyListeners();
+  }
+
+  TouchDirection touchDirection = TouchDirection.idle;
+
+  /// 是否处在 [LoadingArea]
+  bool isInLoadingArea = false;
+
+  LoadingController loadingController = LoadingController();
+}

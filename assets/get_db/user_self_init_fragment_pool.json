@@ -26,6 +26,13 @@
       "route": "0-1",
       "text": "root",
       "background_color": "FFEF5350"
+    },
+    {
+      "node_id": "123456",
+      "type": 1,
+      "route": "0-1-0",
+      "text": "root",
+      "background_color": "FFEF5350"
     }
   ]
 }

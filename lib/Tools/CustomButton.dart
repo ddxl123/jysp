@@ -22,6 +22,7 @@ class _CustomButton extends State<CustomButton> {
   Widget build(BuildContext context) {
     return Listener(
       child: Material(
+        type: MaterialType.transparency,
         child: Container(
           alignment: Alignment.center,
           color: _color ?? widget.color,

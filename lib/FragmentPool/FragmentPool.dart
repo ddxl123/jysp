@@ -132,17 +132,20 @@ class _FragmentNodeState extends State<FragmentNode> {
 
   /// 已获取完 [全部Node的初始属性],开始进行 [布局]
   ///
-  /// 1、获取全部 [tail_route] 的 [map],以及 每个 [route] 数量
+  /// 1、获取全部 [tail_route] 的 [map], 获取每个 [route] 数量和 [father_route]
   void _one() {
     _nodeLayoutMapTemp.forEach((key, value) {
-      /// 获取 [tail_route]
+      /// 获取 [tail_route] 的 [map]
       if (!_nodeLayoutMapTemp.containsKey(key + "-0")) {
         _tailMap[key] = value["index"];
       }
 
-      /// 获取每个 [route] 的 [child] 数量
+      /// 获取每个 [route] 的 [father_route]
       List<String> spl = key.split("-");
       String fatherRoute = spl.sublist(0, spl.length - 1).join("-");
+      _nodeLayoutMapTemp[key]["father_route"] = fatherRoute;
+
+      /// 获取每个 [route] 的 [child] 数量
       if (key != "0" && _nodeLayoutMapTemp.containsKey(fatherRoute)) {
         _nodeLayoutMapTemp[fatherRoute]["child_count"]++;
       }
@@ -263,7 +266,7 @@ class _FragmentNodeState extends State<FragmentNode> {
       }
     });
 
-    /// 实行垂直居中偏移
+    /// 实施垂直居中偏移
     _nodeLayoutMapTemp.forEach((key, value) {
       _nodeLayoutMapTemp[key]["layout_top"] += _nodeLayoutMapTemp[key]["vertical_center_offset"];
     });

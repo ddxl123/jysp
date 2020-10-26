@@ -1,79 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Pages/SheetPage.dart';
 import 'package:jysp/Tools/CustomButton.dart';
+import 'package:jysp/Tools/LoadingAnimation.dart';
 import 'package:jysp/sheet/SheetPagePersistentDelegate.dart';
 
 mixin SheetMixin {
-  /// 顶部
-  Widget mixinTopWidget() {
-    /// 圆角半径
-    double _circularRadius = 35.0;
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(_circularRadius),
-              topRight: Radius.circular(_circularRadius),
-            ),
-            boxShadow: [
-              BoxShadow(blurRadius: 10, offset: Offset(0, -10), spreadRadius: -20),
-            ]),
-        alignment: Alignment.center,
-        height: _circularRadius,
-        child:
-
-            /// 横杠
-            Container(
-          decoration: BoxDecoration(
-            color: Colors.black12,
-            borderRadius: BorderRadius.all(Radius.circular(50)),
-          ),
-          alignment: Alignment.center,
-          width: 50,
-          height: 5,
-        ),
-      ),
-    );
-  }
-
-  /// 顶部下拉栏占位
-  Widget mixinTopPaddingWidget(ScrollController scrollController) {
-    double paddingHeight = 0;
-    return StatefulBuilder(
-      builder: (_, rebuild) {
-        scrollController.addListener(() {
-          paddingHeight = scrollController.offset;
-          if (paddingHeight >= MediaQueryData.fromWindow(window).padding.top) {
-            paddingHeight = MediaQueryData.fromWindow(window).padding.top;
-          }
-          rebuild(() {});
-        });
-        return SliverPersistentHeader(
-          pinned: true,
-          delegate: SheetPagePersistentDelegate(
-            minHeight: paddingHeight,
-            maxHeight: paddingHeight,
-            child: Container(color: Colors.pink),
-          ),
-        );
-      },
-    );
-  }
-
-  /// 底部
-  Widget mixinBottomWidget() {
-    return SliverFillRemaining(
-      hasScrollBody: true,
-      child: Container(
-        color: Colors.white,
-        child: FlatButton(onPressed: () {}, child: Text("no more")),
-      ),
-    );
-  }
-
   ///
   ///
   ///
@@ -92,44 +25,41 @@ mixin SheetMixin {
           delegate: SheetPagePersistentDelegate(
             minHeight: 50.0,
             maxHeight: 50.0,
-            child: Container(
-              color: Colors.pink,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      child: Row(
-                        children: [
-                          SizedBox(width: 5),
-                          Icon(Icons.remove_red_eye),
-                          SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              "池显样式:  ",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    child: Row(
+                      children: [
+                        SizedBox(width: 5),
+                        Icon(Icons.remove_red_eye),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            "池显样式:  ",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                      onPressed: () {
-                        _setStateMappingWidget(() {
-                          _isOffstageMapping = !_isOffstageMapping;
-                        });
-                      },
-                      color: Colors.red,
+                        ),
+                      ],
                     ),
+                    onPressed: () {
+                      _setStateMappingWidget(() {
+                        _isOffstageMapping = !_isOffstageMapping;
+                      });
+                    },
+                    color: Colors.yellow,
                   ),
-                  CustomButton(
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: Icon(Icons.more_horiz),
-                    ),
-                    onPressed: () {},
-                    color: Colors.red,
+                ),
+                CustomButton(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: Icon(Icons.more_horiz),
                   ),
-                ],
-              ),
+                  onPressed: () {},
+                  color: Colors.yellow,
+                ),
+              ],
             ),
           ),
         );
@@ -208,6 +138,60 @@ mixin SheetMixin {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 底部加载区
+  // Widget mixinBottomWidget(SheetPageController sheetPageController) {
+  //   if (sheetPageController.isInLoadingArea) {
+  //     sheetPageController.loadingController.toLoading();
+  //   } else {
+  //     sheetPageController.loadingController.toSuccess();
+  //   }
+  //   return SliverFillRemaining(
+  //     hasScrollBody: true,
+  //     child: Container(
+  //       color: Colors.white,
+  //       child: LoadingAnimation(loadingController: sheetPageController.loadingController),
+  //     ),
+  //   );
+  // }
+}
+
+class SheetLoadingArea extends StatefulWidget {
+  SheetLoadingArea({@required this.sheetPageController});
+  final SheetPageController sheetPageController;
+
+  @override
+  _SheetLoadingAreaState createState() => _SheetLoadingAreaState();
+}
+
+class _SheetLoadingAreaState extends State<SheetLoadingArea> {
+  @override
+  void initState() {
+    super.initState();
+    print("add");
+    widget.sheetPageController.addListener(() {
+      /// TODO: 进入加载区、滚动方向向上滚、手指放开时触发 [Loading] 条件
+      if (widget.sheetPageController.isInLoadingArea) {
+        widget.sheetPageController.loadingController.toLoading();
+      } else {
+        widget.sheetPageController.loadingController.toSuccess();
+      }
+      print("addaddadd");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: SliverFillRemaining(
+        hasScrollBody: true,
+        child: Container(
+          color: Colors.white,
+          child: LoadingAnimation(loadingController: widget.sheetPageController.loadingController),
+        ),
       ),
     );
   }

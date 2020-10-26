@@ -75,6 +75,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
   Map<dynamic, dynamic> _defaultLayoutPropertyMap({Size size}) {
     return {
       "child_count": 0,
+      "father_route": "0",
       "layout_width": size == null ? 10 : size.width, // 不设置它为0是为了防止出现bug观察不出来
       "layout_height": size == null ? 10 : size.height,
       "layout_left": -10000.0,
@@ -94,15 +95,16 @@ class MainSingleNodeState extends State<MainSingleNode> {
             path: () {
               /// 以下皆相对 path
               Path path = Path();
-              // if (widget.nodeData(widget.index, NeedType.getCurrentRouteName) != "0") {
-              //   path.moveTo(0, widget.nodeData(widget.index, NeedType.getCurrentMap, key: "layout_height") / 2);
-              //   path.lineTo(-40, widget.nodeData(widget.index, NeedType.getCurrentMap, key: "layout_height") / 2);
-              //   double fatherCenterTop = widget.nodeData(widget.index, NeedType.getFatherMap, key: "layout_top") + (widget.nodeData(widget.index, NeedType.getFatherMap, key: "layout_height") / 2);
-              //   double thisCenterTop = widget.nodeData(widget.index, NeedType.getCurrentMap, key: "layout_top");
+              if (widget.thisRouteName != "0") {
+                path.moveTo(0, widget.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
+                path.lineTo(-40, widget.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
+                double fatherCenterTop = widget.nodeLayoutMap[widget.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_top"] +
+                    widget.nodeLayoutMap[widget.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_height"] / 2;
+                double thisCenterTop = widget.nodeLayoutMap[widget.thisRouteName]["layout_top"];
 
-              //   path.lineTo(-40, fatherCenterTop - thisCenterTop);
-              //   path.lineTo(-80, fatherCenterTop - thisCenterTop);
-              // }
+                path.lineTo(-40, fatherCenterTop - thisCenterTop);
+                path.lineTo(-80, fatherCenterTop - thisCenterTop);
+              }
               return path;
             }(),
           ),

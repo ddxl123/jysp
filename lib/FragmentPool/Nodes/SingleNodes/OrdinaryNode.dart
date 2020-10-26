@@ -24,21 +24,19 @@ class _OrdinaryNodeState extends State<OrdinaryNode> with NodeMixin, SheetMixin 
         onPressed: () {
           Navigator.of(context).push(
             SheetRoute(
-              slivers: (ScrollController scrollController) {
+              slivers: (SheetPageController _sheetPageController) {
                 return [
-                  mixinTopWidget(),
-                  mixinTopPaddingWidget(scrollController),
-                  SliverToBoxAdapter(
-                    child: FlatButton(
-                      onPressed: () {
-                        addOrdinalNode(widget.currentIndex, widget.thisRouteName, widget.childCount);
-                      },
-                      child: Text("data"),
-                    ),
-                  ),
+                  // SliverToBoxAdapter(
+                  //   child: FlatButton(
+                  //     onPressed: () {
+                  //       addOrdinalNode(widget.currentIndex, widget.thisRouteName, widget.childCount);
+                  //     },
+                  //     child: Text("data"),
+                  //   ),
+                  // ),
                   mixinFixedWidget(),
                   mixinMappingWidget(),
-                  mixinBottomWidget(),
+                  SheetLoadingArea(sheetPageController: _sheetPageController),
                 ];
               },
             ),
