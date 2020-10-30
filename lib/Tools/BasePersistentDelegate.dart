@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SheetPagePersistentDelegate extends SliverPersistentHeaderDelegate {
-  SheetPagePersistentDelegate({@required this.child, @required this.minHeight, @required this.maxHeight});
+class BasePersistentDelegate extends SliverPersistentHeaderDelegate {
+  BasePersistentDelegate({@required this.child, @required this.minHeight, @required this.maxHeight});
   final double minHeight;
   final double maxHeight;
   final Widget child;
@@ -18,7 +18,7 @@ class SheetPagePersistentDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => minHeight;
 
   @override
-  bool shouldRebuild(SheetPagePersistentDelegate oldDelegate) {
+  bool shouldRebuild(BasePersistentDelegate oldDelegate) {
     return maxHeight != oldDelegate.maxHeight || minHeight != oldDelegate.minHeight || child != oldDelegate.child;
   }
 }

@@ -2,10 +2,10 @@
   {
     "_id": "",
     "fragments": [
-      "fragment_id_1",
-      "fragment_id_2",
-      "fragment_id_3",
-      "fragment_id_4"
+      {
+        "fragment_id": "fragment_id_1",
+        "timestamp": 0
+      }
     ]
   }
 ]

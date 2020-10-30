@@ -14,12 +14,13 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
   AnimationController _animationController;
   Animation _animation;
 
-  /// 0表示loading,1表示success,2表示fail
-  int _stataus = 0;
+  /// -1表示被dispose,0表示loading,1表示success,2表示fail
+  int _stataus = 1;
 
   @override
   void dispose() {
     _animationController.dispose();
+    _stataus = -1;
     super.dispose();
   }
 
@@ -34,8 +35,9 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
     widget.loadingController.toFail = _toFail;
   }
 
-  void _toLoading() {
-    if (_stataus == 0) {
+  void _toLoading(Duration wait, Function(LoadingController) startFuture) async {
+    /// 保证了仅触发一次
+    if (_stataus == 0 || _stataus == -1) {
       return;
     }
     _stataus = 0;
@@ -47,10 +49,13 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
         _animationController.reverse();
       }
     });
+    // 触发异步操作后的进一步指令
+    await Future.delayed(wait);
+    startFuture(widget.loadingController);
   }
 
   void _toSuccess() {
-    if (_stataus == 1) {
+    if (_stataus == 1 || _stataus == -1) {
       return;
     }
     _stataus = 1;
@@ -59,7 +64,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
   }
 
   void _toFail() {
-    if (_stataus == 2) {
+    if (_stataus == 2 || _stataus == -1) {
       return;
     }
     _stataus = 2;
@@ -88,7 +93,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
       case 2:
         return Container(
           alignment: Alignment.center,
-          child: Text("fail"),
+          child: Text("fail", style: TextStyle(color: Colors.red)),
         );
         break;
       default:
@@ -101,7 +106,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
 }
 
 class LoadingController {
-  Function toLoading = () {};
+  Function(Duration wait, Function(LoadingController) startFuture) toLoading = (wait, startFuture) {};
   Function toSuccess = () {};
   Function toFail = () {};
 }

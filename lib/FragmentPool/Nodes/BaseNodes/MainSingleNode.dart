@@ -74,6 +74,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
   /// 默认布局数据
   Map<dynamic, dynamic> _defaultLayoutPropertyMap({Size size}) {
     return {
+      "current_index": widget.index,
       "child_count": 0,
       "father_route": "0",
       "layout_width": size == null ? 10 : size.width, // 不设置它为0是为了防止出现bug观察不出来
@@ -108,7 +109,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
               return path;
             }(),
           ),
-          child: IfNode(widget.index, widget.thisRouteName, widget.nodeLayoutMap[widget.thisRouteName]["child_count"])),
+          child: IfNode(widget.index, widget.thisRouteName, widget.nodeLayoutMap)),
     );
   }
 }

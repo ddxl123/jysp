@@ -5,9 +5,9 @@ abstract class BaseNode extends StatefulWidget {
   BaseNode(
     this.currentIndex,
     this.thisRouteName,
-    this.childCount,
+    this.nodeLayoutMap,
   );
   final int currentIndex;
   final String thisRouteName;
-  final int childCount;
+  final Map nodeLayoutMap;
 }

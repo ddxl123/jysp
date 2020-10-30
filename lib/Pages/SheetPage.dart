@@ -116,6 +116,9 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
   /// 是否将被移除，防止 [_remove] 被触发多次
   bool _isWillRemoveOnce = false;
 
+  /// 圆角半径
+  double _circular = 10.0;
+
   @override
   void initState() {
     super.initState();
@@ -199,7 +202,7 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
         child: Material(
           type: MaterialType.transparency,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(_circular),
             child: CustomScrollView(
               controller: _scrollController,
               slivers: widget.slivers(_sheetPageController),
@@ -250,13 +253,6 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
     if (_animation.value != _maxHeight) {
       _animationController.value -= event.delta.dy / _maxHeight;
       _scrollController.jumpTo(0);
-
-      // /// 是否处在 [LoadingArea]
-      // if (_animation.value >= _scrollController.position.maxScrollExtent + 50) {
-      //   _sheetPageController.isInLoadingArea = true;
-      // } else {
-      //   _sheetPageController.isInLoadingArea = false;
-      // }
     }
 
     /// 2、满屏时，内部滑动，外部不滑动。
@@ -265,13 +261,6 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
       if (_scrollController.offset == 0.0) {
         _animationController.value -= event.delta.dy / _maxHeight;
       }
-
-      // /// 是否处在 [LoadingArea]
-      // if (_maxHeight + _scrollController.position.pixels > _scrollController.position.maxScrollExtent + 50) {
-      //   _sheetPageController.isInLoadingArea = true;
-      // } else {
-      //   _sheetPageController.isInLoadingArea = false;
-      // }
     }
 
     /// 已经在 [addListener] 中 [setState] 了
