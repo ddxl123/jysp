@@ -20,7 +20,6 @@ class _OrdinaryNodeState extends State<OrdinaryNode> {
     return Container(
       color: Colors.yellow,
       child: CustomButton(
-        color: Colors.grey[300],
         onPressed: () {
           Navigator.of(context).push(
             () {

@@ -27,7 +27,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _animationController = AnimationController(duration: Duration(seconds: 1), vsync: this);
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.linear);
     _animation = Tween(begin: 0.0, end: MediaQueryData.fromWindow(window).size.width).animate(_animation);
     widget.loadingController.toLoading = _toLoading;

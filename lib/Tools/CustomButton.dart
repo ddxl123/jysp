@@ -4,11 +4,13 @@ class CustomButton extends StatefulWidget {
   CustomButton({
     @required this.child,
     @required this.onPressed,
-    @required this.color,
+    this.upBackgroundColor = Colors.transparent,
+    this.downBackgroundColor = Colors.grey,
   });
   final Widget child;
   final Function() onPressed;
-  final Color color;
+  final Color upBackgroundColor;
+  final Color downBackgroundColor;
   @override
   State<StatefulWidget> createState() {
     return _CustomButton();
@@ -16,7 +18,7 @@ class CustomButton extends StatefulWidget {
 }
 
 class _CustomButton extends State<CustomButton> {
-  Color _color;
+  Color _currentColor;
   bool _isOnMove = false;
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class _CustomButton extends State<CustomButton> {
         type: MaterialType.transparency,
         child: Container(
           alignment: Alignment.center,
-          color: _color ?? widget.color,
+          color: _currentColor ?? widget.upBackgroundColor,
           child: widget.child,
         ),
       ),
@@ -49,12 +51,12 @@ class _CustomButton extends State<CustomButton> {
   }
 
   void toNormalStatus() {
-    _color = widget.color;
+    _currentColor = widget.upBackgroundColor;
     setState(() {});
   }
 
   void toOnDownStatus() {
-    _color = Colors.grey;
+    _currentColor = widget.downBackgroundColor;
     setState(() {});
   }
 }

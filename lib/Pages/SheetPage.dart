@@ -63,11 +63,16 @@ class SheetRoute extends OverlayRoute {
     );
   }
 
-  /// 返回键监听
+  /// 返回监听:
+  /// 当调用 [Navigator.pop] 时，会调用 [didpop] ,该函数中会调用 [NavigatorState] 的 [finalizeRoute] 函数来释放资源(如等待动画完成)。然后再调用route的 [dispose] 函数。
+  /// 当调用 [Navigator.removeRoute] 时,会立即调用route的 [dispose] 。
+  /// 当前路线是：被 [Navigator.pop] 后不进行任何操作，而是调用了 [_removeAnimation] 中的 [Navigator.removeRoute] 。
+  /// 若在 [_removeAnimation] 中调用 [Navigator.pop] 则会循环的调用 [_removeAnimation] ,当然 [_removeAnimation] 中有仅执行一次的判断。
   @override
-  Future<RoutePopDisposition> willPop() {
+  // ignore: must_call_super
+  bool didPop(result) {
     _removeAnimation();
-    return Future.value(RoutePopDisposition.doNotPop);
+    return false;
   }
 }
 
@@ -131,7 +136,7 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
     ///
     ///
     /// 动画区
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _animationController = AnimationController(duration: Duration(milliseconds: 300), vsync: this);
 
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.linear);
 
@@ -235,6 +240,9 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
 
     /// 按下时所有的动画停止
     _animationController.stop();
+
+    /// 清除
+    _lastTouchDelta = 0.0;
   }
 
   void _onPointerMove(event) {

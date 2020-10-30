@@ -22,7 +22,6 @@ class _CollectionNode extends State<CollectionNode> {
     return Container(
       color: Colors.blue,
       child: CustomButton(
-        color: Colors.yellow,
         onPressed: () {
           Navigator.of(context).push(
             () {

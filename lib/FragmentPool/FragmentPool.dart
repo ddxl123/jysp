@@ -96,7 +96,6 @@ class _FragmentNodeState extends State<FragmentNode> {
 
   @override
   Widget build(BuildContext context) {
-    print(GlobalData.instance.userSelfInitFragmentPoolNodes);
     return Stack(
       children: <Widget>[
         for (int childrenIndex = 0; childrenIndex < GlobalData.instance.userSelfInitFragmentPoolNodes.length; childrenIndex++)

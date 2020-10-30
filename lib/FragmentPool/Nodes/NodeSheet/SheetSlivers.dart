@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/Global/GlobalData.dart';
-import 'package:jysp/Nodesheet/SheetPagePersistentDelegate.dart';
+import 'package:jysp/Tools/BasePersistentDelegate.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 
 class SheetSliverHeader extends BaseNode {
   SheetSliverHeader(int currentIndex, String thisRouteName, Map nodeLayoutMap) : super(currentIndex, thisRouteName, nodeLayoutMap);
@@ -15,7 +16,7 @@ class _SheetSliverHeaderState extends State<SheetSliverHeader> {
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
       pinned: true,
-      delegate: SheetPagePersistentDelegate(
+      delegate: BasePersistentDelegate(
         minHeight: 40.0,
         maxHeight: 40.0,
         child: Container(
@@ -25,7 +26,28 @@ class _SheetSliverHeaderState extends State<SheetSliverHeader> {
               SizedBox(width: 20),
               Text("${GlobalData.instance.userSelfInitFragmentPoolNodes[widget.currentIndex]["text"]}：", style: TextStyle(fontSize: 18)),
               Expanded(child: Container()),
-              Text("×", style: TextStyle(fontSize: 30)),
+              CustomButton(
+                upBackgroundColor: Colors.transparent,
+                downBackgroundColor: Colors.transparent,
+                child: Text("添加"),
+                onPressed: () {},
+              ),
+              SizedBox(width: 20),
+              CustomButton(
+                upBackgroundColor: Colors.transparent,
+                downBackgroundColor: Colors.transparent,
+                child: Text("删除"),
+                onPressed: () {},
+              ),
+              SizedBox(width: 20),
+              CustomButton(
+                upBackgroundColor: Colors.transparent,
+                downBackgroundColor: Colors.transparent,
+                child: Text("×", style: TextStyle(fontSize: 30)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
               SizedBox(width: 20),
             ],
           ),
