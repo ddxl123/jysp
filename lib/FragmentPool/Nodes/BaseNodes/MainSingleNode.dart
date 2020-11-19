@@ -36,11 +36,12 @@ class MainSingleNodeState extends State<MainSingleNode> {
     widget.nodeLayoutMap[widget.thisRouteName] = _defaultLayoutPropertyMap(size: null);
   }
 
+  /// 实现了只有调用 [startResetLayout] 时，才会重构 [node] 属性，其他情况的 [setState] 不会重构
   @override
   void didUpdateWidget(MainSingleNode oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    /// 只有当第一帧刚开始被 [rebuild] 时，才调用 [resetLayoutProperty]
+    /// 只有当 [startResetLayout] 被调用时(开始执行第一帧)，才调用 [resetLayoutProperty] ,第二帧的时候啥也不做
     widget.isResetingLayoutProperty(null) ? resetLayoutProperty() : () {}();
   }
 
@@ -53,7 +54,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
       widget.nodeLayoutMapTemp[widget.thisRouteName] = _defaultLayoutPropertyMap(size: size);
 
       /// 若全部的 [Node] 都被重置完成。
-      if (widget.index == GlobalData.instance.userSelfInitFragmentPoolNodes.length - 1) {
+      if (widget.index == GlobalData.instance.fragmentPoolPendingNodes.length - 1) {
         widget.reLayoutHandle();
         widget.isResetingLayoutProperty(false);
         resetLayoutDone();
@@ -65,7 +66,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
   void resetLayoutDone() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       /// 若全部的 [Node] 都被 [rebuild] 完成
-      if (widget.index == GlobalData.instance.userSelfInitFragmentPoolNodes.length - 1) {
+      if (widget.index == GlobalData.instance.fragmentPoolPendingNodes.length - 1) {
         widget.isResetingLayout(false);
       }
     });

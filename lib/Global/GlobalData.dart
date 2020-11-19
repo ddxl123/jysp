@@ -17,8 +17,16 @@ class GlobalData {
 
   final GlobalKey<NavigatorState> navigatorState = GlobalKey();
 
-  final List<dynamic> userSelfInitFragmentPools = [];
-  final List<dynamic> userSelfInitFragmentPoolNodes = [];
+  final List<dynamic> fragmentPoolPendingNodes = [];
 
   Function(Function callback) startResetLayout = (callback) {};
+
+  /// 0表示 待定池，1表示 记忆池，2表示 完成池
+  SelectedFragmentPool selectedFragmentPool = SelectedFragmentPool.pendingPool;
+}
+
+enum SelectedFragmentPool {
+  pendingPool,
+  memoryPool,
+  completePool,
 }

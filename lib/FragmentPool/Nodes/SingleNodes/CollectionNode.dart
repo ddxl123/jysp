@@ -59,7 +59,7 @@ class _CollectionNode extends State<CollectionNode> {
             }(),
           );
         },
-        child: Text(GlobalData.instance.userSelfInitFragmentPoolNodes[widget.currentIndex]["text"]),
+        child: Text(GlobalData.instance.fragmentPoolPendingNodes[widget.currentIndex]["name"]),
       ),
     );
   }

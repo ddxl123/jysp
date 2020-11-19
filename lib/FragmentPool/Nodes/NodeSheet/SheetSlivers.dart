@@ -24,7 +24,7 @@ class _SheetSliverHeaderState extends State<SheetSliverHeader> {
           child: Row(
             children: [
               SizedBox(width: 20),
-              Text("${GlobalData.instance.userSelfInitFragmentPoolNodes[widget.currentIndex]["text"]}：", style: TextStyle(fontSize: 18)),
+              Text("${GlobalData.instance.fragmentPoolPendingNodes[widget.currentIndex]["name"]}：", style: TextStyle(fontSize: 18)),
               Expanded(child: Container()),
               CustomButton(
                 upBackgroundColor: Colors.transparent,

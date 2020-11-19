@@ -46,7 +46,6 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
 
   Widget _containerBody() {
     return Container(
-      alignment: Alignment.center,
       color: widget.backgroundColor,
 
       ///视觉区域、触摸区域

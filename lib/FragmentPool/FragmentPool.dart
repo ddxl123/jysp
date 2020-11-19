@@ -16,14 +16,11 @@ class FragmentPool extends StatefulWidget {
 
 class _FragmentPoolState extends State<FragmentPool> {
   Future _future() async {
-    GlobalData.instance.userSelfInitFragmentPools.clear();
-    GlobalData.instance.userSelfInitFragmentPoolNodes.clear();
-
     await Future.delayed(Duration(seconds: 1));
     await DefaultAssetBundle.of(context).loadString("assets/get_db/user_self_init_fragment_pool.json").then((value) {
-      Map val = json.decode(value);
-      GlobalData.instance.userSelfInitFragmentPools.addAll(val["pools"]);
-      GlobalData.instance.userSelfInitFragmentPoolNodes.addAll(val["nodes"]);
+      List val = json.decode(value);
+      GlobalData.instance.fragmentPoolPendingNodes.clear();
+      GlobalData.instance.fragmentPoolPendingNodes.addAll(val);
     }).catchError((onError) {});
 
     return null;
@@ -98,10 +95,10 @@ class _FragmentNodeState extends State<FragmentNode> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        for (int childrenIndex = 0; childrenIndex < GlobalData.instance.userSelfInitFragmentPoolNodes.length; childrenIndex++)
+        for (int childrenIndex = 0; childrenIndex < GlobalData.instance.fragmentPoolPendingNodes.length; childrenIndex++)
           MainSingleNode(
             index: childrenIndex,
-            thisRouteName: GlobalData.instance.userSelfInitFragmentPoolNodes[childrenIndex]["route"],
+            thisRouteName: GlobalData.instance.fragmentPoolPendingNodes[childrenIndex]["route"],
             nodeLayoutMap: _nodeLayoutMap,
             nodeLayoutMapTemp: _nodeLayoutMapTemp,
 

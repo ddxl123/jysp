@@ -1,38 +1,42 @@
-{
-  "pools": [
-    {
-      "pool_id": "",
-      "is_public": true
-    }
-  ],
-  "nodes": [
-    {
-      "node_id": null,
-      "type": 0,
-      "route": "0",
-      "text": "root",
-      "background_color": "FFEF5350"
-    },
-    {
-      "node_id": null,
-      "type": 0,
-      "route": "0-0",
-      "text": "aaaaaaaaaa",
-      "background_color": "FFEF5350"
-    },
-    {
-      "node_id": null,
-      "type": 0,
-      "route": "0-1",
-      "text": "root",
-      "background_color": "FFEF5350"
-    },
-    {
-      "node_id": "123456",
-      "type": 1,
-      "route": "0-1-0",
-      "text": "col",
-      "background_color": "FFEF5350"
-    }
-  ]
-}
+[
+  {
+    "_id": "",
+    "user_id": "",
+    "pool_type": 0,
+    "node_type": 0,
+    "route": "0",
+    "name": "root"
+  },
+  {
+    "_id": "",
+    "user_id": "",
+    "pool_type": 0,
+    "node_type": 0,
+    "route": "0-0",
+    "name": "root1"
+  },
+  {
+    "_id": "",
+    "user_id": "",
+    "pool_type": 0,
+    "node_type": 0,
+    "route": "0-1",
+    "name": "root2"
+  },
+  {
+    "_id": "",
+    "user_id": "",
+    "pool_type": 0,
+    "node_type": 0,
+    "route": "0-0-0",
+    "name": "ro\not3的"
+  },
+  {
+    "_id": "",
+    "user_id": "",
+    "pool_type": 0,
+    "node_type": 0,
+    "route": "0-0-1",
+    "name": "root4"
+  }
+]

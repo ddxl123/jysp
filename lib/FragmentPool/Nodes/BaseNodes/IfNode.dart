@@ -14,7 +14,7 @@ class IfNode extends BaseNode {
 class _IfNodeState extends State<IfNode> {
   @override
   Widget build(BuildContext context) {
-    switch (GlobalData.instance.userSelfInitFragmentPoolNodes[widget.currentIndex]["type"]) {
+    switch (GlobalData.instance.fragmentPoolPendingNodes[widget.currentIndex]["node_type"]) {
       case 0:
         return OrdinaryNode(widget.currentIndex, widget.thisRouteName, widget.nodeLayoutMap);
       case 1:

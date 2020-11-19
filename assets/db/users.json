@@ -1,0 +1,11 @@
+[
+  {
+    "_id": "",
+    "username": "AAAAAAAA",
+    "password": "123",
+    "create_time": 0,
+    "fragment_pool": {
+      "default_pool": 0
+    }
+  }
+]
