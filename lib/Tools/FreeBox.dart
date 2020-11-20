@@ -4,17 +4,19 @@ import 'package:flutter/material.dart';
 
 class FreeBox extends StatefulWidget {
   FreeBox({
-    @required this.child,
     @required this.backgroundColor,
     this.viewableWidth = double.maxFinite,
     this.viewableHeight = double.maxFinite,
     this.freeBoxController,
+    this.freeMoveScaleLayerChild = const SizedBox(),
+    this.fixedLayerChild = const SizedBox(),
   });
-  final Widget child;
   final Color backgroundColor;
   final double viewableWidth;
   final double viewableHeight;
   final FreeBoxController freeBoxController;
+  final Widget freeMoveScaleLayerChild;
+  final Widget fixedLayerChild;
 
   @override
   State<StatefulWidget> createState() {
@@ -41,6 +43,7 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
         children: [
           /// 自由移动缩放层
           _freeMoveScaleLayer(),
+          _fixedLayer(),
         ],
       ),
     );
@@ -63,11 +66,15 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
           child: Transform.scale(
             alignment: Alignment.topLeft,
             scale: widget.freeBoxController.scale,
-            child: widget.child,
+            child: widget.freeMoveScaleLayerChild,
           ),
         ),
       ),
     );
+  }
+
+  Widget _fixedLayer() {
+    return Positioned(child: widget.fixedLayerChild);
   }
 
   void onScaleStart(details) {

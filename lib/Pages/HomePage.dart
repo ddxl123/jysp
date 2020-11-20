@@ -5,17 +5,20 @@ import 'package:jysp/FragmentPool/FragmentPool.dart';
 import 'package:jysp/Tools/FreeBox.dart';
 import 'package:jysp/Global/GlobalData.dart';
 
+/// 进入HOME页，获取本地数据→获取云端数据
 class HomePage extends StatefulWidget {
   @override
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  FreeBoxController _freeBoxController = FreeBoxController();
+  FreeBoxController _freeBoxController1 = FreeBoxController();
+  FreeBoxController _freeBoxController2 = FreeBoxController();
 
   @override
   void dispose() {
-    _freeBoxController.dispose();
+    _freeBoxController1.dispose();
+    _freeBoxController2.dispose();
     super.dispose();
   }
 
@@ -23,20 +26,20 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Material(
       child: Stack(
-        children: <Widget>[
-          _freeBoxWidget(),
-          _toZeroWidget(),
-          _bottomWidget(),
+        children: [
+          FreeBox(
+            backgroundColor: Colors.green,
+            freeBoxController: _freeBoxController2,
+            freeMoveScaleLayerChild: FragmentPool(freeBoxController: _freeBoxController2),
+            fixedLayerChild: Stack(
+              children: <Widget>[
+                _toZeroWidget(),
+                _bottomWidget(),
+              ],
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _freeBoxWidget() {
-    return FreeBox(
-      backgroundColor: Colors.green,
-      freeBoxController: _freeBoxController,
-      child: FragmentPool(freeBoxController: _freeBoxController),
     );
   }
 
@@ -47,7 +50,7 @@ class HomePageState extends State<HomePage> {
       left: 0,
       child: FlatButton(
         onPressed: () {
-          _freeBoxController.startZeroSliding();
+          _freeBoxController1.startZeroSliding();
         },
         child: Icon(Icons.adjust),
       ),
@@ -82,7 +85,7 @@ class HomePageState extends State<HomePage> {
               selectedFragmentPool = "待定池";
               break;
             case SelectedFragmentPool.memoryPool:
-              selectedFragmentPool = "记忆池";
+              selectedFragmentPool = "ssss";
               break;
             case SelectedFragmentPool.completePool:
               selectedFragmentPool = "完成池";
