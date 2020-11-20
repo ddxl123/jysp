@@ -6,18 +6,14 @@ class FreeBox extends StatefulWidget {
   FreeBox({
     @required this.child,
     @required this.backgroundColor,
-    this.boxWidth = double.maxFinite,
-    this.boxHeight = double.maxFinite,
-    this.eventWidth = double.maxFinite,
-    this.eventHeight = double.maxFinite,
+    this.viewableWidth = double.maxFinite,
+    this.viewableHeight = double.maxFinite,
     this.freeBoxController,
   });
   final Widget child;
   final Color backgroundColor;
-  final double boxWidth;
-  final double boxHeight;
-  final double eventWidth;
-  final double eventHeight;
+  final double viewableWidth;
+  final double viewableHeight;
   final FreeBoxController freeBoxController;
 
   @override
@@ -36,37 +32,40 @@ class _FreeBox extends State<FreeBox> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onScaleStart: onScaleStart,
-      onScaleUpdate: onScaleUpdate,
-      onScaleEnd: onScaleEnd,
-      child: _containerBody(),
+    return Container(
+      color: widget.backgroundColor, //可视区域背景颜色
+      /// [FreeBox可视区域] 宽高
+      width: widget.viewableWidth,
+      height: widget.viewableHeight,
+      child: Stack(
+        children: [
+          /// 自由移动缩放层
+          _freeMoveScaleLayer(),
+        ],
+      ),
     );
   }
 
-  Widget _containerBody() {
-    return Container(
-      color: widget.backgroundColor,
+  Widget _freeMoveScaleLayer() {
+    return Positioned(
+      top: 0,
 
-      ///视觉区域、触摸区域
-      width: widget.boxWidth,
-      height: widget.boxHeight,
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            /// 内部事件区域
-            width: widget.eventWidth,
-            height: widget.eventHeight,
-            child: Transform.translate(
-              offset: widget.freeBoxController.offset,
-              child: Transform.scale(
-                alignment: Alignment.topLeft,
-                scale: widget.freeBoxController.scale,
-                child: widget.child,
-              ),
-            ),
+      /// [内容物可视区域]。要比FreeBox可视区域宽高大，不然溢出可视了。但不能只大一点，必须无限大，因为若内容物很大，但内容物可视区域却很小，会把溢出部分切除。
+      width: double.maxFinite,
+      height: double.maxFinite,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent, //让透明背景也可以触发手势事件
+        onScaleStart: onScaleStart,
+        onScaleUpdate: onScaleUpdate,
+        onScaleEnd: onScaleEnd,
+        child: Transform.translate(
+          offset: widget.freeBoxController.offset,
+          child: Transform.scale(
+            alignment: Alignment.topLeft,
+            scale: widget.freeBoxController.scale,
+            child: widget.child,
           ),
-        ],
+        ),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPool.dart';
-import 'package:jysp/FragmentPool/FreeBox.dart';
+import 'package:jysp/Tools/FreeBox.dart';
 import 'package:jysp/Global/GlobalData.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,17 +33,10 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _freeBoxWidget() {
-    return Positioned(
-      top: 0,
-      child: FreeBox(
-        boxWidth: 100,
-        boxHeight: 100,
-        eventWidth: 100,
-        eventHeight: 100,
-        backgroundColor: Colors.green,
-        freeBoxController: _freeBoxController,
-        child: FragmentPool(freeBoxController: _freeBoxController),
-      ),
+    return FreeBox(
+      backgroundColor: Colors.green,
+      freeBoxController: _freeBoxController,
+      child: FragmentPool(freeBoxController: _freeBoxController),
     );
   }
 
