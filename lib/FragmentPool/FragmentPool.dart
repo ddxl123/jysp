@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/Tools/FreeBox.dart';
+import 'package:jysp/FragmentPool/FragmentPoolState.dart';
+import 'package:jysp/G/G.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNode.dart';
-import 'package:jysp/Global/GlobalData.dart';
 
 class FragmentPool extends StatefulWidget {
-  FragmentPool({@required this.freeBoxController});
-  final FreeBoxController freeBoxController;
+  FragmentPool({@required this.fragmentPoolState});
+  final FragmentPoolState fragmentPoolState;
 
   @override
   _FragmentPoolState createState() => _FragmentPoolState();
@@ -19,8 +19,8 @@ class _FragmentPoolState extends State<FragmentPool> {
     await Future.delayed(Duration(seconds: 1));
     await DefaultAssetBundle.of(context).loadString("assets/get_db/user_self_init_fragment_pool.json").then((value) {
       List val = json.decode(value);
-      GlobalData.instance.fragmentPoolPendingNodes.clear();
-      GlobalData.instance.fragmentPoolPendingNodes.addAll(val);
+      G.fragmentPool.fragmentPoolPendingNodes.clear();
+      G.fragmentPool.fragmentPoolPendingNodes.addAll(val);
     }).catchError((onError) {});
 
     return null;
@@ -48,7 +48,7 @@ class _FragmentPoolState extends State<FragmentPool> {
               ],
             );
           case ConnectionState.done:
-            return FragmentNode(freeBoxController: widget.freeBoxController);
+            return FragmentNode(fragmentPoolState: widget.fragmentPoolState);
           default:
             return Center(child: Text("err"));
         }
@@ -58,8 +58,8 @@ class _FragmentPoolState extends State<FragmentPool> {
 }
 
 class FragmentNode extends StatefulWidget {
-  FragmentNode({@required this.freeBoxController});
-  final FreeBoxController freeBoxController;
+  FragmentNode({@required this.fragmentPoolState});
+  final FragmentPoolState fragmentPoolState;
 
   @override
   _FragmentNodeState createState() => _FragmentNodeState();
@@ -81,24 +81,21 @@ class _FragmentNodeState extends State<FragmentNode> {
   bool _isResetingLayoutProperty = false;
   bool _isResetingLayout = false;
 
-  /// 是否已被初始化 [ToZero]
-  bool _isInitedToZero = false;
-
   @override
   void initState() {
     super.initState();
 
-    GlobalData.instance.startResetLayout = startResetLayout; // 需按地址传递
+    G.fragmentPool.startResetLayout = startResetLayout; // 需按地址传递
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        for (int childrenIndex = 0; childrenIndex < GlobalData.instance.fragmentPoolPendingNodes.length; childrenIndex++)
+        for (int childrenIndex = 0; childrenIndex < G.fragmentPool.fragmentPoolPendingNodes.length; childrenIndex++)
           MainSingleNode(
             index: childrenIndex,
-            thisRouteName: GlobalData.instance.fragmentPoolPendingNodes[childrenIndex]["route"],
+            thisRouteName: G.fragmentPool.fragmentPoolPendingNodes[childrenIndex]["route"],
             nodeLayoutMap: _nodeLayoutMap,
             nodeLayoutMapTemp: _nodeLayoutMapTemp,
 
@@ -278,24 +275,17 @@ class _FragmentNodeState extends State<FragmentNode> {
     /// 伪深拷贝
     _nodeLayoutMap = Map.of(_nodeLayoutMapTemp);
 
-    _toZero();
+    _getNode0Position();
     setState(() {});
   }
 
   /// 获取 [route=="0"] 的坐标,并将镜头预调至原点
-  void _toZero() {
+  void _getNode0Position() {
     /// 获取 [route=="0"] 的坐标
     Offset transformZeroOffset =
         Offset(_nodeLayoutMapTemp["0"]["layout_left"] - _nodeLayoutMapTemp["0"]["layout_width"] / 2, -(_nodeLayoutMapTemp["0"]["layout_top"] + _nodeLayoutMapTemp["0"]["layout_height"] / 2));
     Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
-    widget.freeBoxController.zeroPosition = transformZeroOffset + mediaCenter;
-
-    /// 镜头预调至原点
-    /// 因为重新布局会调用 [six()] ,而这里只需 [init] 时调用一次
-    if (!_isInitedToZero) {
-      _isInitedToZero = true;
-      widget.freeBoxController.startZeroSliding();
-    }
+    widget.fragmentPoolState.node0Position = transformZeroOffset + mediaCenter;
   }
 
   /// 开始进行重置布局

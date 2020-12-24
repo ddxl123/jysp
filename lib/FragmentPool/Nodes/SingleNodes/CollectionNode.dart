@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/FragmentPool/Nodes/NodeSheet/SheetLoadingArea.dart';
 import 'package:jysp/FragmentPool/Nodes/NodeSheet/SheetSlivers.dart';
-import 'package:jysp/Global/GlobalData.dart';
+import 'package:jysp/G/G.dart';
 import 'package:jysp/Pages/SheetPage.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/LoadingAnimation.dart';
@@ -59,7 +59,7 @@ class _CollectionNode extends State<CollectionNode> {
             }(),
           );
         },
-        child: Text(GlobalData.instance.fragmentPoolPendingNodes[widget.currentIndex]["name"]),
+        child: Text(G.fragmentPool.fragmentPoolPendingNodes[widget.currentIndex]["name"]),
       ),
     );
   }

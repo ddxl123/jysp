@@ -1,8 +1,6 @@
-[
-  {
-    "_id": "",
-    "username": "AAAAAAAA",
-    "password": "123",
-    "create_time": 0
-  }
-]
+{
+  "user_id": "",
+  "username": "AAAAAAAA",
+  "password": "123",
+  "create_time": 0
+}

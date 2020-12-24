@@ -1,9 +1,7 @@
-[
-  {
-    "_id": "",
-    "pool_type": 0,
-    "node_type": 0,
-    "route": "0",
-    "name": "root"
-  }
-]
+{
+  "_id": "",
+  "pool_type": 0,
+  "node_type": 0,
+  "route": "0",
+  "name": "root"
+}

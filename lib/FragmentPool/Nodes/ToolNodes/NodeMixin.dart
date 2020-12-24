@@ -1,10 +1,10 @@
-import 'package:jysp/Global/GlobalData.dart';
+import 'package:jysp/G/G.dart';
 
 mixin NodeMixin {
   void addOrdinalNode(int currentIndex, String thisRouteName, int childCount) {
     /// TODO: 需要异步操作
-    GlobalData.instance.startResetLayout(() {
-      GlobalData.instance.fragmentPoolPendingNodes.add({
+    G.fragmentPool.startResetLayout(() {
+      G.fragmentPool.fragmentPoolPendingNodes.add({
         "_id": "",
         "user_id": "",
         "pool_type": 0,

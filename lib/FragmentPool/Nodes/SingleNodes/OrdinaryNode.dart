@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/BaseNode.dart';
 import 'package:jysp/FragmentPool/Nodes/NodeSheet/SheetLoadingArea.dart';
 import 'package:jysp/FragmentPool/Nodes/NodeSheet/SheetSlivers.dart';
-import 'package:jysp/Global/GlobalData.dart';
+import 'package:jysp/G/G.dart';
 import 'package:jysp/Pages/SheetPage.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/LoadingAnimation.dart';
@@ -38,7 +38,7 @@ class _OrdinaryNodeState extends State<OrdinaryNode> {
                         // TODO: 直接获取本地数据(即当前node list中的数据),若本地与云端数据不同(用户不知道)，则用户手动点击 [刷新] 按钮同时进行当前页数据以及碎片池数据的刷新。
                         key.currentState._list.clear();
                         for (var i = 0; i < widget.nodeLayoutMap[widget.thisRouteName]["child_count"]; i++) {
-                          key.currentState._list.add(GlobalData.instance.fragmentPoolPendingNodes[widget.nodeLayoutMap[widget.thisRouteName + "-" + i.toString()]["current_index"]]["name"]);
+                          key.currentState._list.add(G.fragmentPool.fragmentPoolPendingNodes[widget.nodeLayoutMap[widget.thisRouteName + "-" + i.toString()]["current_index"]]["name"]);
                         }
                         key.currentState.setState(() {});
                         loadingController.toSuccess();
@@ -51,7 +51,7 @@ class _OrdinaryNodeState extends State<OrdinaryNode> {
             }(),
           );
         },
-        child: Text(GlobalData.instance.fragmentPoolPendingNodes[widget.currentIndex]["name"]),
+        child: Text(G.fragmentPool.fragmentPoolPendingNodes[widget.currentIndex]["name"]),
       ),
     );
   }

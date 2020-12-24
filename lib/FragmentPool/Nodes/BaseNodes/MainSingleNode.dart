@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/Nodes/BaseNodes/IfNode.dart';
-import 'package:jysp/Global/GlobalData.dart';
+import 'package:jysp/G/G.dart';
 
 class MainSingleNode extends StatefulWidget {
   MainSingleNode({
@@ -54,7 +54,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
       widget.nodeLayoutMapTemp[widget.thisRouteName] = _defaultLayoutPropertyMap(size: size);
 
       /// 若全部的 [Node] 都被重置完成。
-      if (widget.index == GlobalData.instance.fragmentPoolPendingNodes.length - 1) {
+      if (widget.index == G.fragmentPool.fragmentPoolPendingNodes.length - 1) {
         widget.reLayoutHandle();
         widget.isResetingLayoutProperty(false);
         resetLayoutDone();
@@ -66,7 +66,7 @@ class MainSingleNodeState extends State<MainSingleNode> {
   void resetLayoutDone() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       /// 若全部的 [Node] 都被 [rebuild] 完成
-      if (widget.index == GlobalData.instance.fragmentPoolPendingNodes.length - 1) {
+      if (widget.index == G.fragmentPool.fragmentPoolPendingNodes.length - 1) {
         widget.isResetingLayout(false);
       }
     });

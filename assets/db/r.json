@@ -1,20 +1,18 @@
-[
-  {
-    "_id": "",
+{
+  "r_id": "",
 
-    "collector_id": "",
+  "collector_id": "",
 
-    "fragment_id": "",
-    "fragment_creator_id": "",
+  "fragment_id": "",
+  "fragment_creator_id": "",
 
-    "fragment_group_id": "",
-    "fragment_group_creator_id": "",
+  "fragment_group_id": "",
+  "fragment_group_creator_id": "",
 
-    "fragment_pool_node_id": "",
+  "fragment_pool_node_id": "",
 
-    "memory_rule_id": "",
-    "memory_rule_creator_id": "",
+  "memory_rule_id": "",
+  "memory_rule_creator_id": "",
 
-    "separate_rule_id": ""
-  }
-]
+  "separate_rule_id": ""
+}

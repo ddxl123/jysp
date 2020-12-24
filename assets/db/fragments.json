@@ -1,11 +1,5 @@
-[
-  {
-    "_id": "",
-    "create_time": 0,
-    "context": [
-      {
-        "text": "公司大师傅士大夫士大夫"
-      }
-    ]
-  }
-]
+{
+  "fragment_id": "",
+  "create_time": 0,
+  "text": "公司大师傅士大夫士大夫"
+}
