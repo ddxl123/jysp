@@ -1,116 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/IfNode.dart';
-import 'package:jysp/G/G.dart';
+import 'package:jysp/FragmentPool/FragmentPoolController.dart';
+import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 
 class MainSingleNode extends StatefulWidget {
   MainSingleNode({
     Key key,
     @required this.index,
     @required this.thisRouteName,
-    @required this.nodeLayoutMap,
-    @required this.nodeLayoutMapTemp,
-    @required this.isResetingLayout,
-    @required this.isResetingLayoutProperty,
-    @required this.reLayoutHandle,
+    @required this.fragmentPoolController,
   }) : super(key: key);
 
   final int index;
   final String thisRouteName;
-  final Map nodeLayoutMap;
-  final Map nodeLayoutMapTemp;
-  final bool Function(bool) isResetingLayout;
-  final bool Function(bool) isResetingLayoutProperty;
-  final Function reLayoutHandle;
+  final FragmentPoolController fragmentPoolController;
 
   @override
   MainSingleNodeState createState() => MainSingleNodeState();
 }
 
 class MainSingleNodeState extends State<MainSingleNode> {
-  /// 因为每次新增的 [Node] 是不会被调用 [didUpdateWidget] 的,即无法 [reSetLayout] 对其进行初始化布局属性
-  /// 因此需在每个 [Node] 中进行 [initState] 并调用 [reSetLayout] 进行初始化布局属性
-  @override
-  void initState() {
-    super.initState();
-    resetLayoutProperty();
-    widget.nodeLayoutMap[widget.thisRouteName] = _defaultLayoutPropertyMap(size: null);
-  }
+  ///
 
-  /// 实现了只有调用 [startResetLayout] 时，才会重构 [node] 属性，其他情况的 [setState] 不会重构
-  @override
-  void didUpdateWidget(MainSingleNode oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  /// 获取每个 node 的宽高
+  void _getLayout() {
+    if (widget.fragmentPoolController.fragmentPoolRefreshStatus == FragmentPoolRefreshStatus.getLayout) {
+      /// 防止被执行多次, 这里不能写这行, 否则第一个 node 就被禁止了, 应该在 end 里写
+      // widget.fragmentPoolController.fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willSetLayout;
 
-    /// 只有当 [startResetLayout] 被调用时(开始执行第一帧)，才调用 [resetLayoutProperty] ,第二帧的时候啥也不做
-    widget.isResetingLayoutProperty(null) ? resetLayoutProperty() : () {}();
-  }
+      /// 当前帧被 [build] 完成后调用
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        Size size = (this.context.findRenderObject() as RenderBox).size;
 
-  /// 第一帧开始及完成：重置布局属性
-  void resetLayoutProperty() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Size size = (this.context.findRenderObject() as RenderBox).size;
-
-      /// 给 [nodeLayoutMapTemp] 添加 [Node] ,并重置 [nodeLayoutMapTemp],在这之前 [nodeLayoutMapTemp] 已被 [clear] 过了。
-      widget.nodeLayoutMapTemp[widget.thisRouteName] = _defaultLayoutPropertyMap(size: size);
-
-      /// 若全部的 [Node] 都被重置完成。
-      if (widget.index == G.fragmentPool.fragmentPoolPendingNodes.length - 1) {
-        widget.reLayoutHandle();
-        widget.isResetingLayoutProperty(false);
-        resetLayoutDone();
-      }
-    });
-  }
-
-  /// 第二帧开始及完成：重置布局完成
-  void resetLayoutDone() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      /// 若全部的 [Node] 都被 [rebuild] 完成
-      if (widget.index == G.fragmentPool.fragmentPoolPendingNodes.length - 1) {
-        widget.isResetingLayout(false);
-      }
-    });
-  }
-
-  /// 默认布局数据
-  Map<dynamic, dynamic> _defaultLayoutPropertyMap({Size size}) {
-    return {
-      "current_index": widget.index,
-      "child_count": 0,
-      "father_route": "0",
-      "layout_width": size == null ? 10 : size.width, // 不设置它为0是为了防止出现bug观察不出来
-      "layout_height": size == null ? 10 : size.height,
-      "layout_left": -10000.0,
-      "layout_top": -10000.0,
-      "container_height": size == null ? 10 : size.height,
-      "vertical_center_offset": 0.0
-    };
+        /// 给 [nodeLayoutMapTemp] 添加 [Node] ,并重置 [nodeLayoutMapTemp],在这之前 [nodeLayoutMapTemp] 已被 [clear] 过了。
+        widget.fragmentPoolController.nodeLayoutMapTemp[widget.thisRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: size);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    _getLayout();
+    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(widget.thisRouteName)) {
+      widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
+    }
     return Positioned(
-      left: widget.nodeLayoutMap[widget.thisRouteName]["layout_left"],
-      top: widget.nodeLayoutMap[widget.thisRouteName]["layout_top"],
+      left: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_left"],
+      top: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_top"],
       child: CustomPaint(
-          painter: SingleNodeLine(
-            path: () {
-              /// 以下皆相对 path
-              Path path = Path();
-              if (widget.thisRouteName != "0") {
-                path.moveTo(0, widget.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
-                path.lineTo(-40, widget.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
-                double fatherCenterTop = widget.nodeLayoutMap[widget.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_top"] +
-                    widget.nodeLayoutMap[widget.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_height"] / 2;
-                double thisCenterTop = widget.nodeLayoutMap[widget.thisRouteName]["layout_top"];
+        painter: SingleNodeLine(
+          path: () {
+            /// 以下皆相对 path
+            Path path = Path();
+            if (widget.thisRouteName != "0") {
+              path.moveTo(0, widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
+              path.lineTo(-40, widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
+              double fatherCenterTop = widget.fragmentPoolController.nodeLayoutMap[widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_top"] +
+                  widget.fragmentPoolController.nodeLayoutMap[widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_height"] / 2;
+              double thisCenterTop = widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_top"];
 
-                path.lineTo(-40, fatherCenterTop - thisCenterTop);
-                path.lineTo(-80, fatherCenterTop - thisCenterTop);
-              }
-              return path;
-            }(),
-          ),
-          child: IfNode(widget.index, widget.thisRouteName, widget.nodeLayoutMap)),
+              path.lineTo(-40, fatherCenterTop - thisCenterTop);
+              path.lineTo(-80, fatherCenterTop - thisCenterTop);
+            }
+            return path;
+          }(),
+        ),
+        child: TextButton(child: Text("aaa"), onPressed: () {}),
+      ),
     );
   }
 }

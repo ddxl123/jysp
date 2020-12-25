@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPool.dart';
+import 'package:jysp/FragmentPool/FragmentPoolController.dart';
 
 abstract class BaseNode extends StatefulWidget {
   BaseNode(
     this.currentIndex,
     this.thisRouteName,
-    this.nodeLayoutMap,
+    this.fragmentPoolController,
   );
   final int currentIndex;
   final String thisRouteName;
-  final Map nodeLayoutMap;
+  final FragmentPoolController fragmentPoolController;
 }

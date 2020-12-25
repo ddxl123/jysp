@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/GDb.dart';
-import 'package:jysp/G/GFragmentPool.dart';
 import 'package:jysp/G/GHttp.dart';
 
 class G {
@@ -23,6 +22,4 @@ class G {
   static final GHttp http = GHttp();
 
   static final GDb db = GDb();
-
-  static final GFragmentPool fragmentPool = GFragmentPool();
 }

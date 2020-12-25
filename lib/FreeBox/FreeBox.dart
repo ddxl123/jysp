@@ -31,6 +31,21 @@ class FreeBox extends StatefulWidget {
 
 class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   @override
+  void initState() {
+    super.initState();
+
+    initInertialSliding();
+  }
+
+  void initInertialSliding() {
+    widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
+    widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
+    widget.freeBoxController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: widget.backgroundColor, //可视区域背景颜色
@@ -73,20 +88,5 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
 
   Widget _fixedLayer() {
     return Positioned(child: widget.fixedLayerChild);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    initInertialSliding();
-  }
-
-  void initInertialSliding() {
-    widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
-    widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
-    widget.freeBoxController.addListener(() {
-      setState(() {});
-    });
   }
 }
