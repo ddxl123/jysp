@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FragmentPool/Nodes/BaseNodes/MainSingleNode.dart';
+import 'package:jysp/FragmentPool/SingleNode.dart';
 
 class FragmentPool extends StatefulWidget {
   FragmentPool({@required this.fragmentPoolController});
@@ -15,6 +15,7 @@ class _FragmentPoolState extends State<FragmentPool> {
   @override
   void initState() {
     super.initState();
+    widget.fragmentPoolController.refreshLayout(true);
     widget.fragmentPoolController.addListener(_controllerListener);
   }
 
@@ -47,12 +48,12 @@ class _FragmentPoolState extends State<FragmentPool> {
             if (childrenIndex == widget.fragmentPoolController.fragmentPoolNodes.length) {
               return End(fragmentPoolController: widget.fragmentPoolController);
             }
-            return MainSingleNode(
+            return SingleNode(
               index: childrenIndex,
               thisRouteName: widget.fragmentPoolController.fragmentPoolNodes[childrenIndex]["route"],
               fragmentPoolController: widget.fragmentPoolController,
             );
-          }(),
+          }()
       ],
     );
   }
@@ -94,14 +95,6 @@ class _EndState extends State<End> {
   @override
   Widget build(BuildContext context) {
     _getLayout();
-    if (widget.fragmentPoolController.fragmentPoolNodes.length == 0) {
-      return TextButton(
-        child: Text("点击刷新"),
-        onPressed: () {
-          widget.fragmentPoolController.refreshLayout();
-        },
-      );
-    }
     return Container();
   }
 }

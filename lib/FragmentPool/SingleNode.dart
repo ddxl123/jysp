@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
+import 'package:jysp/FragmentPool/SingleNodeLine.dart';
 
-class MainSingleNode extends StatefulWidget {
-  MainSingleNode({
+class SingleNode extends StatefulWidget {
+  SingleNode({
     Key key,
     @required this.index,
     @required this.thisRouteName,
@@ -15,11 +16,18 @@ class MainSingleNode extends StatefulWidget {
   final FragmentPoolController fragmentPoolController;
 
   @override
-  MainSingleNodeState createState() => MainSingleNodeState();
+  SingleNodeState createState() => SingleNodeState();
 }
 
-class MainSingleNodeState extends State<MainSingleNode> {
+class SingleNodeState extends State<SingleNode> {
   ///
+
+  @override
+  Widget build(BuildContext context) {
+    _getLayout();
+    _notFindByThisRouteName();
+    return _buildWidget();
+  }
 
   /// 获取每个 node 的宽高
   void _getLayout() {
@@ -37,51 +45,32 @@ class MainSingleNodeState extends State<MainSingleNode> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _getLayout();
+  /// 未找到对应route
+  void _notFindByThisRouteName() {
     if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(widget.thisRouteName)) {
       widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
     }
+  }
+
+  Widget _buildWidget() {
     return Positioned(
       left: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_left"],
       top: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_top"],
       child: CustomPaint(
-        painter: SingleNodeLine(
-          path: () {
-            /// 以下皆相对 path
-            Path path = Path();
-            if (widget.thisRouteName != "0") {
-              path.moveTo(0, widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
-              path.lineTo(-40, widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_height"] / 2);
-              double fatherCenterTop = widget.fragmentPoolController.nodeLayoutMap[widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_top"] +
-                  widget.fragmentPoolController.nodeLayoutMap[widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["father_route"]]["layout_height"] / 2;
-              double thisCenterTop = widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_top"];
-
-              path.lineTo(-40, fatherCenterTop - thisCenterTop);
-              path.lineTo(-80, fatherCenterTop - thisCenterTop);
-            }
-            return path;
-          }(),
-        ),
-        child: TextButton(child: Text("aaa"), onPressed: () {}),
+        painter: SingleNodeLine(widget),
+        child: _child(),
       ),
     );
   }
-}
 
-class SingleNodeLine extends CustomPainter {
-  SingleNodeLine({@required this.path});
-  final Path path;
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint();
-    paint.color = Colors.white;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 4.0;
-    canvas.drawPath(path, paint);
+  Widget _child() {
+    switch (widget.fragmentPoolController.fragmentPoolNodes[widget.index]["node_type"]) {
+      case -1:
+        return TextButton(child: Text("没有node "), onPressed: () {});
+      case 0:
+        return TextButton(child: Text("普通node"), onPressed: () {});
+      default:
+        return TextButton(child: Text("未知类型node"), onPressed: () {});
+    }
   }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

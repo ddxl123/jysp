@@ -7,12 +7,15 @@ class FragmentPoolController extends ChangeNotifier {
   ///
 
   /// 当前碎片池节点读取数据
-  final List<dynamic> fragmentPoolNodes = [
-    {"_id": "", "user_id": "", "pool_type": 0, "node_type": 0, "route": "0", "name": "root"},
+  final List<Map<dynamic, dynamic>> fragmentPoolNodes = [
+    {"_id": "", "user_id": "", "pool_type": 0, "node_type": 0, "route": "0", "name": "root1"},
     {"_id": "", "user_id": "", "pool_type": 0, "node_type": 0, "route": "0-0", "name": "root1"},
     {"_id": "", "user_id": "", "pool_type": 0, "node_type": 0, "route": "0-1", "name": "root2"},
     {"_id": "", "user_id": "", "pool_type": 0, "node_type": 0, "route": "0-0-0", "name": "ro\not3的"},
   ];
+
+  /// 当 nodes 数量为0时, 创建的临时 node0 节点
+  final Map<dynamic, dynamic> nullNode = const {"route": "0", "node_type": -1};
 
   /// node0 位置
   Offset node0Position = Offset.zero;
@@ -59,7 +62,7 @@ class FragmentPoolController extends ChangeNotifier {
   /// 刷新布局函数
   ///
   /// 每次刷新碎片池时, 需最先获取每个 node 的布局宽高
-  void refreshLayout() {
+  void refreshLayout([bool isInit = false]) {
     if (fragmentPoolRefreshStatus != FragmentPoolRefreshStatus.none) {
       print("非none");
       return;
@@ -68,20 +71,29 @@ class FragmentPoolController extends ChangeNotifier {
     fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willRefresh;
     print("1-willRefresh");
 
-    /// [callback] 可以对 [fragmentPoolDataList] 进行增删操作
-    /// 之所以放在 [if(_isResetingLayout)] 之后，是因为放在前面时， [fragmentPoolDataList] 被修改后，直接被 [return] 了而无法进行剩余操作
-    // callback();
-
-    /// 获取每个 node 的布局宽高前, 要想 clear, 防止元素残余
+    /// 获取每个 node 的布局宽高前, 要先 clear, 防止元素残余
     /// 是独立的地址值，没有相关联的，因此放心 [clear]
     nodeLayoutMapTemp.clear();
-    notifyListeners();
+
+    /// 检测 nodes 数量是否为0, 若为0则生成一个
+    if (fragmentPoolNodes.isEmpty) {
+      fragmentPoolNodes.add(nullNode);
+    }
+
+    /// 初始化刷新与普通刷新分离
+    if (isInit) {
+      fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.getLayout;
+      print("2-getLayout-init");
+    } else {
+      notifyListeners();
+    }
   }
 
   ///
   ///
   ///
   /// 已获取完 [全部 Nodes 的初始属性],开始对 [布局] 进行摆布
+  ///
   void setLayout() {
     Map<String, int> tailMap = {};
     _sl1(tailMap);
