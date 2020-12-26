@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolController.dart';
+import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FragmentPool/SingleNodeLine.dart';
+import 'package:jysp/FragmentPool/NodeType/UnknownNode.dart';
+import 'package:jysp/FragmentPool/SingleNode/SingleNodeLine.dart';
 
 class SingleNode extends StatefulWidget {
   SingleNode({
@@ -70,7 +71,7 @@ class SingleNodeState extends State<SingleNode> {
       case 0:
         return TextButton(child: Text("普通node"), onPressed: () {});
       default:
-        return TextButton(child: Text("未知类型node"), onPressed: () {});
+        return UnknownNode();
     }
   }
 }

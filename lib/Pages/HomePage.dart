@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPool.dart';
-import 'package:jysp/FragmentPool/FragmentPoolController.dart';
+import 'package:jysp/FragmentPool/FragmentPool/FragmentPool.dart';
+import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
+import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 import 'package:jysp/FreeBox/FreeBoxController.dart';
 import 'package:jysp/FreeBox/FreeBox.dart';
@@ -71,128 +72,12 @@ class HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(
-                child: FlatButton(
-                    onPressed: () {
-                      _fragmentPoolController.refreshLayout();
-                    },
-                    child: Text("发现"))),
-            _selectFragmentPool(),
-            Expanded(
-                child: FlatButton(
-                    onPressed: () {
-                      _fragmentPoolController.fragmentPoolNodes.removeLast();
-                    },
-                    child: Text("我"))),
+            Expanded(child: FlatButton(onPressed: () {}, child: Text("发现"))),
+            Expanded(child: FragmentPoolChoice(fragmentPoolController: _fragmentPoolController)),
+            Expanded(child: FlatButton(onPressed: () {}, child: Text("我"))),
           ],
         ),
       ),
     );
-  }
-
-  Widget _selectFragmentPool() {
-    return Expanded(
-      child: StatefulBuilder(
-        builder: (ctx, rebuild) {
-          String selectedFragmentPool = "待定池";
-          switch (_fragmentPoolController.fragmentPoolSelectedType) {
-            case FragmentPoolSelectedType.pendingPool:
-              selectedFragmentPool = "待定池";
-              break;
-            case FragmentPoolSelectedType.memoryPool:
-              selectedFragmentPool = "记忆池";
-              break;
-            case FragmentPoolSelectedType.completePool:
-              selectedFragmentPool = "完成池";
-              break;
-            default:
-              selectedFragmentPool = "待定池";
-          }
-          return FlatButton(
-            color: Colors.white,
-            child: Text(selectedFragmentPool),
-            onPressed: () {
-              Navigator.push(ctx, FragmentPoolChoice(ctx: ctx, rebuild: rebuild, fragmentPoolController: _fragmentPoolController));
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class FragmentPoolChoice extends OverlayRoute {
-  FragmentPoolChoice({@required this.ctx, @required this.rebuild, @required this.fragmentPoolController});
-  BuildContext ctx;
-  Function(Function()) rebuild;
-  FragmentPoolController fragmentPoolController;
-
-  @override
-  Iterable<OverlayEntry> createOverlayEntries() {
-    return [
-      OverlayEntry(
-        builder: (_) {
-          Size size = (ctx.findRenderObject() as RenderBox).size;
-          return Stack(
-            alignment: AlignmentDirectional.center,
-            children: [
-              Positioned(
-                child: Listener(
-                  child: Container(
-                    color: Colors.black12,
-                  ),
-                  onPointerUp: (event) {
-                    Navigator.removeRoute(_, this);
-                  },
-                ),
-              ),
-              Positioned(
-                bottom: size.height,
-                child: Column(
-                  children: [
-                    Offstage(
-                      offstage: fragmentPoolController.fragmentPoolSelectedType == FragmentPoolSelectedType.pendingPool ? true : false,
-                      child: FlatButton(
-                        color: Colors.white,
-                        child: Text("待定池"),
-                        onPressed: () {
-                          fragmentPoolController.fragmentPoolSelectedType = FragmentPoolSelectedType.pendingPool;
-                          rebuild(() {});
-                          Navigator.removeRoute(_, this);
-                        },
-                      ),
-                    ),
-                    Offstage(
-                      offstage: fragmentPoolController.fragmentPoolSelectedType == FragmentPoolSelectedType.memoryPool ? true : false,
-                      child: FlatButton(
-                        color: Colors.white,
-                        child: Text("记忆池"),
-                        onPressed: () {
-                          fragmentPoolController.fragmentPoolSelectedType = FragmentPoolSelectedType.memoryPool;
-                          rebuild(() {});
-                          Navigator.removeRoute(_, this);
-                        },
-                      ),
-                    ),
-                    Offstage(
-                      offstage: fragmentPoolController.fragmentPoolSelectedType == FragmentPoolSelectedType.completePool ? true : false,
-                      child: FlatButton(
-                        color: Colors.white,
-                        child: Text("完成池"),
-                        onPressed: () {
-                          fragmentPoolController.fragmentPoolSelectedType = FragmentPoolSelectedType.completePool;
-                          rebuild(() {});
-                          Navigator.removeRoute(_, this);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    ];
   }
 }

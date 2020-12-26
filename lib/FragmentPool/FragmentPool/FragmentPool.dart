@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolController.dart';
+import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FragmentPool/SingleNode.dart';
+import 'package:jysp/FragmentPool/SingleNode/SingleNode.dart';
 
 class FragmentPool extends StatefulWidget {
   FragmentPool({@required this.fragmentPoolController});

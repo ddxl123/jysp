@@ -25,7 +25,7 @@ class FragmentPoolController extends ChangeNotifier {
   double widthSpace = 80.0;
 
   /// 当前展现的碎片池类型
-  FragmentPoolSelectedType fragmentPoolSelectedType = FragmentPoolSelectedType.none;
+  FragmentPoolSelectedType fragmentPoolSelectedType = FragmentPoolSelectedType.pendingPool;
 
   /// 刷新碎片池操作过程的状态
   FragmentPoolRefreshStatus fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.none;

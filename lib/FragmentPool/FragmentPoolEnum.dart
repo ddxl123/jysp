@@ -1,10 +1,3 @@
-enum FragmentPoolSelectedType {
-  none,
-  pendingPool,
-  memoryPool,
-  completePool,
-}
-
 enum FragmentPoolRefreshStatus {
   none,
   willRefresh,
@@ -12,4 +5,31 @@ enum FragmentPoolRefreshStatus {
   willSetLayout,
   setLayout,
   runLayout,
+}
+enum FragmentPoolSelectedType {
+  none,
+  pendingPool,
+  memoryPool,
+  completePool,
+  wikiPool,
+}
+
+enum FragmentPoolNodeType {
+  none,
+
+  pendingGroup,
+  pendingGroupCol,
+  pendingNode,
+
+  memoryGroup,
+  memoryGroupCol,
+  memoryNode,
+
+  completeGroup,
+  completeGroupCol,
+  completeNode,
+
+  wikiGroup,
+  wikiGroupCol,
+  wikiNode,
 }
