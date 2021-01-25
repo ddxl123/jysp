@@ -1,0 +1,10 @@
+{
+  sort_id: "dart:int, sqlite:INTEGER 主键 不为空 无符号 自增",
+  table_name: "dart:String, sqlite:TEXT",
+  table_field_id: "dart:String, sqlite:Text(存UUID)",
+  curd: "dart:int, sqlite:INTEGER", // 1：增，2：删，3：改
+}
+
+// 此表仅保存在本地
+// 此表为 null 时, 删除该表并重建, 因为需要把 sort_id 重置。
+// 本表某字段对应的 table_field_id 不存在且 curd 不为 [删] 时, 或table_name 不存在时, 直接执行数据损坏任务删除数据库并重建。

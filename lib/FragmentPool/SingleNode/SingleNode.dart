@@ -32,7 +32,7 @@ class SingleNodeState extends State<SingleNode> {
 
   /// 获取每个 node 的宽高
   void _getLayout() {
-    if (widget.fragmentPoolController.fragmentPoolRefreshStatus == FragmentPoolRefreshStatus.getLayout) {
+    if (widget.fragmentPoolController.getFragmentPoolRefreshStatus == FragmentPoolRefreshStatus.willGetLayout) {
       /// 防止被执行多次, 这里不能写这行, 否则第一个 node 就被禁止了, 应该在 end 里写
       // widget.fragmentPoolController.fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willSetLayout;
 

@@ -1,0 +1,71 @@
+{
+  "/公用字段": {
+    "/关于id": "本地采用UUID，云端采用AIID",
+    x_id_m: "dart:String, sqlite:TEXT(存AIID) 唯一 可为空, mysql:BIGINT(设AIID) 主键 不为空 无符号 自增",
+    x_id_s: "dart:String, sqlite:TEXT(设UUID) 唯一 可为空, mysql:CHAR(M)(存UUID) 唯一 可为空",
+    "created_at|updated_at": "dart:int, sqlite:INTEGER, mysql:TIMESTAMP",
+  },
+  "/全部类型": {
+    "/类型": "空               整型            浮点型           字符串           时间戳",
+    dart: "null             int            num             String           int",
+    sqlite: "NULL         INTEGER          REAL             TEXT            INTEGER",
+    mysql: "NULL    TINYINT INT BIGINT     FLOAT      CHAR(M) VARCHAR(M)    TIMESTAMP",
+    mysql_option: "主键 PRIMARY KEY    不为空 NOT NULL    唯一 UNIQUE    无符号 UNSIGNED     自增 AUTO INCREMENT    默认值 DEFAULT",
+  },
+  "/类型详解": {
+    "/空类型": {
+      dart: "null",
+      sqlite: "NULL",
+      mysql: "NULL",
+    },
+    "/整型": {
+      "/普通整型": {
+        "/注": "数值必须在 -2^32 ~ 2^32 范围内",
+        dart: "int -2^53 ~ 2^53",
+        sqlite: "INTEGER -2^63 ~ 2^63-1",
+        mysql: "INT -2^32 ~ 2^32",
+      },
+      "/小整型": {
+        "/注": "数值必须在 -128 ~ 127 范围内",
+        dart: "int -2^53 ~ 2^53",
+        sqlite: "INTEGER -2^63 ~ 2^63-1",
+        mysql: "TINYINT -128 ~ 127",
+      },
+      "/大整型": {
+        "/注": "数值必须在 -2^63 ~ 2^63-1 范围内",
+        dart: "String",
+        sqlite: "TEXT",
+        mysql: "BIGINT -2^63 ~ 2^63-1",
+      },
+    },
+    "/浮点型": {
+      dart: "num",
+      sqlite: "REAL",
+      mysql: "FLOAT",
+    },
+    "/字符串": {
+      "/已知固定长度": {
+        "/注": "utf8字符集, CHAR(255), 不超过254个字符(无论是中文还是英文)",
+        "/使用": "知道长度时使用, M 尽可能的小",
+        "/存储": "保存手机号、用户名等信息",
+        dart: "String",
+        sqlite: "TEXT",
+        mysql: "CHAR(M)",
+      },
+      "/不可/知长度": {
+        "/注": "utf8字符集, VARCHAR(21831), 不超过21830个字符(无论是中文还是英文)",
+        "/使用": "知道长度时使用, M 尽可能的小",
+        "/存储": "长度<254->M=255, 255<长度<1000->M=1000, 1000<长度<2000->M=2000, 2000<长度<5000->M=5000, 5000<长度<10000->M=10000",
+        dart: "String",
+        sqlite: "TEXT",
+        mysql: "VARCHAR(M)",
+      },
+    },
+  },
+  "/图片/视频/声音": {
+    "/注": "只存路径, 图片/视频/声音 存到磁盘中",
+    dart: "String",
+    sqlite: "TEXT",
+    mysql: "VARCHAR(255)",
+  },
+}

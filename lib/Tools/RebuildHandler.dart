@@ -23,7 +23,7 @@ class RebuildHandler {
 class RebuildHandleWidget extends StatefulWidget {
   RebuildHandleWidget({@required this.rebuildHandler, @required this.builder});
   final RebuildHandler rebuildHandler;
-  final Widget Function() builder;
+  final Widget Function(RebuildHandler) builder;
   @override
   _RebuildHandleWidgetState createState() => _RebuildHandleWidgetState();
 }
@@ -39,6 +39,6 @@ class _RebuildHandleWidgetState extends State<RebuildHandleWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder();
+    return widget.builder(widget.rebuildHandler);
   }
 }

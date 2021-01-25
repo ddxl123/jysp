@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
+import 'package:jysp/FreeBox/FreeBoxController.dart';
 
 ///
 ///
@@ -8,60 +9,38 @@ import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 /// 选项按钮
 ///
 class FragmentPoolChoice extends StatefulWidget {
-  FragmentPoolChoice({@required this.fragmentPoolController});
+  FragmentPoolChoice({@required this.fragmentPoolController, @required this.freeBoxController});
   final FragmentPoolController fragmentPoolController;
+  final FreeBoxController freeBoxController;
 
   @override
   _FragmentPoolChoiceState createState() => _FragmentPoolChoiceState();
 }
 
 class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
-  ///
-
-  String _buttonName = "待定池";
-
   @override
   Widget build(BuildContext context) {
-    _changeButtonName();
-    return _choiceButton();
-  }
-
-  void _changeButtonName() {
-    switch (widget.fragmentPoolController.fragmentPoolSelectedType) {
-      case FragmentPoolSelectedType.pendingPool:
-        _buttonName = "待定池";
-        break;
-      case FragmentPoolSelectedType.memoryPool:
-        _buttonName = "记忆池";
-        break;
-      case FragmentPoolSelectedType.completePool:
-        _buttonName = "完成池";
-        break;
-      case FragmentPoolSelectedType.wikiPool:
-        _buttonName = "百科池";
-        break;
-      default:
-        _buttonName = "unknown";
-    }
-  }
-
-  Widget _choiceButton() {
     return FlatButton(
       color: Colors.white,
-      child: Text(_buttonName),
+
+      /// 该文本默认匹配 [currentFragmentPoolType] 的默认值
+      child: Text(widget.fragmentPoolController.getCurrentFragmentPoolType.value),
       onPressed: () {
         Navigator.push(
           context,
           FragmentPoolChoicePage(
             ctx: context,
-            rebuild: () {
-              setState(() {});
-            },
+            mainButtonRebuild: _mainButtonRebuild,
             fragmentPoolController: widget.fragmentPoolController,
+            freeBoxController: widget.freeBoxController,
           ),
         );
       },
     );
+  }
+
+  void _mainButtonRebuild() {
+    setState(() {});
   }
 }
 
@@ -71,14 +50,21 @@ class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
 /// 弹出的选项页
 ///
 class FragmentPoolChoicePage extends OverlayRoute {
-  FragmentPoolChoicePage({@required this.ctx, @required this.rebuild, @required this.fragmentPoolController});
+  FragmentPoolChoicePage({
+    @required this.ctx,
+    @required this.mainButtonRebuild,
+    @required this.fragmentPoolController,
+    @required this.freeBoxController,
+  });
   final BuildContext ctx;
-  final Function rebuild;
+  final Function mainButtonRebuild;
   final FragmentPoolController fragmentPoolController;
+  final FreeBoxController freeBoxController;
   Size size;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
+    /// 获取 mainButton 的尺寸
     size = (ctx.findRenderObject() as RenderBox).size;
     return [
       OverlayEntry(
@@ -88,7 +74,9 @@ class FragmentPoolChoicePage extends OverlayRoute {
             children: [
               /// 背景
               _background(_),
-              _choiceArea(_),
+
+              /// 子按钮区域
+              _toButtonArea(_),
             ],
           );
         },
@@ -107,32 +95,40 @@ class FragmentPoolChoicePage extends OverlayRoute {
     );
   }
 
-  Widget _choiceArea(BuildContext _) {
+  Widget _toButtonArea(BuildContext _) {
     return Positioned(
       bottom: size.height,
       child: Column(
         children: [
-          _choiceButton(_, FragmentPoolSelectedType.pendingPool, "待定池"),
-          _choiceButton(_, FragmentPoolSelectedType.memoryPool, "记忆池"),
-          _choiceButton(_, FragmentPoolSelectedType.completePool, "完成池"),
-          _choiceButton(_, FragmentPoolSelectedType.wikiPool, "百科池"),
+          _toButton(ctx: _, toButtonType: FragmentPoolType.pendingPool),
+          _toButton(ctx: _, toButtonType: FragmentPoolType.memoryPool),
+          _toButton(ctx: _, toButtonType: FragmentPoolType.completePool),
+          _toButton(ctx: _, toButtonType: FragmentPoolType.wikiPool),
         ],
       ),
     );
   }
 
-  Widget _choiceButton(BuildContext _, FragmentPoolSelectedType currentButtonType, String currentButtonName) {
-    return Offstage(
-      offstage: fragmentPoolController.fragmentPoolSelectedType == currentButtonType ? true : false,
-      child: FlatButton(
-        color: Colors.white,
-        child: Text(currentButtonName),
-        onPressed: () {
-          fragmentPoolController.fragmentPoolSelectedType = currentButtonType;
-          rebuild();
-          Navigator.removeRoute(_, this);
-        },
-      ),
+  Widget _toButton({@required BuildContext ctx, @required FragmentPoolType toButtonType}) {
+    return FlatButton(
+      color: Colors.white,
+      child: Text(toButtonType.value),
+      onPressed: () async {
+        /// 关闭当前路由窗口
+        Navigator.removeRoute(ctx, this);
+
+        fragmentPoolController.refreshLayout(
+          freeBoxController: freeBoxController,
+          isInit: false,
+          isGetData: true,
+          toPoolType: toButtonType,
+          toPoolTypeResult: (resultCode) {
+            if (resultCode == 1) {
+              mainButtonRebuild();
+            }
+          },
+        );
+      },
     );
   }
 }

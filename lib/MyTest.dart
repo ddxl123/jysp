@@ -1,59 +1,14 @@
-import 'package:flutter/material.dart';
-
-class MyTest extends StatefulWidget {
-  @override
-  _MyTestState createState() => _MyTestState();
+main(List<String> args) {
+  a();
 }
 
-class _MyTestState extends State<MyTest> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: GestureDetector(
-          onScaleStart: (details) {
-            lastLocalFocalPoint = details.localFocalPoint;
-          },
-          onScaleUpdate: (details) {
-            Offset deltaLFP = details.localFocalPoint - lastLocalFocalPoint;
-            offset += deltaLFP;
-            lastLocalFocalPoint = details.localFocalPoint;
-            setState(() {});
-          },
-          child: _body(),
-        ),
-      ),
-    );
-  }
+void a() {
+  print("111");
+  b();
+  print("222");
+}
 
-  var offset = Offset.zero;
-  var lastLocalFocalPoint = Offset.zero;
-
-  Widget _body() {
-    return Container(
-      alignment: Alignment.center,
-      color: Colors.green,
-      width: 300,
-      height: 300,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            child: Transform.translate(
-              offset: offset,
-              child: Container(
-                color: Colors.red,
-                width: 500,
-                height: 200,
-                child: FlatButton(
-                  child: Text("button"),
-                  onPressed: () {},
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+Future b() async {
+  print("333");
+  await Future.delayed(Duration(seconds: 2));
 }

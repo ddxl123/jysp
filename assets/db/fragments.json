@@ -1,5 +1,7 @@
 {
-  "fragment_id": "",
-  "create_time": 0,
-  "text": "公司大师傅士大夫士大夫"
+  "fragment_id_m": "",
+  "fragment_id_s": "",
+  "text": "dart:String, sqlite:TEXT, mysql:VARCHAR(255)",
+  "created_at": "",
+  "updated_at": ""
 }

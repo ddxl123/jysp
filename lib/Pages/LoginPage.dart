@@ -95,36 +95,36 @@ class _LoginPageState extends State<LoginPage> {
   Widget _sendEmailButton() {
     return RebuildHandleWidget(
       rebuildHandler: _sendEmailButtonRebuildHandler,
-      builder: () {
-        if (_sendEmailButtonRebuildHandler.handleCode == 1) {
+      builder: (handler) {
+        if (handler.handleCode == 1) {
           // 倒计时状态
-          _sendEmailButtonRebuildHandler.state["banOnPressed"] = true;
-          var time = (_sendEmailButtonRebuildHandler.state["time"] ??= 5);
-          _sendEmailButtonRebuildHandler.state["text"] = "$time s";
-          _sendEmailButtonRebuildHandler.state["timer"] ??= Timer.periodic(
+          handler.state["banOnPressed"] = true;
+          var time = (handler.state["time"] ??= 5);
+          handler.state["text"] = "$time s";
+          handler.state["timer"] ??= Timer.periodic(
             Duration(seconds: 1),
             (timer) {
-              if (_sendEmailButtonRebuildHandler.state["time"] == 0) {
-                (_sendEmailButtonRebuildHandler.state["timer"] as Timer).cancel();
-                _sendEmailButtonRebuildHandler.reset(true);
+              if (handler.state["time"] == 0) {
+                (handler.state["timer"] as Timer).cancel();
+                handler.reset(true);
               } else {
-                _sendEmailButtonRebuildHandler.state["time"] -= 1;
-                _sendEmailButtonRebuildHandler.rebuild();
+                handler.state["time"] -= 1;
+                handler.rebuild();
               }
             },
           );
         } else {
           // 未发送状态
-          _sendEmailButtonRebuildHandler.state["banOnPressed"] = false;
-          (_sendEmailButtonRebuildHandler.state["timer"] as Timer)?.cancel();
-          _sendEmailButtonRebuildHandler.reset(false);
-          _sendEmailButtonRebuildHandler.state["text"] = "发送验证码";
+          handler.state["banOnPressed"] = false;
+          (handler.state["timer"] as Timer)?.cancel();
+          handler.reset(false);
+          handler.state["text"] = "发送验证码";
         }
         return TextButton(
           style: ButtonStyle(
             side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
           ),
-          child: Text(_sendEmailButtonRebuildHandler.state["text"]),
+          child: Text(handler.state["text"]),
           onPressed: _sendEmailRequest,
         );
       },
@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // TODO: /api/register_and_login/by_email/send_email
-  void _sendEmailRequest() {
+  void _sendEmailRequest() async {
     if (_sendEmailButtonRebuildHandler.state["banOnPressed"] == true) {
       print("banOnPressed");
       return;
@@ -162,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
     // 服务器验证：
     _sendEmailButtonRebuildHandler.rebuildHandle(1);
 
-    G.http.postRequestBase(
+    await G.http.sendPostRequest(
       route: "/register_and_login/by_email/send_email",
       data: {
         "qq_email": this._qqEmailTextEditingController.text,
@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // TODO: /api/register_and_login/by_email/verify_email
-  void _verifyEmailRequest() {
+  void _verifyEmailRequest() async {
     //
     //
     // 本地验证
@@ -205,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
     //
     //
     // 服务器验证
-    G.http.postRequestBase(
+    await G.http.sendPostRequest(
       route: "/register_and_login/by_email/verify_email",
       data: {
         "qq_email": _qqEmailTextEditingController.text,

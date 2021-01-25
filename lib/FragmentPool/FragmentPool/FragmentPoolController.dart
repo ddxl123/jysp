@@ -2,8 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
+import 'package:jysp/FreeBox/FreeBoxController.dart';
+import 'package:jysp/G/G.dart';
+import 'package:jysp/Tools/RebuildHandler.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
-class FragmentPoolController extends ChangeNotifier {
+mixin _Root on ChangeNotifier {
   ///
 
   /// 当前碎片池节点读取数据
@@ -17,32 +21,7 @@ class FragmentPoolController extends ChangeNotifier {
   /// 当 nodes 数量为0时, 创建的临时 node0 节点
   final Map<dynamic, dynamic> nullNode = const {"route": "0", "node_type": -1};
 
-  /// node0 位置
-  Offset node0Position = Offset.zero;
-
-  /// 间隔空间大小
-  double heightSpace = 40.0;
-  double widthSpace = 80.0;
-
-  /// 当前展现的碎片池类型
-  FragmentPoolSelectedType fragmentPoolSelectedType = FragmentPoolSelectedType.pendingPool;
-
-  /// 刷新碎片池操作过程的状态
-  FragmentPoolRefreshStatus fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.none;
-
-  ///
-  ///
-  ///
-  /// 视图 Map
-  ///
-  /// 在刷新布局的过程中, 会 clear [nodeLayoutMap] ,因此需要 [nodeLayoutMapTemp]
-  Map<dynamic, dynamic> nodeLayoutMap = {};
-  Map<dynamic, dynamic> nodeLayoutMapTemp = {};
-
-  ///
-  ///
-  ///
-  /// 默认布局数据
+  /// node 的默认布局数据
   Map<dynamic, dynamic> defaultLayoutPropertyMap({@required Size size}) {
     return {
       "child_count": 0,
@@ -56,38 +35,39 @@ class FragmentPoolController extends ChangeNotifier {
     };
   }
 
-  ///
-  ///
-  ///
-  /// 刷新布局函数
-  ///
-  /// 每次刷新碎片池时, 需最先获取每个 node 的布局宽高
-  void refreshLayout([bool isInit = false]) {
-    if (fragmentPoolRefreshStatus != FragmentPoolRefreshStatus.none) {
-      print("非none");
-      return;
-    }
+  /// 当前展现的碎片池类型
+  FragmentPoolType _currentFragmentPoolType = FragmentPoolType.pendingPool;
+  FragmentPoolType get getCurrentFragmentPoolType => _currentFragmentPoolType;
+  set setCurrentFragmentPoolType(FragmentPoolType value) => _currentFragmentPoolType = value;
 
-    fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willRefresh;
-    print("1-willRefresh");
+  /// 每个碎片池的视口位置和缩放, 以及对应池默认的视口位置
+  /// 这里必须把子类型写清楚了, 不然会报错:"type 'Offset' is not a subtype of type 'String' of 'value'"
+  Map<FragmentPoolType, Map<String, dynamic>> viewSelectedType = {
+    FragmentPoolType.pendingPool: {"offset": null, "scale": null, "node0": Offset.zero},
+    FragmentPoolType.memoryPool: {"offset": null, "scale": null, "node0": Offset.zero},
+    FragmentPoolType.completePool: {"offset": null, "scale": null, "node0": Offset.zero},
+    FragmentPoolType.wikiPool: {"offset": null, "scale": null, "node0": Offset.zero},
+  };
 
-    /// 获取每个 node 的布局宽高前, 要先 clear, 防止元素残余
-    /// 是独立的地址值，没有相关联的，因此放心 [clear]
-    nodeLayoutMapTemp.clear();
+  /// 刷新碎片池操作过程的状态
+  FragmentPoolRefreshStatus _fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.none;
+  FragmentPoolRefreshStatus get getFragmentPoolRefreshStatus => _fragmentPoolRefreshStatus;
+  set setFragmentPoolRefreshStatus(FragmentPoolRefreshStatus value) => _fragmentPoolRefreshStatus = value;
 
-    /// 检测 nodes 数量是否为0, 若为0则生成一个
-    if (fragmentPoolNodes.isEmpty) {
-      fragmentPoolNodes.add(nullNode);
-    }
+  ///
+}
 
-    /// 初始化刷新与普通刷新分离
-    if (isInit) {
-      fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.getLayout;
-      print("2-getLayout-init");
-    } else {
-      notifyListeners();
-    }
-  }
+mixin _SetLayout on _Root {
+  ///
+
+  /// 间隔空间大小
+  double heightSpace = 40.0;
+  double widthSpace = 80.0;
+
+  /// 视图 Map
+  /// 在刷新布局的过程中, 会 clear [nodeLayoutMap] ,因此需要 [nodeLayoutMapTemp]
+  Map<dynamic, dynamic> nodeLayoutMap = {};
+  Map<dynamic, dynamic> nodeLayoutMapTemp = {};
 
   ///
   ///
@@ -101,8 +81,7 @@ class FragmentPoolController extends ChangeNotifier {
     _sl3();
     _sl4(tailMap);
     _sl5LayoutDone();
-    _sl6GetNode0Position();
-    _sl7FrameTwo();
+    _sl6FrameTwo();
   }
 
   /// 1、获取全部 [tail_route] 的 [map], 获取每个 [route] 数量和 [father_route]
@@ -247,26 +226,208 @@ class FragmentPoolController extends ChangeNotifier {
 
   /// 5、完成布局设置
   void _sl5LayoutDone() {
-    /// 作用：防止残留的 [route] 干扰
+    /// 防止残留的元素干扰
     nodeLayoutMap.clear();
 
     /// 伪深拷贝
     nodeLayoutMap = Map.of(nodeLayoutMapTemp);
+
+    /// 防止残留的元素干扰
+    nodeLayoutMapTemp.clear();
   }
 
-  /// 6、获取布局后需要的 state
-  void _sl6GetNode0Position() {
-    /// 获取 [route=="0"] 的坐标
-    Offset transformZeroOffset =
-        Offset(nodeLayoutMapTemp["0"]["layout_left"] - nodeLayoutMapTemp["0"]["layout_width"] / 2, -(nodeLayoutMapTemp["0"]["layout_top"] + nodeLayoutMapTemp["0"]["layout_height"] / 2));
-    Offset mediaCenter = Offset(MediaQueryData.fromWindow(window).size.width / 2, MediaQueryData.fromWindow(window).size.height / 2);
-    node0Position = transformZeroOffset + mediaCenter;
-  }
-
-  /// 7、调用第二帧
-  void _sl7FrameTwo() {
-    fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.runLayout;
-    print("5-runLayout");
+  /// 6、调用第二帧
+  void _sl6FrameTwo() {
+    setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willRunLayout;
+    dPrint("5-willRunLayout");
     notifyListeners();
   }
+
+  ///
 }
+
+mixin _RefreshLayout on _Root, _Request {
+  ///
+
+  /// 是否弹出加载 Toast
+  RebuildHandler isLoadingBarrierRebuildHandler = RebuildHandler();
+
+  /// 防止刷新碎片池操作并发
+  Set<Object> lineCodes = {};
+
+  ///
+  ///
+  ///
+  /// 刷新布局函数
+  ///
+  /// 每次刷新碎片池时, 需先获取每个 node 的布局宽高, 因此碎片池 widget 需要被 build 2次
+  ///
+  /// [isInit]：不能为 null
+  ///   当前调用是否为初始化调用
+  /// [isGetData]：不能为 null
+  ///   是否需要 [异步] 获取数据。
+  /// [toPoolTypeResult]：不可以为 null
+  ///   跳转至指定 type of pool 成功与失败
+  ///   成功时回调带 1
+  ///   失败时回调带 0
+  ///   异步获取数据被中断时回调带 -1
+  ///
+  void refreshLayout({
+    @required FreeBoxController freeBoxController,
+    @required bool isInit,
+    @required bool isGetData,
+    @required FragmentPoolType toPoolType,
+    @required Function(int resultCode) toPoolTypeResult,
+  }) {
+    interruptRefreshLayout();
+    _refreshLayoutHandle(freeBoxController, isInit, isGetData, toPoolType, toPoolTypeResult);
+  }
+
+  /// 具体操作分类
+  void _refreshLayoutHandle(
+    FreeBoxController freeBoxController,
+    bool isInit,
+    bool isGetData,
+    FragmentPoolType toPoolType,
+    Function(int resultCode) toPoolTypeResult,
+  ) async {
+    //
+    /// [仅-初始化刷新布局]
+    if (isInit == true && isGetData == false) {
+      /// 初始化无法修改其他 widget 的 state, 因此需让 [currentFragmentPoolType] 保持为默认值, 从而使得其他 widget 的 state 能保持初始化 state 同步
+      /// 因未完成布局而无法获取当前的 offset/scale, 因此会默认匹配到完成布局后 node0 的 offset/scale
+      toPoolTypeResult(1);
+
+      setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willGetLayout;
+      dPrint("2-willGetLayout-init");
+    }
+    //
+    /// 先 [刷新布局], 再异步 [获取数据], 最后再 [仅-非初始化刷新布局]
+    else if (isInit == true && isGetData == true) {
+      /// 初始化无法修改其他 widget 的 state, 因此需让 [currentFragmentPoolType] 保持为默认值, 从而使得其他 widget 的 state 能保持初始化 state 同步
+      /// 因未完成布局而无法获取当前的 offset/scale, 因此会默认匹配到完成布局后 node0 的 offset/scale
+      /// toPoolTypeResult(true); 这里无需进行回调, 因为该回调是要让异步获取数据完成后进行回调的
+
+      setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willGetLayout;
+      dPrint("2-willGetLayout-init");
+
+      await _getRefreshLayoutData(freeBoxController, getCurrentFragmentPoolType, toPoolTypeResult);
+    }
+    //
+    /// [仅-非初始化刷新布局]
+    else if (isInit == false && isGetData == false) {
+      setView(freeBoxController, toPoolType);
+      toPoolTypeResult(1);
+
+      setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willLayout;
+      dPrint("1-willLayout");
+      notifyListeners(); // 同步
+    }
+    //
+    /// 先 [获取数据], 再 [仅-非初始化刷新布局]
+    else if (isInit == false && isGetData == true) {
+      await _getRefreshLayoutData(freeBoxController, toPoolType, toPoolTypeResult);
+    }
+  }
+
+  /// [异步] 获取布局数据
+  Future _getRefreshLayoutData(
+    FreeBoxController freeBoxController,
+    FragmentPoolType toPoolType,
+    Function(int resultCode) toPoolTypeResult,
+  ) async {
+    /// 必须都放在异步中
+    await Future(() async {
+      /// 打开加载屏障
+      isLoadingBarrierRebuildHandler.rebuildHandle(1);
+
+      /// 给予 [willGetData] 信号
+      setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willGetData;
+      dPrint("willGetData");
+
+      /// 安排线码
+      Object lineCode = Object();
+      lineCodes.add(lineCode);
+      dPrint("线码:${lineCode.hashCode}");
+
+      /// 获取数据：[toPoolType] 的数据
+      bool result = await _layoutDataRequest();
+
+      ///
+      ///
+      ///
+      /// 并发中断
+      /// 若不存在, 则代表该调用需被中断
+      if (!lineCodes.contains(lineCode)) {
+        toPoolTypeResult(-1); // 无法预测何时会进行回调
+        dPrint("中断线码成功:${lineCode.hashCode}");
+        return;
+      }
+
+      if (result) {
+        dPrint("获取数据成功");
+
+        /// 获取数据阶段收尾
+        setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.none;
+        dPrint("0-none");
+
+        /// 根据结果重新刷新布局, [setView] 和 [toPoolTypeResult] 操作交给下面这行代码
+        refreshLayout(freeBoxController: freeBoxController, isInit: false, isGetData: false, toPoolType: toPoolType, toPoolTypeResult: (bool) {}); //同步
+
+        /// 最终完成后取消屏障
+        isLoadingBarrierRebuildHandler.rebuildHandle(0);
+      } else {
+        dPrint("获取数据失败");
+
+        toPoolTypeResult(0);
+
+        /// 收尾
+        setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.none;
+        dPrint("0-none");
+
+        /// 最终完成后取消屏障
+        isLoadingBarrierRebuildHandler.rebuildHandle(0);
+      }
+    });
+  }
+
+  /// 中断数据获取的异步
+  void interruptRefreshLayout() {
+    if (getFragmentPoolRefreshStatus == FragmentPoolRefreshStatus.willGetData) {
+      /// 若并发, 则中断上一次程序
+      isLoadingBarrierRebuildHandler.rebuildHandle(0); // 取消屏障
+      lineCodes.clear();
+      // 这里被中断无需调用 [isGetData] 回调函数
+      dPrint("被中断");
+    }
+  }
+
+  /// 保存当前 offset/scale , 并设置当前碎片池的为指定池
+  void setView(FreeBoxController freeBoxController, FragmentPoolType toPoolType) {
+    viewSelectedType[getCurrentFragmentPoolType]["offset"] = freeBoxController.offset;
+    viewSelectedType[getCurrentFragmentPoolType]["scale"] = freeBoxController.scale;
+    setCurrentFragmentPoolType = toPoolType; // 必须放到设置 viewSelectedType 的后面
+  }
+
+  ///
+}
+
+mixin _Request {
+  Future<bool> _layoutDataRequest() async {
+    await _sqliteLayoutData();
+    await _cloudLayoutData();
+  }
+
+  Future<bool> _sqliteLayoutData() async {}
+  Future<bool> _cloudLayoutData() async {
+    await G.http.sendPostRequest(
+      route: null,
+      data: null,
+      result: null,
+      error: null,
+      notConcurrent: null,
+    );
+  }
+}
+
+class FragmentPoolController with ChangeNotifier, _Root, _SetLayout, _Request, _RefreshLayout {}

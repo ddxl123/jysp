@@ -116,15 +116,15 @@ class FreeBoxController extends ChangeNotifier {
   ///
   ///
   /// 滑动至目标位置
-  void targetSlide(Offset target) {
+  void targetSlide({@required Offset targetOffset, @required double targetScale}) {
     targetSlideAnimationController.duration = Duration(seconds: 1);
     _offsetAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(
           begin: this.offset,
-          end: target,
+          end: targetOffset,
         ));
     _scaleAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(
           begin: this.scale,
-          end: 1.0,
+          end: targetScale,
         ));
     targetSlideAnimationController.forward(from: 0.4);
     targetSlideAnimationController.addListener(_targetSlideListener);

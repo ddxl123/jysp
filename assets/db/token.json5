@@ -1,0 +1,8 @@
+{
+  token: "dart:String, sqlite:TEXT",
+  created_at: "",
+  updated_at: "",
+}
+
+// 之所以 token 独立放在一个表，是因为让 token 有自己的创建、更新时间
+// 在上传队列中检查 token

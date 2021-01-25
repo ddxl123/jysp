@@ -1,0 +1,22 @@
+{
+  fragment_pool_node_id_m: "",
+  fragment_pool_node_id_s: "",
+  pool_type: "dart:int, sqlite:INTEGER, mysql:TINYINT 不为空 无符号",
+  node_type: "dart:int, sqlite:INTEGER, mysql:INT 不为空 无符号",
+  route: "dart:String, sqlite:TEXT, mysql:VARCHAR(255) 不为空",
+  name: "dart:String, sqlite:TEXT, mysql:VARCHAR(255)",
+  created_at: "",
+  updated_at: "",
+}
+/// 该表是【必须模块（整体式模块）】
+
+/// 初始化：
+/// sqlite 中查询该表，若没有字段，则说明未初始化Ⅰ，并将 state 存储一个 node_type 为Ⅰ的节点,  sqlite 无需标记。
+/// 为Ⅰ时，若触发初始化，则需先向云端发送请求，云端返回的内容：Ⅱ未创建信息、Ⅲ异常信息、Ⅳ、有信息；
+/// 若为Ⅱ时，则 sqlite 存储一个 node_type 为Ⅱ的节点 ，state 刷新即可；
+/// 若为Ⅲ时，则 sqlite 存储一个 node_type 为Ⅱ的节点 ，state 刷新即可，Toast 提示Ⅲ；
+/// 若为Ⅳ时，则直接获取。
+
+/// 待解决：
+/// 1、重复 route 问题
+/// 2、缺失 route 问题

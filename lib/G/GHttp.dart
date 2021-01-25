@@ -10,10 +10,11 @@ class GHttp {
   Map<dynamic, dynamic> notConcurrentMap = {};
 
   /// 初始化 [http]
-  void defaultHttpOptions() {
+  GHttp init() {
     dio.options.baseUrl = "http://192.168.10.10:80/";
-    dio.options.connectTimeout = 10000; //5s
+    dio.options.connectTimeout = 5000; //5s
     dio.options.receiveTimeout = 3000;
+    return this;
   }
 
   /// [route] 请求路径
@@ -21,7 +22,7 @@ class GHttp {
   /// [result] 响应结果。[response] 响应数据, [unknowCode] 未知响应码
   /// [error] 本地异常
   /// [notConcurrent] 不可并发请求标志
-  void postRequestBase({
+  Future<void> sendPostRequest({
     @required String route,
     @required dynamic data,
     @required Function({Response<dynamic> response, Function unknownCode}) result,
