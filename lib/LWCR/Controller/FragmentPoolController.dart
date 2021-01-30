@@ -2,12 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FreeBox/FreeBoxController.dart';
 import 'package:jysp/G/G.dart';
+import 'package:jysp/G/GSqliteField.dart';
+import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-mixin _Root on ChangeNotifier {
+class Init extends ChangeNotifier {}
+
+mixin _Root on Init {
   ///
 
   /// 当前碎片池节点读取数据
@@ -268,8 +271,8 @@ mixin _RefreshLayout on _Root, _Request {
   ///   是否需要 [异步] 获取数据。
   /// [toPoolTypeResult]：不可以为 null
   ///   跳转至指定 type of pool 成功与失败
-  ///   成功时回调带 1
-  ///   失败时回调带 0
+  ///   成功时回调带 1, 即跳转到对应的 type
+  ///   失败时回调带 0, 即不跳转到对应的 type
   ///   异步获取数据被中断时回调带 -1
   ///
   void refreshLayout({
@@ -414,20 +417,49 @@ mixin _RefreshLayout on _Root, _Request {
 
 mixin _Request {
   Future<bool> _layoutDataRequest() async {
-    await _sqliteLayoutData();
-    await _cloudLayoutData();
+    return await _sqliteLayoutData();
   }
 
-  Future<bool> _sqliteLayoutData() async {}
+  Future<bool> _sqliteLayoutData() async {
+    /// 本地/云端获取数据是否成功
+    bool isSuccess = false;
+
+    /// 进行本地查询
+    await G.sqlite.db.query(TFragmentPoolNodes.getTableName).then(
+      (successValue) async {
+        dLog("", successValue);
+
+        /// 若本地中一个也没有，则代表未初始化，需向云端请求数据
+        if (successValue.length == 0) {
+          isSuccess = await _cloudLayoutData();
+        }
+
+        /// 若本地中存在，则代表已初始化过，无需向云端请求数据，直接使用即可
+        else {
+          isSuccess = true;
+        }
+      },
+    ).catchError((onError) {
+      dPrint(onError);
+
+      /// 若本地 sqlite 错误，则 Toast 提示
+      isSuccess = false;
+    });
+
+    return isSuccess;
+  }
+
   Future<bool> _cloudLayoutData() async {
+    bool isSuccess = false;
     await G.http.sendPostRequest(
       route: null,
       data: null,
       result: null,
-      error: null,
+      onError: null,
       notConcurrent: null,
     );
+    return isSuccess;
   }
 }
 
-class FragmentPoolController with ChangeNotifier, _Root, _SetLayout, _Request, _RefreshLayout {}
+class FragmentPoolController extends Init with _Root, _SetLayout, _Request, _RefreshLayout {}

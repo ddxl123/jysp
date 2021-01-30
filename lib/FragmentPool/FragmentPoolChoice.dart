@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FreeBox/FreeBoxController.dart';
+import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
+import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
 
 ///
 ///

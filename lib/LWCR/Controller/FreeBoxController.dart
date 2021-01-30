@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
-///
-/// 不能直接让 [widget] [rebuild]，而只会触发 [addListener]
-class FreeBoxController extends ChangeNotifier {
+/// 如果使用 extends 就得需要层层写构造函数
+
+class Init extends ChangeNotifier {
+  Init(
+    this.backgroundColor,
+    this.viewableWidth,
+    this.viewableHeight,
+  );
+
+  final Color backgroundColor;
+  final double viewableWidth;
+  final double viewableHeight;
+}
+
+mixin _Root on Init {
   ///
 
   /// 缩放值,默认必须1
@@ -11,8 +23,11 @@ class FreeBoxController extends ChangeNotifier {
   /// 偏移值,默认必须(0,0)
   Offset offset = Offset(0, 0);
 
-  /// 是否禁用触摸
-  bool _isDisableTouch = false;
+  ///
+}
+
+mixin _TouchEvent on _Root {
+  ///
 
   double _lastTempScale = 1;
   Offset _lastTempTouchPosition = Offset(0, 0);
@@ -22,28 +37,9 @@ class FreeBoxController extends ChangeNotifier {
   Animation _offsetAnimation;
   Animation _scaleAnimation;
 
-  ///
-  ///
-  ///
-  @override
-  void dispose() {
-    inertialSlideAnimationController.dispose();
-    targetSlideAnimationController.dispose();
-    super.dispose();
-  }
+  /// 是否禁用触摸
+  bool _isDisableTouch = false;
 
-  ///
-  ///
-  ///
-  /// 禁用触摸事件
-  void isDisableTouch(bool isDisable) {
-    _isDisableTouch = isDisable;
-    notifyListeners();
-  }
-
-  ///
-  ///
-  ///
   /// touch 事件
   void onScaleStart(details) {
     if (_isDisableTouch) {
@@ -112,9 +108,25 @@ class FreeBoxController extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
+  void dispose() {
+    inertialSlideAnimationController.dispose();
+    targetSlideAnimationController.dispose();
+    super.dispose();
+  }
+
   ///
+}
+
+mixin _CommonTool on _TouchEvent {
   ///
-  ///
+
+  /// 禁用触摸事件
+  void isDisableTouch(bool isDisable) {
+    _isDisableTouch = isDisable;
+    notifyListeners();
+  }
+
   /// 滑动至目标位置
   void targetSlide({@required Offset targetOffset, @required double targetScale}) {
     targetSlideAnimationController.duration = Duration(seconds: 1);
@@ -130,7 +142,7 @@ class FreeBoxController extends ChangeNotifier {
     targetSlideAnimationController.addListener(_targetSlideListener);
   }
 
-  // 滑动至目标位置监听
+  /// 滑动至目标位置监听
   void _targetSlideListener() {
     this.offset = _offsetAnimation.value;
     this.scale = _scaleAnimation.value;
@@ -141,4 +153,13 @@ class FreeBoxController extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  ///
+}
+
+class FreeBoxController extends Init with _Root, _TouchEvent, _CommonTool {
+  FreeBoxController(Color backgroundColor, double viewableWidth, double viewableHeight) : super(backgroundColor, viewableWidth, viewableHeight);
+
+  ///
+  ///
 }

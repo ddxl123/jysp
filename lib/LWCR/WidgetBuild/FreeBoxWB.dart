@@ -1,57 +1,17 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:jysp/FreeBox/FreeBoxController.dart';
+import 'package:jysp/LWCR/Base/WidgetBuildBase.dart';
+import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
 
-class FreeBox extends StatefulWidget {
-  FreeBox({
-    @required this.backgroundColor,
-    this.viewableWidth = double.maxFinite,
-    this.viewableHeight = double.maxFinite,
-    this.freeBoxController,
-    this.freeMoveScaleLayerChild = const SizedBox(),
-    this.fixedLayerChild = const SizedBox(),
-  });
-  final Color backgroundColor;
-  final double viewableWidth;
-  final double viewableHeight;
-  final FreeBoxController freeBoxController;
-
-  /// 可使用任意 Widget
-  final Widget freeMoveScaleLayerChild;
-
-  /// 可使用任意 Widget
-  final Widget fixedLayerChild;
-
-  @override
-  State<StatefulWidget> createState() {
-    return _FreeBox();
-  }
-}
-
-class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-
-    initInertialSliding();
-  }
-
-  void initInertialSliding() {
-    widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
-    widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
-    widget.freeBoxController.addListener(() {
-      setState(() {});
-    });
-  }
+class FreeBoxWB extends WidgetBuildBase<FreeBox> {
+  FreeBoxWB(FreeBox widget) : super(widget);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: widget.backgroundColor, //可视区域背景颜色
+      color: widget.freeBoxController.backgroundColor, //可视区域背景颜色
       /// [FreeBox可视区域] 宽高
-      width: widget.viewableWidth,
-      height: widget.viewableHeight,
+      width: widget.freeBoxController.viewableWidth,
+      height: widget.freeBoxController.viewableHeight,
       child: Stack(
         children: [
           /// 自由移动缩放层

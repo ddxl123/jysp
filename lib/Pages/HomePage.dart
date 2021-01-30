@@ -1,11 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPool/FragmentPool.dart';
-import 'package:jysp/FragmentPool/FragmentPool/FragmentPoolController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
-import 'package:jysp/FreeBox/FreeBoxController.dart';
-import 'package:jysp/FreeBox/FreeBox.dart';
+import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
+import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
+import 'package:jysp/LWCR/LifeCycle/FragmentPool.dart';
+import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 
 ///
@@ -19,12 +19,13 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  FreeBoxController _freeBoxController = FreeBoxController();
+  FreeBoxController _freeBoxController = FreeBoxController(Colors.green, double.maxFinite, double.maxFinite);
   FragmentPoolController _fragmentPoolController = FragmentPoolController();
 
   @override
   void dispose() {
     _freeBoxController.dispose();
+    _fragmentPoolController.dispose();
     super.dispose();
   }
 
@@ -34,7 +35,6 @@ class HomePageState extends State<HomePage> {
       child: Stack(
         children: [
           FreeBox(
-            backgroundColor: Colors.green,
             freeBoxController: _freeBoxController,
             freeMoveScaleLayerChild: FragmentPool(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController),
             fixedLayerChild: Stack(

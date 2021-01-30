@@ -48,8 +48,6 @@ mixin CommonTools on Root, TablesNeededSql {
       return _createTable(tableName);
     });
   }
-
-  ///
 }
 
 /// 诊断工具
@@ -138,6 +136,8 @@ class GSqlite with Root, TablesNeededSql, CommonTools, DiagTools {
     } else {
       dLog("应用已被初始化过。");
     }
+
+    // await db.insert(TFragmentPoolNodes.getTableName, TFragmentPoolNodes.toMap(1, 2, "0-0-0", "哈哈哈哈"));
     dLog("sqlite 包含的表：" + (await _getAllTableNames()).toString());
 
     return SqliteDamagedResult.notDamaged;

@@ -46,14 +46,14 @@ class _MainState extends State<Main> {
   }
 
   Future<void> _future() async {
-    G.http.init();
-    await G.sqlite.init();
+      G.http.init();
+      await G.sqlite.init();
   }
 
   Widget _builder(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
     /// 因为 FutureBuilder 里的 future 调用了 then，异常被直接捕获了
     if (snapshot.hasError) {
-      throw (snapshot.error).toString();
+      throw snapshot.error.toString();
     }
     switch (snapshot.connectionState) {
       case ConnectionState.none:

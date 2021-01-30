@@ -3,12 +3,17 @@ main(List<String> args) {
 }
 
 void a() {
-  print("111");
   b();
-  print("222");
 }
 
 Future b() async {
-  print("333");
-  await Future.delayed(Duration(seconds: 2));
+  print("1");
+  await Future.delayed(Duration(seconds: 2)).then((value) async {
+    print("2");
+    await Future.delayed(Duration(seconds: 2)).then((value) {
+      print("3");
+    });
+    print("4");
+  });
+  print("5");
 }

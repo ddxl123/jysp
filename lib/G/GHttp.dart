@@ -26,7 +26,7 @@ class GHttp {
     @required String route,
     @required dynamic data,
     @required Function({Response<dynamic> response, Function unknownCode}) result,
-    @required Function error,
+    @required Function onError,
     @required String notConcurrent,
   }) async {
     // 若并发了，则直接返回。
@@ -53,7 +53,7 @@ class GHttp {
         } else {
           showToast("捕获到本地未知异常!");
         }
-        error();
+        onError();
       },
     ).whenComplete(() {
       notConcurrentMap.remove(notConcurrent);

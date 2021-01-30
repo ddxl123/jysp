@@ -189,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
             _sendEmailButtonRebuildHandler.rebuildHandle(0);
         }
       },
-      error: () {
+      onError: () {
         _sendEmailButtonRebuildHandler.rebuildHandle(0);
       },
       notConcurrent: "_sendEmailRequest",
@@ -229,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
             unknownCode();
         }
       },
-      error: null,
+      onError: null,
       notConcurrent: "_verifyEmailRequest",
     );
   }
