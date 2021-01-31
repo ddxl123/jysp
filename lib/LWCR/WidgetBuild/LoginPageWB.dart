@@ -1,23 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/G/G.dart';
+import 'package:jysp/LWCR/Base/WidgetBuildBase.dart';
+import 'package:jysp/LWCR/LifeCycle/LoginPage.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
-import 'package:jysp/Tools/Toast.dart';
 
-class LoginPage extends StatefulWidget {
-  LoginPage({Key key}) : super(key: key);
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  TextEditingController _qqEmailTextEditingController = TextEditingController();
-  TextEditingController _codeTextEditingController = TextEditingController();
-
-  /// 触发 [rebuild], 同时返回代码, 根据代码进行处理。
-  RebuildHandler _sendEmailButtonRebuildHandler = RebuildHandler();
+class LoginPageWB extends WidgetBuildBase<LoginPage> {
+  LoginPageWB(LoginPage widget) : super(widget);
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _emailInputField() {
     return Flexible(
       child: TextField(
-        controller: _qqEmailTextEditingController,
+        controller: widget.loginPageController.qqEmailTextEditingController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.person),
@@ -80,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _codeInputField() {
     return Expanded(
       child: TextField(
-        controller: _codeTextEditingController,
+        controller: widget.loginPageController.codeTextEditingController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.lock),
@@ -94,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _sendEmailButton() {
     return RebuildHandleWidget(
-      rebuildHandler: _sendEmailButtonRebuildHandler,
+      rebuildHandler: widget.loginPageController.sendEmailButtonRebuildHandler,
       builder: (handler) {
         if (handler.handleCode == 1) {
           // 倒计时状态
@@ -125,7 +114,12 @@ class _LoginPageState extends State<LoginPage> {
             side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
           ),
           child: Text(handler.state["text"]),
-          onPressed: _sendEmailRequest,
+          onPressed: () {
+            widget.loginPageController.sendEmailRequest(
+              sendEmailButtonRebuildHandler: widget.loginPageController.sendEmailButtonRebuildHandler,
+              qqEmailTextEditingController: widget.loginPageController.qqEmailTextEditingController,
+            );
+          },
         );
       },
     );
@@ -140,103 +134,14 @@ class _LoginPageState extends State<LoginPage> {
             side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
           ),
           child: Text("登陆/注册"),
-          onPressed: _verifyEmailRequest,
+          onPressed: () {
+            widget.loginPageController.verifyEmailRequest(
+              qqEmailTextEditingController: widget.loginPageController.qqEmailTextEditingController,
+              codeTextEditingController: widget.loginPageController.codeTextEditingController,
+            );
+          },
         ),
       ),
     );
-  }
-
-  // TODO: /api/register_and_login/by_email/send_email
-  void _sendEmailRequest() async {
-    if (_sendEmailButtonRebuildHandler.state["banOnPressed"] == true) {
-      print("banOnPressed");
-      return;
-    }
-
-    //
-    //
-    // 本地验证：
-
-    //
-    //
-    // 服务器验证：
-    _sendEmailButtonRebuildHandler.rebuildHandle(1);
-
-    await G.http.sendPostRequest(
-      route: "/register_and_login/by_email/send_email",
-      data: {
-        "qq_email": this._qqEmailTextEditingController.text,
-      },
-      result: ({response, unknownCode}) {
-        switch (response.data["code"]) {
-          case 100:
-            showToast("验证码已发送，请注意查收!");
-            break;
-          case 101:
-            showToast("验证码发送异常!");
-            _sendEmailButtonRebuildHandler.rebuildHandle(0);
-            break;
-          case 103:
-            showToast("邮箱格式错误!");
-            _sendEmailButtonRebuildHandler.rebuildHandle(0);
-            break;
-          case 104:
-            showToast("数据库存在多个该邮箱!");
-            _sendEmailButtonRebuildHandler.rebuildHandle(0);
-            break;
-          default:
-            unknownCode();
-            _sendEmailButtonRebuildHandler.rebuildHandle(0);
-        }
-      },
-      onError: () {
-        _sendEmailButtonRebuildHandler.rebuildHandle(0);
-      },
-      notConcurrent: "_sendEmailRequest",
-    );
-  }
-
-  // TODO: /api/register_and_login/by_email/verify_email
-  void _verifyEmailRequest() async {
-    //
-    //
-    // 本地验证
-
-    //
-    //
-    // 服务器验证
-    await G.http.sendPostRequest(
-      route: "/register_and_login/by_email/verify_email",
-      data: {
-        "qq_email": _qqEmailTextEditingController.text,
-        "code": _codeTextEditingController.text,
-      },
-      result: ({unknownCode, response}) {
-        switch (response.data["code"]) {
-          case 105:
-            showToast("验证码正确!");
-            break;
-          case 106:
-            showToast("验证码错误!");
-            break;
-          case 107:
-            showToast("邮箱验证异常!");
-            break;
-          case 108:
-            showToast("邮箱格式错误!");
-            break;
-          default:
-            unknownCode();
-        }
-      },
-      onError: null,
-      notConcurrent: "_verifyEmailRequest",
-    );
-  }
-
-  @override
-  void dispose() {
-    (_sendEmailButtonRebuildHandler.state["timer"] as Timer)?.cancel();
-    super.dispose();
   }
 }

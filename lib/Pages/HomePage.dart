@@ -8,11 +8,6 @@ import 'package:jysp/LWCR/LifeCycle/FragmentPool.dart';
 import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 
-///
-///
-/// 必需模块：[nodes]、[我中的内容]
-///
-///
 class HomePage extends StatefulWidget {
   @override
   HomePageState createState() => HomePageState();

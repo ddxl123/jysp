@@ -1,13 +1,16 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/Pages/HomePage.dart';
+import 'package:jysp/LWCR/Controller/LoginPageController.dart';
+import 'package:jysp/LWCR/LifeCycle/LoginPage.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 void main() {
-  runApp(MyApp());
+  try {
+    runApp(MyApp());
+  } catch (e) {
+    dLog("ee:" + e.toString());
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -37,6 +40,8 @@ class Main extends StatefulWidget {
 }
 
 class _MainState extends State<Main> {
+  LoginPageController loginPageController = LoginPageController();
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -46,8 +51,8 @@ class _MainState extends State<Main> {
   }
 
   Future<void> _future() async {
-      G.http.init();
-      await G.sqlite.init();
+    G.http.init();
+    await G.sqlite.init();
   }
 
   Widget _builder(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -76,7 +81,7 @@ class _MainState extends State<Main> {
         children: [
           FlatButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => HomePage()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => LoginPage(loginPageController: loginPageController)));
             },
             child: Text("To home"),
           ),

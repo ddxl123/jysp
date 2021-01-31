@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast.dart';
 
 class GHttp {
@@ -17,16 +18,19 @@ class GHttp {
     return this;
   }
 
-  /// [route] 请求路径
+  /// [method] GET POST
+  /// [route] 请求路径,/api$route
   /// [data] 请求体
   /// [result] 响应结果。[response] 响应数据, [unknowCode] 未知响应码
   /// [error] 本地异常
   /// [notConcurrent] 不可并发请求标志
-  Future<void> sendPostRequest({
+  Future<void> sendRequest({
+    @required String method,
     @required String route,
-    @required dynamic data,
-    @required Function({Response<dynamic> response, Function unknownCode}) result,
-    @required Function onError,
+    Map<String, dynamic> data,
+    Map<String, dynamic> queryParameters,
+    @required void Function({Response<dynamic> response, Function unknownCode}) result,
+    @required Function haveError,
     @required String notConcurrent,
   }) async {
     // 若并发了，则直接返回。
@@ -35,9 +39,9 @@ class GHttp {
       return;
     }
     notConcurrentMap[notConcurrent] = 1;
-
     await Future.delayed(Duration(seconds: 2));
-    dio.post("/api$route", data: data).then(
+
+    await dio.request("/api$route", data: data, queryParameters: queryParameters, options: Options(method: method)).then(
       (Response<dynamic> response) {
         result(
           response: response,
@@ -49,11 +53,13 @@ class GHttp {
     ).catchError(
       (dynamic onError) {
         if (onError.runtimeType == DioError) {
+          dLog(onError.toString());
           showToast("捕获到本地DioError异常!");
         } else {
+          dLog(onError.toString());
           showToast("捕获到本地未知异常!");
         }
-        onError();
+        haveError();
       },
     ).whenComplete(() {
       notConcurrentMap.remove(notConcurrent);

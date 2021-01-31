@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// 如果使用 extends 就得需要层层写构造函数
-
 class Init extends ChangeNotifier {
   Init(
     this.backgroundColor,
@@ -108,13 +106,6 @@ mixin _TouchEvent on _Root {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    inertialSlideAnimationController.dispose();
-    targetSlideAnimationController.dispose();
-    super.dispose();
-  }
-
   ///
 }
 
@@ -159,7 +150,4 @@ mixin _CommonTool on _TouchEvent {
 
 class FreeBoxController extends Init with _Root, _TouchEvent, _CommonTool {
   FreeBoxController(Color backgroundColor, double viewableWidth, double viewableHeight) : super(backgroundColor, viewableWidth, viewableHeight);
-
-  ///
-  ///
 }

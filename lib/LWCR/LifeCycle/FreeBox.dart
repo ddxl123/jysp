@@ -4,7 +4,7 @@ import 'package:jysp/LWCR/WidgetBuild/FreeBoxWB.dart';
 
 class FreeBox extends StatefulWidget {
   FreeBox({
-    this.freeBoxController,
+    @required this.freeBoxController,
     this.freeMoveScaleLayerChild = const SizedBox(),
     this.fixedLayerChild = const SizedBox(),
   });
@@ -36,6 +36,13 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
     widget.freeBoxController.addListener(() {
       setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    widget.freeBoxController.inertialSlideAnimationController.dispose();
+    widget.freeBoxController.targetSlideAnimationController.dispose();
+    super.dispose();
   }
 
   @override

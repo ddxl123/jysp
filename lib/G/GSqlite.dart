@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:jysp/G/GSqliteField.dart';
+import 'package:jysp/Table/TableBase.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/utils/utils.dart';
@@ -14,7 +14,7 @@ mixin Root {
 }
 
 /// 通用工具
-mixin CommonTools on Root, TablesNeededSql {
+mixin CommonTools on Root, TableToSql {
   ///
 
   /// 获取全部的表
@@ -39,19 +39,19 @@ mixin CommonTools on Root, TablesNeededSql {
 
   /// 创建指定表
   Future<void> _createTable(String tableName) async {
-    return await db.execute(createTableNeededSqls[tableName]);
+    return await db.execute(sql[tableName]);
   }
 
   /// 创建全部需要的表
   Future<void> _createAllTables() async {
-    await Future.forEach(createTableNeededSqls.keys, (tableName) {
+    await Future.forEach(sql.keys, (tableName) {
       return _createTable(tableName);
     });
   }
 }
 
 /// 诊断工具
-mixin DiagTools on Root, TablesNeededSql, CommonTools {
+mixin DiagTools on Root, TableToSql, CommonTools {
   ///
 
   /// 检测数据库是否存在
@@ -71,7 +71,7 @@ mixin DiagTools on Root, TablesNeededSql, CommonTools {
   /// 1.需要的表只要存在至少一个，即被视为【应用初始化】已被执行过
   Future<bool> _isAppInited() async {
     List<String> tableNames = await _getAllTableNames();
-    List<String> neededSqls = createTableNeededSqls.keys.toList();
+    List<String> neededSqls = sql.keys.toList();
     for (int i = 0; i < neededSqls.length; i++) {
       if (tableNames.contains(neededSqls[i])) {
         return true;
@@ -90,7 +90,7 @@ mixin DiagTools on Root, TablesNeededSql, CommonTools {
     }
 
     List<String> tableNames = await _getAllTableNames();
-    List<String> neededSqls = createTableNeededSqls.keys.toList();
+    List<String> neededSqls = sql.keys.toList();
     bool isExistOne = false;
     bool isNotExistOne = false;
     for (int i = 0; i < neededSqls.length; i++) {
@@ -110,13 +110,13 @@ mixin DiagTools on Root, TablesNeededSql, CommonTools {
   ///
 }
 
-class GSqlite with Root, TablesNeededSql, CommonTools, DiagTools {
+class GSqlite with Root, TableToSql, CommonTools, DiagTools {
   ///
 
   /// 初始化 Sqlite
   Future<SqliteDamagedResult> init() async {
     /// 罗列全部被需要的表的 sql 语句
-    toSetCreateTablesNeededSql();
+    toSetSql();
 
     /// 打开 sqlite 数据库
     dbPathRoot = await getDatabasesPath();
