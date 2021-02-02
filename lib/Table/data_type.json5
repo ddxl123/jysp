@@ -44,6 +44,7 @@
       mysql: "FLOAT",
     },
     "/字符串": {
+      laravel: "sqlite:char —> laravel:char (不可变)，sqlite:varchar —> laravel:string (可变)",
       "/已知固定长度": {
         "/注": "utf8字符集, CHAR(255), 不超过254个字符(无论是中文还是英文)",
         "/使用": "知道长度时使用, M 尽可能的小",

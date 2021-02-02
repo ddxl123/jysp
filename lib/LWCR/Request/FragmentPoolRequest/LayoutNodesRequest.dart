@@ -1,5 +1,5 @@
 import 'package:jysp/G/G.dart';
-import 'package:jysp/Table/TFragmentPoolNodes.dart';
+import 'package:jysp/Table/both/TFragmentPoolNodes.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 mixin LayoutNodesRequest {

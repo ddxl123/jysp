@@ -1,9 +1,0 @@
-{
-  "user_id_m": "",
-  "user_id_s": "",
-  "username": "dart:String, sqlite:TEXT, mysql:CHAR(21) 不为空 默认:随机",
-  "qq_email": "dart:String, sqlite:TEXT, mysql:CHAR(21)",
-  "password": "dart:String, sqlite:TEXT 不保存, mysql:CHAR(21) 不为空 默认:随机",
-  "created_at": "",
-  "updated_at": ""
-}
