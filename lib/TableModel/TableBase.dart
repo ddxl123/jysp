@@ -1,12 +1,15 @@
 // ignore_for_file: non_constant_identifier_names
 // ignore_for_file: unused_element
 
-import 'package:jysp/Table/both/TFragmentPoolNodes.dart';
-import 'package:jysp/Table/both/TFragments.dart';
-import 'package:jysp/Table/both/TMemoryRules.dart';
-import 'package:jysp/Table/both/TRs.dart';
-import 'package:jysp/Table/both/TSeparateRules.dart';
-import 'package:jysp/Table/both/TUsers.dart';
+import 'package:jysp/TableModel/both/TFragment.dart';
+import 'package:jysp/TableModel/both/TFragmentPoolNode.dart';
+import 'package:jysp/TableModel/both/TMemoryRule.dart';
+import 'package:jysp/TableModel/both/TR.dart';
+import 'package:jysp/TableModel/both/TSeparateRule.dart';
+import 'package:jysp/TableModel/both/TUser.dart';
+import 'package:jysp/TableModel/local/TCurd.dart';
+import 'package:jysp/TableModel/local/TToken.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 enum SqliteType { TEXT, INTEGER, UNIQUE, PRIMARY_KEY, NOT_NULL, UNSIGNED, AUTOINCREMENT }
 
@@ -38,18 +41,20 @@ mixin TableToSql {
   ///
 
   /// 针对 sqlite 的 sql create table 语句
-  /// [key]：表名，[value]：create sql
+  /// [key]：表名，[value]：create sqls
   Map<String, String> sql = {};
 
   /// 罗列针对 sqlite 的 sql create table 语句
   void toSetSql() {
     sql.clear();
-    _tableToSql(TUsers());
-    _tableToSql(TSeparateRules());
-    _tableToSql(TMemoryRules());
-    _tableToSql(TFragments());
-    _tableToSql(TFragmentPoolNodes());
-    _tableToSql(TRs());
+    _tableToSql(TFragment());
+    _tableToSql(TFragmentPoolNode());
+    _tableToSql(TMemoryRule());
+    _tableToSql(TR());
+    _tableToSql(TSeparateRule());
+    _tableToSql(TUser());
+    _tableToSql(TCurd());
+    _tableToSql(TToken());
   }
 
   /// 设置针对 sqlite 的 sql create table 语句
@@ -58,9 +63,6 @@ mixin TableToSql {
     /// 解析 table
     String tableName = table.getTableNameInstance;
     List<List<dynamic>> fields = table.fields;
-
-    /// 去掉后缀的 s
-    String tableNameNoS = tableName.substring(0, tableName.length - 1);
 
     /// 解析 fields
     String fieldsSql = "";
@@ -78,14 +80,13 @@ mixin TableToSql {
       fieldsSql += ",";
     });
 
+    /// 去掉最后一个逗号
+    fieldsSql = fieldsSql.substring(0, fieldsSql.length - 1);
+
     /// 存入
     sql[tableName] = """
       CREATE TABLE $tableName (
-      ${tableNameNoS}_id_m ${SqliteType.TEXT.value} ${SqliteType.UNIQUE.value},
-      ${tableNameNoS}_id_s ${SqliteType.TEXT.value} ${SqliteType.UNIQUE.value},
       $fieldsSql
-      created_at ${SqliteType.INTEGER.value},
-      updated_at ${SqliteType.INTEGER.value}
       )
     """;
   }
@@ -105,6 +106,7 @@ abstract class Table {
   /// _m sqlite:TEXT(存AIID) 可不唯一 可为空, mysql:BIGINT(设AIID) 主键 不为空 无符号 自增
   /// _s sqlite:TEXT(设UUID) 唯一 可为空, mysql:CHAR(20)(存UUID) 唯一 可为空
   static List x_id_ms_sql(String x_id_x) {
+    dPrint(x_id_x);
     if (x_id_x[x_id_x.length - 1] == "m") {
       return [x_id_x, SqliteType.TEXT];
     } else if (x_id_x[x_id_x.length - 1] == "s") {
@@ -119,6 +121,11 @@ abstract class Table {
   /// _m sqlite:TEXT(存AIID) 可不唯一 可为空, mysql:BIGINT(存AIID) 可不唯一 可为空
   /// _s sqlite:TEXT(存UUID) 可不唯一 可为空, mysql:CHAR(20)(存UUID) 可不唯一 可为空
   static List x_id_ms_sql_nopk(String x_id_x) => [x_id_x, SqliteType.TEXT];
+
+  ///
+  /// 对于非 ms 的主键：
+  /// 针对的是 mysql 自增值，并非 sqlite 自增值
+  static List id_no_ms_sql(String x_id) => [x_id, SqliteType.TEXT, SqliteType.PRIMARY_KEY];
 
   static List get created_at_sql => [created_at, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED];
 

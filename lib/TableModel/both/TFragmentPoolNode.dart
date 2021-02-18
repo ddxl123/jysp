@@ -1,6 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 
 /// 该表是【必须模块（整体式模块）】
 
@@ -15,7 +15,7 @@ import 'package:jysp/Table/TableBase.dart';
 /// 1、重复 route 问题
 /// 2、缺失 route 问题
 
-class TFragmentPoolNodes implements Table {
+class TFragmentPoolNode implements Table {
   @override
   String getTableNameInstance = getTableName;
 

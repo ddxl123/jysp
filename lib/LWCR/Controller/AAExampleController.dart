@@ -6,6 +6,9 @@ class _Init extends ChangeNotifier {
   /// 继承 ChangeNotifier 的目的是进行 setState
 }
 
+/// 以下使用 mixin 是方便构造函数进行初始化，若也用 class 进行层层继承的话，构造函数需要层层书写，使用 mixin 更为合适
+
+/// 混入需要的 request
 mixin _Root on _Init, ExampleRequest {
   /// 顶层调用的地方。
 }

@@ -1,5 +1,6 @@
 import 'package:jysp/G/G.dart';
-import 'package:jysp/Table/both/TFragmentPoolNodes.dart';
+import 'package:jysp/G/GHttp.dart';
+import 'package:jysp/TableModel/both/TFragmentPoolNode.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 mixin LayoutNodesRequest {
@@ -12,7 +13,7 @@ mixin LayoutNodesRequest {
     bool isSuccess = false;
 
     /// 进行本地查询
-    await G.sqlite.db.query(TFragmentPoolNodes.getTableName).then(
+    await G.sqlite.db.query(TFragmentPoolNode.getTableName).then(
       (successValue) async {
         dLog("本地查询结果" + successValue.toString());
 
@@ -47,11 +48,9 @@ mixin LayoutNodesRequest {
       queryParameters: {
         "pool_type": "",
       },
-      result: ({response, unknownCode}) {
-        dLog(response.toString());
-      },
-      haveError: () {},
-      notConcurrent: null,
+      sameNotConcurrent: null,
+      interruptedCallback: (TokenStatus tokenStatus) {},
+      resultCallback: ({int code, data}) {},
     );
     return isSuccess;
   }

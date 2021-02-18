@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/LWCR/Base/WidgetBuildBase.dart';
 import 'package:jysp/LWCR/LifeCycle/LoginPage.dart';
+import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 
 class LoginPageWB extends WidgetBuildBase<LoginPage> {
@@ -88,7 +88,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPage> {
         if (handler.handleCode == 1) {
           // 倒计时状态
           handler.state["banOnPressed"] = true;
-          var time = (handler.state["time"] ??= 5);
+          var time = (handler.state["time"] ??= 10);
           handler.state["text"] = "$time s";
           handler.state["timer"] ??= Timer.periodic(
             Duration(seconds: 1),

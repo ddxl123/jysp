@@ -87,7 +87,7 @@ class _MainState extends State<Main> {
           ),
           FlatButton(
             onPressed: () {
-              G.sqlite.removeTables();
+              G.sqlite.clearSqlite();
             },
             child: Text("deleteDatabase"),
           ),

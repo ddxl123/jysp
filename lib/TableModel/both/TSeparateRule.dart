@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 
-class TSeparateRules implements Table {
+class TSeparateRule implements Table {
   @override
   String getTableNameInstance = getTableName;
 

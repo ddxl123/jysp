@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/utils/utils.dart';
@@ -23,13 +23,14 @@ mixin CommonTools on Root, TableToSql {
     return tableNames;
   }
 
-  /// 删除指定的表
-  Future<void> _removeTable(String tableName) async {
-    return await db.execute("DROP TABLE $tableName");
+  /// 清空指定表，并非删除表
+  /// - [return] 返回删除的行数量
+  Future<int> clearTable(String tableName) async {
+    return await db.delete(tableName);
   }
 
-  /// 删除数据库并重新创建数据库，清空所有非默认的表
-  Future<void> removeTables() async {
+  /// 删除数据库并重新创建数据库，清空所有非默认的表，并非重置
+  Future<void> clearSqlite() async {
     dLog("清空前的表：" + (await _getAllTableNames()).toString());
     await deleteDatabase(dbPathRoot + dbName).whenComplete(() => dLog("清空全部的表成功"));
     // db.close(); // 当数据库被删除时，执行关闭也会提示 err
@@ -122,6 +123,8 @@ class GSqlite with Root, TableToSql, CommonTools, DiagTools {
     dbPathRoot = await getDatabasesPath();
     String dbPath = dbPathRoot + dbName;
     db = await openDatabase(dbPath);
+
+    await clearSqlite();
 
     /// 检测是否数据损坏
     SqliteDamagedResult sqliteDamagedResult = await _isSqliteDamaged();

@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 
-class TRs implements Table {
+class TR implements Table {
   @override
   String getTableNameInstance = getTableName;
 
@@ -63,7 +63,7 @@ class TRs implements Table {
         Table.x_id_ms_sql_nopk(fragment_creator_id_m),
         Table.x_id_ms_sql_nopk(fragment_creator_id_s),
         Table.x_id_ms_sql_nopk(fragment_pool_node_id_m),
-        Table.x_id_ms_sql_nopk(fragment_pool_node_id_m),
+        Table.x_id_ms_sql_nopk(fragment_pool_node_id_s),
         Table.x_id_ms_sql_nopk(fragment_pool_node_creator_id_m),
         Table.x_id_ms_sql_nopk(fragment_pool_node_creator_id_s),
         Table.x_id_ms_sql_nopk(memory_rule_id_m),

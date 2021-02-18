@@ -7,9 +7,9 @@ import 'package:jysp/LWCR/Request/FragmentPoolRequest/LayoutNodesRequest.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-class Init extends ChangeNotifier {}
+class _Init extends ChangeNotifier {}
 
-mixin _Root on Init, LayoutNodesRequest {
+mixin _Root on _Init, LayoutNodesRequest {
   ///
 
   /// 当前碎片池节点读取数据
@@ -414,4 +414,4 @@ mixin _RefreshLayout on _Root {
   ///
 }
 
-class FragmentPoolController extends Init with LayoutNodesRequest, _Root, _SetLayout, _RefreshLayout {}
+class FragmentPoolController extends _Init with LayoutNodesRequest, _Root, _SetLayout, _RefreshLayout {}

@@ -10,6 +10,6 @@ void a() {
       print("aaa");
       break;
     default:
-      print(v["code"].runtimeType);
+      print(v["code"].runtimeType());
   }
 }

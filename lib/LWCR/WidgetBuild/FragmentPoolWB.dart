@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 import 'package:jysp/FragmentPool/SingleNode/SingleNode.dart';
-import 'package:jysp/LWCR/Base/WidgetBuildBase.dart';
 import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
 import 'package:jysp/LWCR/LifeCycle/FragmentPool.dart';
+import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 class FragmentPoolWB extends WidgetBuildBase<FragmentPool> {

@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 
-class TFragments implements Table {
+class TFragment implements Table {
   @override
   String getTableNameInstance = getTableName;
 

@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Table/TableBase.dart';
+import 'package:jysp/TableModel/TableBase.dart';
 
-class TMemoryRules implements Table {
+class TMemoryRule implements Table {
   @override
   String getTableNameInstance = getTableName;
 
@@ -10,7 +10,7 @@ class TMemoryRules implements Table {
 
   static String get memory_rule_id_m => "memory_rule_id_m";
 
-  static String get memory_rule_id_s => "memory_rule_id_m";
+  static String get memory_rule_id_s => "memory_rule_id_s";
 
   static String get created_at => Table.created_at;
 

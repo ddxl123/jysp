@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/LWCR/Base/WidgetBuildBase.dart';
 import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
+import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 
 class FreeBoxWB extends WidgetBuildBase<FreeBox> {
   FreeBoxWB(FreeBox widget) : super(widget);

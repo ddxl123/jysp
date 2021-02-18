@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Init extends ChangeNotifier {
-  Init(
+class _Init extends ChangeNotifier {
+  _Init(
     this.backgroundColor,
     this.viewableWidth,
     this.viewableHeight,
@@ -12,7 +12,7 @@ class Init extends ChangeNotifier {
   final double viewableHeight;
 }
 
-mixin _Root on Init {
+mixin _Root on _Init {
   ///
 
   /// 缩放值,默认必须1
@@ -148,6 +148,6 @@ mixin _CommonTool on _TouchEvent {
   ///
 }
 
-class FreeBoxController extends Init with _Root, _TouchEvent, _CommonTool {
+class FreeBoxController extends _Init with _Root, _TouchEvent, _CommonTool {
   FreeBoxController(Color backgroundColor, double viewableWidth, double viewableHeight) : super(backgroundColor, viewableWidth, viewableHeight);
 }
