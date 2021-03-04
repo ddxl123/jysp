@@ -1,6 +1,8 @@
 import 'dart:io';
 
-import 'package:jysp/TableModel/TableBase.dart';
+import 'package:flutter/material.dart';
+import 'package:jysp/Database/DBTableBase.dart';
+import 'package:jysp/Database/local/TToken.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/utils/utils.dart';
@@ -31,11 +33,13 @@ mixin CommonTools on Root, TableToSql {
 
   /// 删除数据库并重新创建数据库，清空所有非默认的表，并非重置
   Future<void> clearSqlite() async {
-    dLog("清空前的表：" + (await _getAllTableNames()).toString());
-    await deleteDatabase(dbPathRoot + dbName).whenComplete(() => dLog("清空全部的表成功"));
+    List<String> logGetAllTableNamesBefore = await _getAllTableNames();
+    dLog(() => "清空前的表：" + logGetAllTableNamesBefore.toString());
+    await deleteDatabase(dbPathRoot + dbName).whenComplete(() => dLog(() => "清空全部的表成功"));
     // db.close(); // 当数据库被删除时，执行关闭也会提示 err
     db = await openDatabase(dbPathRoot + dbName);
-    dLog("清空后的表：" + (await _getAllTableNames()).toString());
+    List<String> logGetAllTableNamesAfter = await _getAllTableNames();
+    dLog(() => "清空后的表：" + logGetAllTableNamesAfter.toString());
   }
 
   /// 创建指定表
@@ -61,10 +65,12 @@ mixin DiagTools on Root, TableToSql, CommonTools {
   }
 
   // 检查指定表是否存在
-  Future<bool> _isTableExist(String table) async {
+  Future<bool> isTableExist(String table) async {
     var count = firstIntValue(await db.query('sqlite_master', columns: ['COUNT(*)'], where: 'type = ? AND name = ?', whereArgs: ['table', table]));
     if (count > 0) {
       return true;
+    } else {
+      return false;
     }
   }
 
@@ -111,7 +117,77 @@ mixin DiagTools on Root, TableToSql, CommonTools {
   ///
 }
 
-class GSqlite with Root, TableToSql, CommonTools, DiagTools {
+mixin Token on Root {
+  ///
+
+  /// 从 sqlite 中获取 access_token 或 refresh_token。
+  ///
+  /// 无论是否失败，或是否为 null，都要将请求发送出去，以便能拿到可使用的 tokens。
+  ///
+  /// 该请求不会抛出任何 err。
+  ///
+  /// - [tokenType]:
+  ///   - [0]: access_token
+  ///   - [1]: refresh_token
+  /// - [return]: string ,不能返回 null, 因为 ""+null 会报错
+  ///
+  Future<String> getSqliteToken({@required int tokenTypeCode}) async {
+    String tokenType = tokenTypeCode == 0 ? "access_token" : (tokenTypeCode == 1 ? "refresh_token" : null);
+    String token;
+    try {
+      token = (await db.query(TToken.getTableName))[0][tokenType];
+    } catch (e) {
+      // 获取失败。可能是 query 失败，也可能是 [0] 值为 null
+      token = null;
+    }
+    dLog(() => "从 sqlite 中获取 $tokenType 的结果：", () => token.toString());
+    // 不能返回 null, 因为 ""+null 会报错
+    return token ?? "";
+  }
+
+  /// 在 sqlite 存储 access_token 和 refresh_token
+  ///
+  /// - [tokens]: 需要存储的 access_token 和 refresh_token。
+  /// - [success]: 存储成功的回调。**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
+  /// - [fail]: 存储失败的回调。**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
+  ///   - [failCode]: [1]: tokens 值为 null。 [2]: tokens sqlite 存储失败。
+  ///
+  Future<void> setSqliteToken({
+    @required Map tokens,
+    @required Function() success,
+    @required Function(int failCode) fail,
+  }) async {
+    if (tokens[TToken.access_token] == null || tokens[TToken.refresh_token] == null) {
+      await fail(1);
+      dLog(() => "响应的 tokens 数据异常!");
+    } else {
+      dLog(() => "响应的 tokens 数据正常!");
+
+      // 先清空表，再插入
+      await db.transaction(
+        (txn) async {
+          await txn.delete(TToken.getTableName);
+          await txn.insert(TToken.getTableName, TToken.toMap(tokens[TToken.access_token], tokens[TToken.refresh_token]));
+        },
+      )
+          //
+          .then((onValue) async {
+        await success();
+        List<Map> queryResult = await db.query(TToken.getTableName);
+        dLog(() => "sqlite 查询 tokens 成功：", () => queryResult);
+      })
+          //
+          .catchError((onError) async {
+        await fail(2);
+        dLog(() => "token sqlite 存储失败");
+      });
+    }
+  }
+
+  ///
+}
+
+class GSqlite with Root, TableToSql, CommonTools, DiagTools, Token {
   ///
 
   /// 初始化 Sqlite
@@ -135,13 +211,14 @@ class GSqlite with Root, TableToSql, CommonTools, DiagTools {
     /// 检测是否已经【应用初始化】过
     if (!await _isAppInited()) {
       await _createAllTables();
-      dLog("应用初始化成功。");
+      dLog(() => "应用初始化成功。");
     } else {
-      dLog("应用已被初始化过。");
+      dLog(() => "应用已被初始化过。");
     }
 
     // await db.insert(TFragmentPoolNodes.getTableName, TFragmentPoolNodes.toMap(1, 2, "0-0-0", "哈哈哈哈"));
-    dLog("sqlite 包含的表：" + (await _getAllTableNames()).toString());
+    List<String> getResult = await _getAllTableNames();
+    dLog(() => "sqlite 包含的表：" + getResult.toString());
 
     return SqliteDamagedResult.notDamaged;
   }

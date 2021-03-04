@@ -12,3 +12,5 @@
 /pubspec.yaml
 /README.md
 /.VSCodeCounter
+/.flutter-plugins
+/.flutter-plugins-dependencies

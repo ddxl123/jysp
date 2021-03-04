@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
+import 'package:jysp/LWCR/LifeCycle/FreeBoxLC.dart';
 import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 
-class FreeBoxWB extends WidgetBuildBase<FreeBox> {
-  FreeBoxWB(FreeBox widget) : super(widget);
+class FreeBoxWB extends WidgetBuildBase<FreeBoxLC> {
+  FreeBoxWB(FreeBoxLC widget) : super(widget);
 
   @override
   Widget build(BuildContext context) {

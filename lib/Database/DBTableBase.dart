@@ -1,15 +1,14 @@
 // ignore_for_file: non_constant_identifier_names
 // ignore_for_file: unused_element
 
-import 'package:jysp/TableModel/both/TFragment.dart';
-import 'package:jysp/TableModel/both/TFragmentPoolNode.dart';
-import 'package:jysp/TableModel/both/TMemoryRule.dart';
-import 'package:jysp/TableModel/both/TR.dart';
-import 'package:jysp/TableModel/both/TSeparateRule.dart';
-import 'package:jysp/TableModel/both/TUser.dart';
-import 'package:jysp/TableModel/local/TCurd.dart';
-import 'package:jysp/TableModel/local/TToken.dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/Database/both/TFragment.dart';
+import 'package:jysp/Database/both/TFragmentPoolNode.dart';
+import 'package:jysp/Database/both/TMemoryRule.dart';
+import 'package:jysp/Database/both/TSeparateRule.dart';
+import 'package:jysp/Database/both/TTest.dart';
+import 'package:jysp/Database/both/TUser.dart';
+import 'package:jysp/Database/local/TCurd.dart';
+import 'package:jysp/Database/local/TToken.dart';
 
 enum SqliteType { TEXT, INTEGER, UNIQUE, PRIMARY_KEY, NOT_NULL, UNSIGNED, AUTOINCREMENT }
 
@@ -29,7 +28,7 @@ extension SqliteTypeValue on SqliteType {
       case 5:
         return "UNSIGNED";
       case 6:
-        return "AUTOINCREMENT";
+        return "AUTO_INCREMENT";
       default:
         throw Exception("Unknown value!");
     }
@@ -50,16 +49,16 @@ mixin TableToSql {
     _tableToSql(TFragment());
     _tableToSql(TFragmentPoolNode());
     _tableToSql(TMemoryRule());
-    _tableToSql(TR());
     _tableToSql(TSeparateRule());
     _tableToSql(TUser());
     _tableToSql(TCurd());
     _tableToSql(TToken());
+    _tableToSql(TTest());
   }
 
   /// 设置针对 sqlite 的 sql create table 语句
   /// [tableName] 要加 [s]
-  void _tableToSql(Table table) {
+  void _tableToSql(DBTableBase table) {
     /// 解析 table
     String tableName = table.getTableNameInstance;
     List<List<dynamic>> fields = table.fields;
@@ -94,7 +93,7 @@ mixin TableToSql {
   ///
 }
 
-abstract class Table {
+abstract class DBTableBase {
   List<List<dynamic>> get fields;
   String getTableNameInstance;
 
@@ -102,30 +101,17 @@ abstract class Table {
 
   static String get updated_at => "updated_at";
 
-  /// 对于主键：
-  /// _m sqlite:TEXT(存AIID) 可不唯一 可为空, mysql:BIGINT(设AIID) 主键 不为空 无符号 自增
-  /// _s sqlite:TEXT(设UUID) 唯一 可为空, mysql:CHAR(20)(存UUID) 唯一 可为空
-  static List x_id_ms_sql(String x_id_x) {
-    dPrint(x_id_x);
-    if (x_id_x[x_id_x.length - 1] == "m") {
-      return [x_id_x, SqliteType.TEXT];
-    } else if (x_id_x[x_id_x.length - 1] == "s") {
-      return [x_id_x, SqliteType.TEXT, SqliteType.UNIQUE];
-    } else {
-      throw "no m or s";
-    }
-  }
+  /// 非主键
+  /// _m sqlite:INTEGER(存AIID) 可为空, [mysql:BIGINT](设AIID) 主键 不为空 无符号 自增
+  static List x_id_m_no_primary(String x_id) => [x_id, SqliteType.INTEGER, SqliteType.UNIQUE];
 
-  ///
-  /// 对于非主键：
-  /// _m sqlite:TEXT(存AIID) 可不唯一 可为空, mysql:BIGINT(存AIID) 可不唯一 可为空
-  /// _s sqlite:TEXT(存UUID) 可不唯一 可为空, mysql:CHAR(20)(存UUID) 可不唯一 可为空
-  static List x_id_ms_sql_nopk(String x_id_x) => [x_id_x, SqliteType.TEXT];
+  /// 非主键
+  /// _s sqlite:TEXT(设UUID) 可为空
+  static List x_id_s_no_primary(String x_id_s) => [x_id_s, SqliteType.TEXT, SqliteType.UNIQUE];
 
-  ///
-  /// 对于非 ms 的主键：
-  /// 针对的是 mysql 自增值，并非 sqlite 自增值
-  static List id_no_ms_sql(String x_id) => [x_id, SqliteType.TEXT, SqliteType.PRIMARY_KEY];
+  /// 主键
+  /// sqlite 自增
+  static List x_id_primary(String x_id) => [x_id, SqliteType.AUTOINCREMENT, SqliteType.PRIMARY_KEY];
 
   static List get created_at_sql => [created_at, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED];
 
@@ -148,36 +134,37 @@ abstract class Table {
 ///
 ///
 /// 例子
-class TExamples implements Table {
+// ignore_for_file: non_constant_identifier_names
+class TExamples implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;
 
   static String get getTableName => "examples";
 
-  static String get _id_m => "_id_m";
+  static String get _id => "_id";
 
   static String get _id_s => "_id_s";
 
-  static String get created_at => Table.created_at;
+  static String get created_at => DBTableBase.created_at;
 
-  static String get updated_at => Table.updated_at;
+  static String get updated_at => DBTableBase.updated_at;
 
   @override
   List<List> get fields => [
-        Table.x_id_ms_sql(_id_m),
-        Table.x_id_ms_sql(_id_s),
-        Table.created_at_sql,
-        Table.updated_at_sql,
+        DBTableBase.x_id_m_no_primary(_id),
+        DBTableBase.x_id_s_no_primary(_id_s),
+        DBTableBase.created_at_sql,
+        DBTableBase.updated_at_sql,
       ];
 
   static Map<String, dynamic> toMap(
-    String _id_m_v,
+    String _id_v,
     String _id_s_v,
     int created_at_v,
     int updated_at_v,
   ) {
     return {
-      _id_m: _id_m_v,
+      _id: _id_v,
       _id_s: _id_s_v,
       created_at: created_at_v,
       updated_at: updated_at_v,

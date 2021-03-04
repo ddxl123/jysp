@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/TableModel/TableBase.dart';
+import 'package:flutter/material.dart';
+import 'package:jysp/Database/DBTableBase.dart';
 
 /// 该表是【必须模块（整体式模块）】
 
@@ -15,13 +16,13 @@ import 'package:jysp/TableModel/TableBase.dart';
 /// 1、重复 route 问题
 /// 2、缺失 route 问题
 
-class TFragmentPoolNode implements Table {
+class TFragmentPoolNode implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;
 
   static String get getTableName => "fragment_pool_nodes";
 
-  static String get fragment_pool_node_id_m => "fragment_pool_node_id_m";
+  static String get fragment_pool_node_id => "fragment_pool_node_id";
 
   static String get fragment_pool_node_id_s => "fragment_pool_node_id_s";
 
@@ -29,42 +30,47 @@ class TFragmentPoolNode implements Table {
 
   static String get node_type => "node_type";
 
-  static String get route => "route";
+  static String get father_node => "father_node";
+
+  static String get father_node_s => "father_node_s";
 
   static String get name => "name";
 
-  static String get created_at => Table.created_at;
+  static String get created_at => DBTableBase.created_at;
 
-  static String get updated_at => Table.updated_at;
+  static String get updated_at => DBTableBase.updated_at;
 
   @override
   List<List> get fields => [
-        Table.x_id_ms_sql(fragment_pool_node_id_m),
-        Table.x_id_ms_sql(fragment_pool_node_id_s),
+        DBTableBase.x_id_m_no_primary(fragment_pool_node_id),
+        DBTableBase.x_id_s_no_primary(fragment_pool_node_id_s),
         [pool_type, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED], // mysql:TINYINT 不为空 无符号
         [node_type, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED], // mysql:INT 不为空 无符号
-        [route, SqliteType.TEXT, SqliteType.NOT_NULL], // mysql:VARCHAR(50) 不为空
+        DBTableBase.x_id_m_no_primary(father_node),
+        DBTableBase.x_id_s_no_primary(father_node_s),
         [name, SqliteType.TEXT], // mysql:VARCHAR(20)
-        Table.created_at_sql,
-        Table.updated_at_sql,
+        DBTableBase.created_at_sql,
+        DBTableBase.updated_at_sql,
       ];
 
-  static Map<String, dynamic> toMap(
-    String fragment_pool_node_id_m_v,
-    String fragment_pool_node_id_s_v,
-    int pool_type_v,
-    int node_type_v,
-    String route_v,
-    String name_v,
-    int created_at_v,
-    int updated_at_v,
-  ) {
+  static Map<String, dynamic> toMap({
+    @required int fragment_pool_node_id_v,
+    @required String fragment_pool_node_id_s_v,
+    @required int pool_type_v,
+    @required int node_type_v,
+    @required String father_node_v,
+    @required String father_node_s_v,
+    @required String name_v,
+    @required int created_at_v,
+    @required int updated_at_v,
+  }) {
     return {
-      fragment_pool_node_id_m: fragment_pool_node_id_m_v,
+      fragment_pool_node_id: fragment_pool_node_id_v,
       fragment_pool_node_id_s: fragment_pool_node_id_s_v,
       pool_type: pool_type_v,
       node_type: node_type_v,
-      route: route_v,
+      father_node: father_node_v,
+      father_node_s: father_node_s_v,
       name: name_v,
       created_at: created_at_v,
       updated_at: updated_at_v,

@@ -1,11 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/TableModel/TableBase.dart';
-
 // 此表为 null 时, 删除该表并重建, 因为需要把 sort_id 重置。
 // 本表某字段对应的 table_field_id 不存在且 curd 不为 [删] 时, 或table_name 不存在时, 直接执行数据损坏任务删除数据库并重建。
 
-class TCurd implements Table {
+import 'package:jysp/Database/DBTableBase.dart';
+
+class TCurd implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;
 
@@ -24,7 +24,7 @@ class TCurd implements Table {
 
   @override
   List<List> get fields => [
-        Table.id_no_ms_sql(sort_id),
+        DBTableBase.x_id_primary(sort_id),
         [table_name, SqliteType.TEXT],
         [table_field_id, SqliteType.TEXT],
         [curd, SqliteType.INTEGER],

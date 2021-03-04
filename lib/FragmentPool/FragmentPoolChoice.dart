@@ -24,7 +24,7 @@ class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
       color: Colors.white,
 
       /// 该文本默认匹配 [currentFragmentPoolType] 的默认值
-      child: Text(widget.fragmentPoolController.getCurrentFragmentPoolType.value),
+      child: Text(widget.fragmentPoolController.getCurrentPoolType.value),
       onPressed: () {
         Navigator.push(
           context,
@@ -100,16 +100,16 @@ class FragmentPoolChoicePage extends OverlayRoute {
       bottom: size.height,
       child: Column(
         children: [
-          _toButton(ctx: _, toButtonType: FragmentPoolType.pendingPool),
-          _toButton(ctx: _, toButtonType: FragmentPoolType.memoryPool),
-          _toButton(ctx: _, toButtonType: FragmentPoolType.completePool),
-          _toButton(ctx: _, toButtonType: FragmentPoolType.wikiPool),
+          _toButton(ctx: _, toButtonType: PoolType.pendingPool),
+          _toButton(ctx: _, toButtonType: PoolType.memoryPool),
+          _toButton(ctx: _, toButtonType: PoolType.completePool),
+          _toButton(ctx: _, toButtonType: PoolType.wikiPool),
         ],
       ),
     );
   }
 
-  Widget _toButton({@required BuildContext ctx, @required FragmentPoolType toButtonType}) {
+  Widget _toButton({@required BuildContext ctx, @required PoolType toButtonType}) {
     return FlatButton(
       color: Colors.white,
       child: Text(toButtonType.value),
@@ -117,10 +117,8 @@ class FragmentPoolChoicePage extends OverlayRoute {
         /// 关闭当前路由窗口
         Navigator.removeRoute(ctx, this);
 
-        fragmentPoolController.refreshLayout(
+        fragmentPoolController.toPool(
           freeBoxController: freeBoxController,
-          isInit: false,
-          isGetData: true,
           toPoolType: toButtonType,
           toPoolTypeResult: (resultCode) {
             if (resultCode == 1) {

@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/LWCR/LifeCycle/LoginPage.dart';
+import 'package:jysp/LWCR/LifeCycle/LoginPageLC.dart';
 import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
-class LoginPageWB extends WidgetBuildBase<LoginPage> {
-  LoginPageWB(LoginPage widget) : super(widget);
+class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
+  LoginPageWB(LoginPageLC widget) : super(widget);
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPage> {
   Widget _emailInputField() {
     return Flexible(
       child: TextField(
-        controller: widget.loginPageController.qqEmailTextEditingController,
+        controller: widget.loginPageController.emailTextEditingController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.person),
@@ -82,42 +83,48 @@ class LoginPageWB extends WidgetBuildBase<LoginPage> {
   }
 
   Widget _sendEmailButton() {
-    return RebuildHandleWidget(
+    return RebuildHandleWidget<SendEmailButtonHandlerEnum>(
       rebuildHandler: widget.loginPageController.sendEmailButtonRebuildHandler,
       builder: (handler) {
-        if (handler.handleCode == 1) {
+        if (handler.handleCode == SendEmailButtonHandlerEnum.countdown) {
           // 倒计时状态
           handler.state["banOnPressed"] = true;
-          var time = (handler.state["time"] ??= 10);
-          handler.state["text"] = "$time s";
+          handler.state["time"] ??= 10;
+          handler.state["text"] = "${handler.state["time"]} s";
           handler.state["timer"] ??= Timer.periodic(
             Duration(seconds: 1),
             (timer) {
               if (handler.state["time"] == 0) {
                 (handler.state["timer"] as Timer).cancel();
-                handler.reset(true);
+                handler.rebuildHandle(SendEmailButtonHandlerEnum.unSent, true);
               } else {
                 handler.state["time"] -= 1;
-                handler.rebuild();
+                handler.rebuildHandle(SendEmailButtonHandlerEnum.countdown);
               }
             },
           );
-        } else {
+        } else if (handler.handleCode == SendEmailButtonHandlerEnum.unSent) {
           // 未发送状态
+          handler.state["timer"]?.cancel();
+          handler.state.clear();
           handler.state["banOnPressed"] = false;
-          (handler.state["timer"] as Timer)?.cancel();
-          handler.reset(false);
           handler.state["text"] = "发送验证码";
         }
+
         return TextButton(
           style: ButtonStyle(
             side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
           ),
           child: Text(handler.state["text"]),
           onPressed: () {
+            if (handler.state["banOnPressed"] == true) {
+              dLog(() => "banOnPressed");
+              return;
+            }
+            handler.rebuildHandle(SendEmailButtonHandlerEnum.countdown);
             widget.loginPageController.sendEmailRequest(
-              sendEmailButtonRebuildHandler: widget.loginPageController.sendEmailButtonRebuildHandler,
-              qqEmailTextEditingController: widget.loginPageController.qqEmailTextEditingController,
+              handler: handler,
+              emailTextEditingController: widget.loginPageController.emailTextEditingController,
             );
           },
         );
@@ -136,7 +143,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPage> {
           child: Text("登陆/注册"),
           onPressed: () {
             widget.loginPageController.verifyEmailRequest(
-              qqEmailTextEditingController: widget.loginPageController.qqEmailTextEditingController,
+              qqEmailTextEditingController: widget.loginPageController.emailTextEditingController,
               codeTextEditingController: widget.loginPageController.codeTextEditingController,
             );
           },

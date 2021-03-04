@@ -1,11 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/TableModel/TableBase.dart';
-
 // 之所以 token 独立放在一个表，是因为让 token 有自己的创建、更新时间
 // 在上传队列中检查 token
 
-class TToken implements Table {
+import 'package:jysp/Database/DBTableBase.dart';
+
+class TToken implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;
 

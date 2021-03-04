@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:jysp/LWCR/Controller/LoginPageController.dart';
 import 'package:jysp/LWCR/WidgetBuild/LoginPageWB.dart';
 
-class LoginPage extends StatefulWidget {
-  LoginPage({this.loginPageController});
+class LoginPageLC extends StatefulWidget {
+  LoginPageLC({this.loginPageController});
   final LoginPageController loginPageController;
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginPageLCState createState() => _LoginPageLCState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageLCState extends State<LoginPageLC> {
   @override
   void dispose() {
     (widget.loginPageController.sendEmailButtonRebuildHandler.state["timer"] as Timer)?.cancel();

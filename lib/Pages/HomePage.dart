@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
 import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
 import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
-import 'package:jysp/LWCR/LifeCycle/FragmentPool.dart';
-import 'package:jysp/LWCR/LifeCycle/FreeBox.dart';
+import 'package:jysp/LWCR/LifeCycle/FragmentPoolLC.dart';
+import 'package:jysp/LWCR/LifeCycle/FreeBoxLC.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,9 +29,9 @@ class HomePageState extends State<HomePage> {
     return Material(
       child: Stack(
         children: [
-          FreeBox(
+          FreeBoxLC(
             freeBoxController: _freeBoxController,
-            freeMoveScaleLayerChild: FragmentPool(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController),
+            freeMoveScaleLayerChild: FragmentPoolLC(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController),
             fixedLayerChild: Stack(
               children: <Widget>[
                 _toZeroButton(),
@@ -53,7 +53,7 @@ class HomePageState extends State<HomePage> {
       child: FlatButton(
         onPressed: () {
           _freeBoxController.targetSlide(
-            targetOffset: _fragmentPoolController.viewSelectedType[_fragmentPoolController.getCurrentFragmentPoolType]["node0"],
+            targetOffset: _fragmentPoolController.viewSelectedType[_fragmentPoolController.getCurrentPoolType]["node0"],
             targetScale: 1.0,
           );
         },
@@ -62,11 +62,12 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  /// 加载屏障
   Widget _loadingBarrier() {
-    return RebuildHandleWidget(
+    return RebuildHandleWidget<LoadingBarrierHandlerEnum>(
       rebuildHandler: _fragmentPoolController.isLoadingBarrierRebuildHandler,
       builder: (handler) {
-        if (handler.handleCode == 1) {
+        if (handler.handleCode == LoadingBarrierHandlerEnum.enabled) {
           return Positioned(
             child: Container(
               alignment: Alignment.center,
@@ -78,7 +79,7 @@ class HomePageState extends State<HomePage> {
                   TextButton(
                     child: Text("取消"),
                     onPressed: () {
-                      _fragmentPoolController.interruptRefreshLayout();
+                      _fragmentPoolController.isCancelToPool;
                     },
                   ),
                 ],
@@ -107,7 +108,7 @@ class HomePageState extends State<HomePage> {
                 child: FlatButton(
                     onPressed: () {
                       // _fragmentPoolController.fragmentPoolNodes.removeLast();
-                      _fragmentPoolController.interruptRefreshLayout();
+                      _fragmentPoolController.cancelToPool();
                     },
                     child: Text("我"))),
           ],

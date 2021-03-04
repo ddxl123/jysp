@@ -2,15 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/LWCR/Controller/LoginPageController.dart';
-import 'package:jysp/LWCR/LifeCycle/LoginPage.dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/LWCR/LifeCycle/LoginPageLC.dart';
 
 void main() {
-  try {
-    runApp(MyApp());
-  } catch (e) {
-    dLog("ee:" + e.toString());
-  }
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -31,6 +26,31 @@ class _MyApp extends State<MyApp> {
         child: Main(),
       ),
     );
+    // return MaterialApp(
+    //   home: Material(
+    //     child: BBB<String>(
+    //       aaa: AAA(),
+    //       builder: (aaa) => Text("text"),
+    //     ),
+    //   ),
+    // );
+  }
+}
+
+class AAA<T> {}
+
+class BBB<T> extends StatefulWidget {
+  BBB({@required this.aaa, @required this.builder});
+  final AAA<T> aaa;
+  final Widget Function(AAA<T>) builder;
+  @override
+  _BBBState<T> createState() => _BBBState<T>();
+}
+
+class _BBBState<T> extends State<BBB<T>> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder((widget.aaa));
   }
 }
 
@@ -81,7 +101,7 @@ class _MainState extends State<Main> {
         children: [
           FlatButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => LoginPage(loginPageController: loginPageController)));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => LoginPageLC(loginPageController: loginPageController)));
             },
             child: Text("To home"),
           ),

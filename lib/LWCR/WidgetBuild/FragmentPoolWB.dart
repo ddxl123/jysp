@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/both/TFragmentPoolNode.dart';
 import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 import 'package:jysp/FragmentPool/SingleNode/SingleNode.dart';
 import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
-import 'package:jysp/LWCR/LifeCycle/FragmentPool.dart';
+import 'package:jysp/LWCR/LifeCycle/FragmentPoolLC.dart';
 import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-class FragmentPoolWB extends WidgetBuildBase<FragmentPool> {
-  FragmentPoolWB(FragmentPool widget) : super(widget);
+class FragmentPoolWB extends WidgetBuildBase<FragmentPoolLC> {
+  FragmentPoolWB(FragmentPoolLC widget) : super(widget);
 
   @override
   Widget build(BuildContext context) {
-    /// 检测 nodes 数量是否为0, 若为0则生成一个
-    if (widget.fragmentPoolController.fragmentPoolNodes.isEmpty) {
-      widget.fragmentPoolController.fragmentPoolNodes.add(widget.fragmentPoolController.nullNode);
+    if (widget.fragmentPoolController.isInitFragmentPool) {
+      return Text("initing...");
     }
+
+    // 在 [setFragmentPoolNodes] 中已经全部准备好了，不用再确认 route 是否无效等问题。
     return Stack(
       children: <Widget>[
         for (int childrenIndex = 0; childrenIndex <= widget.fragmentPoolController.fragmentPoolNodes.length; childrenIndex++)
@@ -24,7 +26,7 @@ class FragmentPoolWB extends WidgetBuildBase<FragmentPool> {
             }
             return SingleNode(
               index: childrenIndex,
-              thisRouteName: widget.fragmentPoolController.fragmentPoolNodes[childrenIndex]["route"],
+              thisRouteName: widget.fragmentPoolController.fragmentPoolNodes[childrenIndex][TFragmentPoolNode.route],
               fragmentPoolController: widget.fragmentPoolController,
             );
           }()
@@ -47,15 +49,13 @@ class End extends StatefulWidget {
 class _EndState extends State<End> {
   /// 每个 node 的宽高都被获取完成后
   void _getLayout() {
-    if (widget.fragmentPoolController.getFragmentPoolRefreshStatus == FragmentPoolRefreshStatus.willGetLayout) {
+    if (widget.fragmentPoolController.getPoolRefreshStatus == PoolRefreshStatus.getLayout) {
       /// 防止被执行多次
-      widget.fragmentPoolController.setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.willSetLayout;
-      dPrint("3-willSetLayout");
+      widget.fragmentPoolController.setPoolRefreshStatus = PoolRefreshStatus.setLayout;
+      dLog(() => "3-setLayout");
 
       /// 每个 node 都被 [build] 完成后调用
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        widget.fragmentPoolController.setFragmentPoolRefreshStatus = FragmentPoolRefreshStatus.setLayoutDone;
-        dPrint("4-setLayoutDone");
         widget.fragmentPoolController.setLayout();
       });
     }

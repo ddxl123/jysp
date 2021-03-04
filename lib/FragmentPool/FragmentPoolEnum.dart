@@ -1,20 +1,24 @@
-enum FragmentPoolRefreshStatus {
+enum PoolRefreshStatus {
   none,
-  willLayout,
-  willGetData,
-  willGetLayout,
-  willSetLayout,
-  setLayoutDone,
-  willRunLayout,
+  refreshLayout,
+  getLayout,
+  setLayout,
+  buildLayout,
 }
-enum FragmentPoolType {
+
+/// 1. 当 [PoolType.index] 时，获取的是 [int]。
+/// 2. 当 [PoolType.value] 时，获取的是 [string]。
+/// 3. 当 [PoolType.indexs.toList] 时，获取的是角标数组。
+enum PoolType {
   pendingPool,
   memoryPool,
   completePool,
   wikiPool,
+  indexs,
 }
 
-extension FragmentPoolSelectedTypeExt on FragmentPoolType {
+extension PoolSelectedTypeExt on PoolType {
+  List<int> get toList => [0, 1, 2, 3];
   String get value {
     switch (this.index) {
       case 0:
@@ -25,14 +29,15 @@ extension FragmentPoolSelectedTypeExt on FragmentPoolType {
         return "完成池";
       case 3:
         return "百科池";
+      case 4:
       default:
         throw Exception("Index is unknown!");
     }
   }
 }
 
-enum FragmentPoolNodeType {
-  none,
+enum NodeType {
+  root,
 
   pendingGroup,
   pendingGroupCol,
@@ -49,4 +54,14 @@ enum FragmentPoolNodeType {
   wikiGroup,
   wikiGroupCol,
   wikiNode,
+}
+
+enum OutType {
+  id,
+  pool_type,
+  node_type,
+  route_exception,
+  route_no_father,
+  route_repeat,
+  name,
 }

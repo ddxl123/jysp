@@ -1,44 +1,64 @@
 import 'package:flutter/material.dart';
 
-class RebuildHandler {
-  /// 处理码
-  int handleCode = 0;
-  Function() rebuild = () {};
+enum SendEmailButtonHandlerEnum {
+  /// 倒计时状态
+  countdown,
+
+  /// 未发送状态
+  unSent,
+}
+enum LoadingBarrierHandlerEnum {
+  /// 启用状态
+  enabled,
+
+  /// 禁用状态
+  disabled,
+}
+
+///
+///
+///
+/// rebuild 处理模块
+///
+class RebuildHandler<T> {
+  /// [_handleCode]：默认值。
+  RebuildHandler([this._handleCode]);
+
+  /// 处理代号
+  T _handleCode;
+  T get handleCode => _handleCode;
+
+  Function() _rebuild = () {};
   Map<dynamic, dynamic> state = {};
 
-  void rebuildHandle(int handleCode) {
-    this.handleCode = handleCode;
-    rebuild();
-  }
-
-  void reset(bool isRebuild) {
-    handleCode = 0;
-    state.clear();
-    if (isRebuild) {
-      rebuild();
+  void rebuildHandle(T handleCode, [bool isClearState = false]) {
+    if (isClearState) {
+      state.clear();
     }
+    this._handleCode = handleCode;
+    _rebuild();
   }
 }
 
-class RebuildHandleWidget extends StatefulWidget {
+class RebuildHandleWidget<T> extends StatefulWidget {
   RebuildHandleWidget({@required this.rebuildHandler, @required this.builder});
-  final RebuildHandler rebuildHandler;
-  final Widget Function(RebuildHandler) builder;
+  final RebuildHandler<T> rebuildHandler;
+  final Widget Function(RebuildHandler<T>) builder;
   @override
-  _RebuildHandleWidgetState createState() => _RebuildHandleWidgetState();
+  _RebuildHandleWidgetState<T> createState() => _RebuildHandleWidgetState<T>();
 }
 
-class _RebuildHandleWidgetState extends State<RebuildHandleWidget> {
+class _RebuildHandleWidgetState<T> extends State<RebuildHandleWidget<T>> {
   @override
   void initState() {
     super.initState();
-    widget.rebuildHandler.rebuild = () {
+    widget.rebuildHandler._rebuild = () {
       setState(() {});
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(widget.rebuildHandler);
+    return widget.builder((widget.rebuildHandler));
   }
 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
 import 'package:jysp/LWCR/WidgetBuild/FreeBoxWB.dart';
 
-class FreeBox extends StatefulWidget {
-  FreeBox({
+class FreeBoxLC extends StatefulWidget {
+  FreeBoxLC({
     @required this.freeBoxController,
     this.freeMoveScaleLayerChild = const SizedBox(),
     this.fixedLayerChild = const SizedBox(),
@@ -18,11 +18,11 @@ class FreeBox extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _FreeBox();
+    return _FreeBoxLC();
   }
 }
 
-class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
+class _FreeBoxLC extends State<FreeBoxLC> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
