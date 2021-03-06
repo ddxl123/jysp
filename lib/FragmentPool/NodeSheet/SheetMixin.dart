@@ -67,8 +67,8 @@
 
 //   /// [Node] 映射栏
 //   Widget mixinMappingWidget() {
-//     // double layoutWidth = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisRouteName]["layout_width"];
-//     // double layoutHeight = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisRouteName]["layout_height"];
+//     // double layoutWidth = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisBranchName]["layout_width"];
+//     // double layoutHeight = widget.mainSingleNodeData.fragmentPoolLayoutDataMap[widget.mainSingleNodeData.thisBranchName]["layout_height"];
 //     // String poolDisplayName = widget.mainSingleNodeData.fragmentPoolDataList[widget.mainSingleNodeData.thisIndex]["pool_display_name"].toString();
 //     double layoutWidth = 100;
 //     double layoutHeight = 100;

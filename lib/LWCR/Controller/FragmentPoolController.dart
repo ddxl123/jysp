@@ -17,132 +17,154 @@ mixin FragmentPoolControllerRoot on _Init {
   /// 需要显示在池内的节点
   /// const 代表 [] 对象无法被赋予新对象，而内元素可以被修改
   final List<Map> fragmentPoolNodes = [
-    // 标准格式：
+    // 标准格式：同 [TFragmentPoolNode] 表结构
   ];
 
-  /// 重复的、没有 father 的、route=null 的节点
-  List<Map> fragmentPoolNodeOuts = [];
+  /// 重复的、没有 father 的、branch=null 的节点
+  List<Map> fragmentPoolNodeOuts = [
+    // 标准格式：同 [fragmentPoolNodes] 结构，且格外 key="out_type"
+  ];
 
-  /// 将 [参数异常]、[重复的 route] 、[没有 father 的 route] 过滤到 [fragmentPoolNodeOuts] 中，保证 [fragmentPoolNodes] 中每个 Map 的 route 唯一且不为空：
+  /// 将 [参数异常]、[重复的 branch] 、[没有 father 的 branch] 过滤到 [fragmentPoolNodeOuts] 中，保证 [fragmentPoolNodes] 中每个 Map 的 branch 唯一且不为空：
   void setFragmentPoolNodes(bool isClearBefore, Function(List<Map> fpn) setCallback) {
     if (isClearBefore) {
       fragmentPoolNodes.clear();
     }
 
-    fragmentPoolNodeOuts.clear();
-
     setCallback(fragmentPoolNodes);
 
-    dLog(() => "setFragmentPoolNodes 过滤前：", () => fragmentPoolNodes);
-
-    // route="0" 必须存在
-    if (fragmentPoolNodes.where((item) => (item["route"] == "0")).length == 0) {
-      fragmentPoolNodes.add(_poolNodeZero());
+    // branch="0" 必须存在
+    if (fragmentPoolNodes.where((item) => (item["branch"] == "0")).length == 0) {
+      fragmentPoolNodes.add(
+        TFragmentPoolNode.toMap(
+          fragment_pool_node_id_v: null,
+          fragment_pool_node_id_s_v: null,
+          pool_type_v: getCurrentPoolType.index,
+          node_type_v: NodeType.root.index,
+          father_id_v: null,
+          father_id_s_v: null,
+          branch_v: "0",
+          name_v: "root",
+          created_at_v: null,
+          updated_at_v: null,
+        ),
+      );
     }
+    _toOut();
+    // _toBranch();
+    List<Map> fragmentPoolNodesTemp = [];
+    fragmentPoolNodesTemp.addAll(fragmentPoolNodes);
 
+    // 给每个 node 获取 sons：
+    fragmentPoolNodesTemp.forEach(
+      (elementFather) {
+        elementFather["sons"] = [];
+        fragmentPoolNodesTemp.forEach(
+          (elementSon) {
+            if (elementSon[TFragmentPoolNode.father_id] == elementFather[TFragmentPoolNode.fragment_pool_node_id] ||
+                elementSon[TFragmentPoolNode.father_id_s] == elementFather[TFragmentPoolNode.fragment_pool_node_id_s]) {
+              elementFather["sons"].add(
+                {
+                  "son_id": elementSon[TFragmentPoolNode.fragment_pool_node_id],
+                  "son_id_s": elementSon[TFragmentPoolNode.fragment_pool_node_id_s],
+                },
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  void _toOut() {
+    fragmentPoolNodeOuts.clear();
     fragmentPoolNodes.removeWhere(
-      (itemRaw) {
-        // 先过滤掉参数异常的数据 ----------------------------------------------------
-        if (!(itemRaw[TFragmentPoolNode.fragment_pool_node_id] is int) && !(itemRaw[TFragmentPoolNode.fragment_pool_node_id_s] is int)) {
-          itemRaw["out_type"] = OutType.id.index;
-          fragmentPoolNodeOuts.add(itemRaw);
-          return true;
-        }
-        if (!(PoolType.indexs.toList.contains(itemRaw[TFragmentPoolNode.pool_type]))) {
-          itemRaw["out_type"] = OutType.pool_type.index;
-          fragmentPoolNodeOuts.add(itemRaw);
-          return true;
-        }
-        if (!(PoolType.indexs.toList.contains(itemRaw[TFragmentPoolNode.node_type]))) {
-          itemRaw["out_type"] = OutType.node_type.index;
-          fragmentPoolNodeOuts.add(itemRaw);
-          return true;
-        }
-        if (!(itemRaw[TFragmentPoolNode.route] is String)) {
-          itemRaw["out_type"] = OutType.route_exception.index;
-          fragmentPoolNodeOuts.add(itemRaw);
-          return true;
-        }
-        if (!(itemRaw[TFragmentPoolNode.name] is String)) {
-          itemRaw["out_type"] = OutType.name.index;
-          fragmentPoolNodeOuts.add(itemRaw);
-          return true;
-        }
-
-        // 过滤掉没有 father 的：------------------------------------------------
-        bool isRemoveNoFather = false;
-        if (itemRaw["route"] != "0") {
-          List<String> splitResult = itemRaw["route"].toString().split("-");
-          if (splitResult[0] != "0") {
-            itemRaw["out_type"] = OutType.route_exception.index;
-            fragmentPoolNodeOuts.add(itemRaw);
+      (elementOut) {
+        if (elementOut["branch"] != "0") {
+          if (elementOut[TFragmentPoolNode.fragment_pool_node_id] == null && elementOut[TFragmentPoolNode.fragment_pool_node_id_s] == null) {
+            elementOut["out_type"] = OutType.id_exception.index;
+            fragmentPoolNodeOuts.add(elementOut);
             return true;
           }
-          String fatherRoute = splitResult.sublist(0, splitResult.length - 1).join("-");
-          fragmentPoolNodes.firstWhere(
-            (fatherItem) {
-              // 若当前 [itemRaw] 存在 [fatherRoute]：
-              if (fatherItem["route"] == fatherRoute) {
-                return true;
-              }
-              return false;
-            },
-            orElse: () {
-              // 若当前 [itemRaw] 不存在 [fatherRoute]：
-              itemRaw["out_type"] = OutType.route_no_father.index;
-              fragmentPoolNodeOuts.add(itemRaw);
-              isRemoveNoFather = true;
-              return null;
-            },
-          );
-          // 若当前 [itemRaw] 没有被过滤掉，则继续往下执行识别
-          if (isRemoveNoFather) {
-            return isRemoveNoFather;
-          }
-
-          // 过滤掉重复的：------------------------------------------------------
-          if (itemRaw["out_type"] == OutType.route_repeat.index) {
-            fragmentPoolNodeOuts.add(itemRaw);
+          if (!PoolType.indexs.toList.contains(elementOut[TFragmentPoolNode.pool_type])) {
+            elementOut["out_type"] = OutType.pool_type.index;
+            fragmentPoolNodeOuts.add(elementOut);
             return true;
           }
-          fragmentPoolNodes.firstWhere(
-            (repeatItem) {
-              // 若 [fragmentPoolNodes] 中存在与当前 [itemRaw] 相同的 route，则
-              bool isExist = (repeatItem["route"] == itemRaw["route"]);
-              if (isExist) {
-                repeatItem["out_type"] = OutType.route_repeat.index;
+          if (!NodeType.indexs.toList.contains(elementOut[TFragmentPoolNode.node_type])) {
+            elementOut["out_type"] = OutType.node_type.index;
+            fragmentPoolNodeOuts.add(elementOut);
+            return true;
+          }
+          if (!(elementOut[TFragmentPoolNode.name] is String)) {
+            elementOut["out_type"] = OutType.name.index;
+            fragmentPoolNodeOuts.add(elementOut);
+            return true;
+          }
+          // 检查 id 是否重复
+          if (elementOut["repeat"] != null) {
+            elementOut["out_type"] = OutType.id_repeat.index;
+            fragmentPoolNodeOuts.add(elementOut);
+            return true;
+          }
+          fragmentPoolNodes.forEach(
+            (element) {
+              if (elementOut[TFragmentPoolNode.fragment_pool_node_id] == element[TFragmentPoolNode.fragment_pool_node_id] ||
+                  elementOut[TFragmentPoolNode.fragment_pool_node_id_s] == element[TFragmentPoolNode.fragment_pool_node_id_s]) {
+                element["repeat"] = true;
               }
-              return true;
             },
           );
         }
-
         return false;
       },
     );
-
-    dLog(() => "setFragmentPoolNodes 过滤后：", () => {"fragmentPoolNodes": fragmentPoolNodes, "fragmentPoolNodeOuts": fragmentPoolNodeOuts});
   }
 
-  /// [fragmentPoolNodes] 数量为0时, [node_type] 为 -1。
-  Map _poolNodeZero() {
-    return {
-      "fragment_pool_node_id": -1,
-      "fragment_pool_node_id_s": -1,
-      "pool_type": getCurrentPoolType.index,
-      "node_type": NodeType.root.index,
-      "route": "0",
-      "name": "root",
-      "created_at": null,
-      "updated_at": null,
-    };
+  void _toBranch() {
+    // 用 fragmentPoolNodesRemain 来拷贝一份 fragmentPoolNodes，并 对其进行一次次 remove 操作。
+    // 用 fragmentPoolNodesLast 来保存上一轮被 remove 的内容。
+    // fragmentPoolNodes 用来存储最终结果。
+    List<Map> fragmentPoolNodesRemain = [];
+    List<Map> fragmentPoolNodesLast = [];
+    fragmentPoolNodesRemain.addAll(fragmentPoolNodes);
+    fragmentPoolNodes.clear();
+
+    // 检查所有没有 father 的，并将其设置为 branch="0" 的子 branch，即 branch="0-X"
+    int branchNum = 0;
+    fragmentPoolNodesRemain.removeWhere(
+      (elementOut) {
+        bool haveFather = false;
+        fragmentPoolNodesRemain.forEach(
+          (element) {
+            // 若存在 father，将 haveFather = true
+            if (elementOut[TFragmentPoolNode.father_id] == element[TFragmentPoolNode.father_id] || elementOut[TFragmentPoolNode.father_id_s] == element[TFragmentPoolNode.father_id_s]) {
+              haveFather = true;
+            }
+          },
+        );
+
+        // 若无，则设置其分支的尾号，并添加至 fragmentPoolNodesLast 和 fragmentPoolNodes
+        if (!haveFather) {
+          elementOut[TFragmentPoolNode.branch] = "0-$branchNum";
+          branchNum++;
+          fragmentPoolNodesLast.add(elementOut);
+          fragmentPoolNodes.add(elementOut);
+        }
+
+        // 若有，则移除于 fragmentPoolNodesTemp
+        return !haveFather;
+      },
+    );
   }
+
+  void _toBranchRepeat() {}
 
   /// node 的默认布局数据
   Map defaultLayoutPropertyMap({@required Size size}) {
     return {
       "child_count": 0,
-      "father_route": "0", // 默认不能为 null ，因为节点的连接线需要 xx["father_route"]["layout_top"] 等
+      "father_branch": "0", // 默认不能为 null ，因为节点的连接线需要 xx["father_branch"]["layout_top"] 等
       "layout_width": size == null ? 100 : size.width, // 不设置它为0是为了防止出现bug观察不出来
       "layout_height": size == null ? 100 : size.height,
       "layout_left": -10000.0,
@@ -187,7 +209,7 @@ mixin _RefreshLayout on LayoutNodesRequest {
   ///    ↓
   /// toPool
   ///    ↓
-  /// getData成功                                 设置 route="0"
+  /// getData成功                                 设置 branch="0"
   ///    ↓                                             |
   /// setFragmentPoolNodes ——> refreshLayout ——>    rebuild    ——>    getLayouts ——>     endGetLayout      ——>      setLayout             ——>            rebuild
   ///                                                  |                  |                                          |    |                                 |
@@ -245,55 +267,55 @@ mixin _RefreshLayout on LayoutNodesRequest {
     _sl6FrameTwo();
   }
 
-  /// 1、获取全部 [tail_route] 的 [map], 获取每个 [route] 数量和 [father_route]
+  /// 1、获取全部 [tail_branch] 的 [map], 获取每个 [branch] 数量和 [father_branch]
   void _sl1(Map<String, int> tailMap) {
     nodeLayoutMapTemp.forEach((key, value) {
-      // 获取 [tail_route] 的 [map]
+      // 获取 [tail_branch] 的 [map]
       if (!nodeLayoutMapTemp.containsKey(key + "-0")) {
         tailMap[key] = value["index"];
       }
 
       if (key != "0") {
-        // 获取每个 [route] 的 [father_route]
+        // 获取每个 [branch] 的 [father_branch]
         List<String> spl = key.split("-");
-        String fatherRoute = spl.sublist(0, spl.length - 1).join("-");
-        nodeLayoutMapTemp[key]["father_route"] = fatherRoute;
+        String fatherBranch = spl.sublist(0, spl.length - 1).join("-");
+        nodeLayoutMapTemp[key]["father_branch"] = fatherBranch;
 
-        // 获取每个 [route] 的 [child] 数量
-        if (nodeLayoutMapTemp.containsKey(fatherRoute)) {
-          nodeLayoutMapTemp[fatherRoute]["child_count"]++; // 根据当前 key(子route) 给 fatherRoute 赋值
+        // 获取每个 [branch] 的 [child] 数量
+        if (nodeLayoutMapTemp.containsKey(fatherBranch)) {
+          nodeLayoutMapTemp[fatherBranch]["child_count"]++; // 根据当前 key(子branch) 给 fatherBranch 赋值
         }
       }
     });
   }
 
-  /// 2、从 [tail_route] 开始,依次向左迭代并获取 [container_height]
+  /// 2、从 [tail_branch] 开始,依次向左迭代并获取 [container_height]
   void _sl2(Map<String, int> tailMap) {
     tailMap.forEach((key, value) {
       List<String> keyNums = key.split("-");
       for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
-        String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
+        String partBranch = keyNums.sublist(0, partIndex + 1).join("-");
 
         /// 既然从尾部开始，那么就不处理"0"
-        if (partRoute != "0") {
-          String fatherRoute = keyNums.sublist(0, partIndex).join("-");
+        if (partBranch != "0") {
+          String fatherBranch = keyNums.sublist(0, partIndex).join("-");
           double childrenContainerHeight = 0.0 - heightSpace; // 减去 [height_space] 是因为 [container_height] 不包含最底下的 [height_space]
 
-          /// 迭代同层级的 [route]
-          for (int incIndex = 0; incIndex < nodeLayoutMapTemp[fatherRoute]["child_count"]; incIndex++) {
-            String incRoute = fatherRoute + "-$incIndex";
-            childrenContainerHeight += nodeLayoutMapTemp[incRoute]["container_height"] + heightSpace; // 需要加上 [heightSpace]
+          /// 迭代同层级的 [branch]
+          for (int incIndex = 0; incIndex < nodeLayoutMapTemp[fatherBranch]["child_count"]; incIndex++) {
+            String incBranch = fatherBranch + "-$incIndex";
+            childrenContainerHeight += nodeLayoutMapTemp[incBranch]["container_height"] + heightSpace; // 需要加上 [heightSpace]
           }
 
           /// 比较并赋值
-          nodeLayoutMapTemp[fatherRoute]["container_height"] =
-              nodeLayoutMapTemp[fatherRoute]["layout_height"] > childrenContainerHeight ? nodeLayoutMapTemp[fatherRoute]["layout_height"] : childrenContainerHeight;
+          nodeLayoutMapTemp[fatherBranch]["container_height"] =
+              nodeLayoutMapTemp[fatherBranch]["layout_height"] > childrenContainerHeight ? nodeLayoutMapTemp[fatherBranch]["layout_height"] : childrenContainerHeight;
         }
       }
     });
   }
 
-  /// 3、从任意 [route] 开始,向上紧贴,并向左对齐
+  /// 3、从任意 [branch] 开始,向上紧贴,并向左对齐
   void _sl3() {
     nodeLayoutMapTemp.forEach((key, value) {
       double topContainerHeight = 0.0; // 不减去 [height_space] 是因为 top 时包含最底下的 height_space
@@ -302,7 +324,7 @@ mixin _RefreshLayout on LayoutNodesRequest {
       /// 逐渐减
       List<String> keyNums = key.split("-");
       for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
-        String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
+        String partBranch = keyNums.sublist(0, partIndex + 1).join("-");
 
         /// 向上紧贴
         for (int upIndex = 0; upIndex < int.parse(keyNums[partIndex]); upIndex++) {
@@ -310,8 +332,8 @@ mixin _RefreshLayout on LayoutNodesRequest {
         }
 
         /// 向左对齐
-        if (partRoute != key) {
-          finalLeft += nodeLayoutMapTemp[partRoute]["layout_width"] + widthSpace; // 需要加上 [widthSpace]
+        if (partBranch != key) {
+          finalLeft += nodeLayoutMapTemp[partBranch]["layout_width"] + widthSpace; // 需要加上 [widthSpace]
         }
       }
       nodeLayoutMapTemp[key]["layout_top"] = topContainerHeight;
@@ -319,59 +341,59 @@ mixin _RefreshLayout on LayoutNodesRequest {
     });
   }
 
-  /// 4、从 [tail_route] 开始,垂直居中偏移
+  /// 4、从 [tail_branch] 开始,垂直居中偏移
   void _sl4(Map<String, int> tailMap) {
     tailMap.forEach((key, value) {
       /// 向左传递,逐渐减
       List<String> keyNums = key.split("-");
       for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
-        String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
+        String partBranch = keyNums.sublist(0, partIndex + 1).join("-");
 
         /// 既然从尾部开始，那么就不处理"0"
-        if (partRoute != "0") {
-          String fatherRoute = keyNums.sublist(0, partIndex).join("-");
+        if (partBranch != "0") {
+          String fatherBranch = keyNums.sublist(0, partIndex).join("-");
 
-          double childrenUp = nodeLayoutMapTemp[fatherRoute + "-0"]["layout_top"]; // 可以为负值
-          double childrenDown = nodeLayoutMapTemp[fatherRoute + "-${nodeLayoutMapTemp[fatherRoute]["child_count"] - 1}"]["layout_top"] +
-              nodeLayoutMapTemp[fatherRoute + "-${nodeLayoutMapTemp[fatherRoute]["child_count"] - 1}"]["layout_height"]; // 可以为负值
+          double childrenUp = nodeLayoutMapTemp[fatherBranch + "-0"]["layout_top"]; // 可以为负值
+          double childrenDown = nodeLayoutMapTemp[fatherBranch + "-${nodeLayoutMapTemp[fatherBranch]["child_count"] - 1}"]["layout_top"] +
+              nodeLayoutMapTemp[fatherBranch + "-${nodeLayoutMapTemp[fatherBranch]["child_count"] - 1}"]["layout_height"]; // 可以为负值
           double childrenUDHeight = (childrenDown - childrenUp).abs(); // 不能为负值
-          double fatherUp = nodeLayoutMapTemp[fatherRoute]["layout_top"]; // 可以为负值
-          double fatherHeight = nodeLayoutMapTemp[fatherRoute]["layout_height"]; // 不能为负值
-          if (childrenUDHeight >= nodeLayoutMapTemp[fatherRoute]["layout_height"]) {
+          double fatherUp = nodeLayoutMapTemp[fatherBranch]["layout_top"]; // 可以为负值
+          double fatherHeight = nodeLayoutMapTemp[fatherBranch]["layout_height"]; // 不能为负值
+          if (childrenUDHeight >= nodeLayoutMapTemp[fatherBranch]["layout_height"]) {
             /// 1、这里不能用"2、"的方式,因为 [children] 上方的空无不容易计算;
-            nodeLayoutMapTemp[fatherRoute]["layout_top"] = (childrenUDHeight / 2 - fatherHeight / 2) + childrenUp;
+            nodeLayoutMapTemp[fatherBranch]["layout_top"] = (childrenUDHeight / 2 - fatherHeight / 2) + childrenUp;
           } else {
             /// 2、这里不能用"1、"的方法,因为需要把整个 [children] 进行调整;
             double finalchild0Top = (fatherHeight / 2 - childrenUDHeight / 2) + fatherUp; // 可以为负值
             double delta = finalchild0Top - childrenUp; // 可以为负值
-            void func(String route, double del) {
-              for (int i = 0; i < nodeLayoutMapTemp[route]["child_count"]; i++) {
-                String childRoute = route + "-$i";
-                nodeLayoutMapTemp[childRoute]["vertical_center_offset"] = del;
-                func(childRoute, del);
+            void func(String branch, double del) {
+              for (int i = 0; i < nodeLayoutMapTemp[branch]["child_count"]; i++) {
+                String childBranch = branch + "-$i";
+                nodeLayoutMapTemp[childBranch]["vertical_center_offset"] = del;
+                func(childBranch, del);
               }
             }
 
             if (delta >= 0) {
-              func(fatherRoute, delta.abs());
+              func(fatherBranch, delta.abs());
             } else {
               // 因为 [delta >= 0] 时，其 ["vertical_center_offset"] 还残留着非0值,因此需要把他们的值赋为0
-              func(fatherRoute, 0);
-              List<String> keyNums = fatherRoute.split("-");
+              func(fatherBranch, 0);
+              List<String> keyNums = fatherBranch.split("-");
               for (int partIndex = keyNums.length - 1; partIndex >= 0; partIndex--) {
-                // [fatherRoute] 假设为 0-1-2-3 ,结果为: 0, 0-1, 0-1-2, 0-1-2-3
-                String partRoute = keyNums.sublist(0, partIndex + 1).join("-");
+                // [fatherBranch] 假设为 0-1-2-3 ,结果为: 0, 0-1, 0-1-2, 0-1-2-3
+                String partBranch = keyNums.sublist(0, partIndex + 1).join("-");
                 // 自身: 0, 0-1, 0-1-2, 0-1-2-3
-                nodeLayoutMapTemp[partRoute]["vertical_center_offset"] = delta.abs();
+                nodeLayoutMapTemp[partBranch]["vertical_center_offset"] = delta.abs();
                 for (int brotherIndex = int.parse(keyNums[partIndex]) + 1; brotherIndex < nodeLayoutMapTemp.length; brotherIndex++) {
                   // 递增: (1+), 0-(2+), 0-1-(3+), 0-1-2-(4+)
-                  String partIncRoute = keyNums.sublist(0, partIndex).join("-") + "-$brotherIndex";
-                  if (nodeLayoutMapTemp.containsKey(partIncRoute) == false) {
+                  String partIncBranch = keyNums.sublist(0, partIndex).join("-") + "-$brotherIndex";
+                  if (nodeLayoutMapTemp.containsKey(partIncBranch) == false) {
                     break;
                   } else {
                     // TODO: 这部分不知为何下移的距离会过大
-                    nodeLayoutMapTemp[partIncRoute]["vertical_center_offset"] = delta.abs(); // 自身
-                    func(partIncRoute, delta.abs());
+                    nodeLayoutMapTemp[partIncBranch]["vertical_center_offset"] = delta.abs(); // 自身
+                    func(partIncBranch, delta.abs());
                   }
                 }
               }

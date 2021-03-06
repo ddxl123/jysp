@@ -8,12 +8,12 @@ class SingleNode extends StatefulWidget {
   SingleNode({
     Key key,
     @required this.index,
-    @required this.thisRouteName,
+    @required this.thisBranchName,
     @required this.fragmentPoolController,
   }) : super(key: key);
 
   final int index;
-  final String thisRouteName;
+  final String thisBranchName;
   final FragmentPoolController fragmentPoolController;
 
   @override
@@ -40,28 +40,28 @@ class SingleNodeState extends State<SingleNode> {
         Size size = (this.context.findRenderObject() as RenderBox).size;
 
         /// 给每个 node 的 [nodeLayoutMapTemp] 添加布局属性 ,并重置 [nodeLayoutMapTemp], 在这之前 [nodeLayoutMapTemp] 已被 [clear] 过了。
-        widget.fragmentPoolController.nodeLayoutMapTemp[widget.thisRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: size);
+        widget.fragmentPoolController.nodeLayoutMapTemp[widget.thisBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: size);
       });
     }
   }
 
   /// 对新元素的配置，防止没有基本布局属性配置
   void _newIndexLayoutPropertyConfig() {
-    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(widget.thisRouteName)) {
-      widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
+    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(widget.thisBranchName)) {
+      widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
     }
-    // 若 [fragmentPoolNodes] 不是按照 [{"route":"0"},{"route":"0-1"}] 这样的 [先父后子] 的顺序排列，则需将其父同时添加 [nodeLayoutMap] 的默认值，防止之后
-    List<String> split = widget.thisRouteName.split("-");
-    String fatherRouteName = split.sublist(0, split.length - 1).join("-");
-    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(fatherRouteName)) {
-      widget.fragmentPoolController.nodeLayoutMap[fatherRouteName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
+    // 若 [fragmentPoolNodes] 不是按照 [{"branch":"0"},{"branch":"0-1"}] 这样的 [先父后子] 的顺序排列，则需将其父同时添加 [nodeLayoutMap] 的默认值，防止之后
+    List<String> split = widget.thisBranchName.split("-");
+    String fatherBranchName = split.sublist(0, split.length - 1).join("-");
+    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(fatherBranchName)) {
+      widget.fragmentPoolController.nodeLayoutMap[fatherBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
     }
   }
 
   Widget _buildWidget() {
     return Positioned(
-      left: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_left"],
-      top: widget.fragmentPoolController.nodeLayoutMap[widget.thisRouteName]["layout_top"],
+      left: widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName]["layout_left"],
+      top: widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName]["layout_top"],
       child: CustomPaint(
         painter: SingleNodeLine(widget),
         child: _child(),

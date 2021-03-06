@@ -16,7 +16,7 @@ class FragmentPoolWB extends WidgetBuildBase<FragmentPoolLC> {
       return Text("initing...");
     }
 
-    // 在 [setFragmentPoolNodes] 中已经全部准备好了，不用再确认 route 是否无效等问题。
+    // 在 [setFragmentPoolNodes] 中已经全部准备好了，不用再确认 branch 是否无效等问题。
     return Stack(
       children: <Widget>[
         for (int childrenIndex = 0; childrenIndex <= widget.fragmentPoolController.fragmentPoolNodes.length; childrenIndex++)
@@ -26,7 +26,7 @@ class FragmentPoolWB extends WidgetBuildBase<FragmentPoolLC> {
             }
             return SingleNode(
               index: childrenIndex,
-              thisRouteName: widget.fragmentPoolController.fragmentPoolNodes[childrenIndex][TFragmentPoolNode.route],
+              thisBranchName: widget.fragmentPoolController.fragmentPoolNodes[childrenIndex][TFragmentPoolNode.branch],
               fragmentPoolController: widget.fragmentPoolController,
             );
           }()

@@ -12,10 +12,6 @@ import 'package:jysp/Database/DBTableBase.dart';
 /// 若为Ⅲ时，则 sqlite 存储一个 node_type 为Ⅱ的节点 ，state 刷新即可，Toast 提示Ⅲ；
 /// 若为Ⅳ时，则直接获取。
 
-/// 待解决：
-/// 1、重复 route 问题
-/// 2、缺失 route 问题
-
 class TFragmentPoolNode implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;
@@ -30,9 +26,11 @@ class TFragmentPoolNode implements DBTableBase {
 
   static String get node_type => "node_type";
 
-  static String get father_node => "father_node";
+  static String get father_id => "father_id";
 
-  static String get father_node_s => "father_node_s";
+  static String get father_id_s => "father_id_s";
+
+  static String get branch => "branch";
 
   static String get name => "name";
 
@@ -46,8 +44,9 @@ class TFragmentPoolNode implements DBTableBase {
         DBTableBase.x_id_s_no_primary(fragment_pool_node_id_s),
         [pool_type, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED], // mysql:TINYINT 不为空 无符号
         [node_type, SqliteType.INTEGER, SqliteType.NOT_NULL, SqliteType.UNSIGNED], // mysql:INT 不为空 无符号
-        DBTableBase.x_id_m_no_primary(father_node),
-        DBTableBase.x_id_s_no_primary(father_node_s),
+        DBTableBase.x_id_m_no_primary(father_id),
+        DBTableBase.x_id_s_no_primary(father_id_s),
+        [branch, SqliteType.TEXT],
         [name, SqliteType.TEXT], // mysql:VARCHAR(20)
         DBTableBase.created_at_sql,
         DBTableBase.updated_at_sql,
@@ -58,8 +57,9 @@ class TFragmentPoolNode implements DBTableBase {
     @required String fragment_pool_node_id_s_v,
     @required int pool_type_v,
     @required int node_type_v,
-    @required String father_node_v,
-    @required String father_node_s_v,
+    @required String father_id_v,
+    @required String father_id_s_v,
+    @required String branch_v,
     @required String name_v,
     @required int created_at_v,
     @required int updated_at_v,
@@ -69,8 +69,9 @@ class TFragmentPoolNode implements DBTableBase {
       fragment_pool_node_id_s: fragment_pool_node_id_s_v,
       pool_type: pool_type_v,
       node_type: node_type_v,
-      father_node: father_node_v,
-      father_node_s: father_node_s_v,
+      father_id: father_id_v,
+      father_id_s: father_id_s_v,
+      branch: branch_v,
       name: name_v,
       created_at: created_at_v,
       updated_at: updated_at_v,

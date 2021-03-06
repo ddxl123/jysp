@@ -93,7 +93,7 @@ mixin LayoutNodesRequest on FragmentPoolControllerRoot {
   }
 
   Future<bool> _sqliteData(PoolType toPoolType, dynamic data, bool isCancelToPool, bool isDataFromSqlite) async {
-    // data 必然是 List 类型，且必然至少存在一个【数据已初始化但 nodes 数量为 0】的 Map
+    // data 必然是 List 类型
     this.setFragmentPoolNodes(true, (fpn) {
       fpn.addAll(data);
     });
@@ -137,7 +137,7 @@ mixin LayoutNodesRequest on FragmentPoolControllerRoot {
           fragment_pool_node_id_s_v: list[i][TFragmentPoolNode.fragment_pool_node_id_s], //因为是 mysql 生成，插入的 _s 是 null 值
           pool_type_v: list[i][TFragmentPoolNode.pool_type],
           node_type_v: list[i][TFragmentPoolNode.node_type],
-          route_v: list[i][TFragmentPoolNode.route],
+          branch_v: list[i][TFragmentPoolNode.branch],
           name_v: list[i][TFragmentPoolNode.name],
           created_at_v: list[i][TFragmentPoolNode.created_at],
           updated_at_v: list[i][TFragmentPoolNode.updated_at],
