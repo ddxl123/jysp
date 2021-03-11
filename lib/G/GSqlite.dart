@@ -1,17 +1,16 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:jysp/Database/DBTableBase.dart';
 import 'package:jysp/Database/local/TToken.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/utils/utils.dart';
 
-enum SqliteDamagedResult { notDamaged, notExistDbFile, tableLost }
+enum SqliteDamagedResult { notDamaged, notExistDbFile, tableLost, catchError }
 
 mixin Root {
-  Database db;
-  String dbPathRoot;
+  late Database db;
+  late String dbPathRoot;
   String dbName = "/jysp.db";
 }
 
@@ -31,12 +30,11 @@ mixin CommonTools on Root, TableToSql {
     return await db.delete(tableName);
   }
 
-  /// 删除数据库并重新创建数据库，清空所有非默认的表，并非重置
+  /// 删除数据库并重新创建数据库.(清空所有的表)
   Future<void> clearSqlite() async {
     List<String> logGetAllTableNamesBefore = await _getAllTableNames();
     dLog(() => "清空前的表：" + logGetAllTableNamesBefore.toString());
     await deleteDatabase(dbPathRoot + dbName).whenComplete(() => dLog(() => "清空全部的表成功"));
-    // db.close(); // 当数据库被删除时，执行关闭也会提示 err
     db = await openDatabase(dbPathRoot + dbName);
     List<String> logGetAllTableNamesAfter = await _getAllTableNames();
     dLog(() => "清空后的表：" + logGetAllTableNamesAfter.toString());
@@ -44,12 +42,12 @@ mixin CommonTools on Root, TableToSql {
 
   /// 创建指定表
   Future<void> _createTable(String tableName) async {
-    return await db.execute(sql[tableName]);
+    return await db.execute(sql[tableName]!);
   }
 
   /// 创建全部需要的表
   Future<void> _createAllTables() async {
-    await Future.forEach(sql.keys, (tableName) {
+    await Future.forEach<String>(sql.keys, (tableName) {
       return _createTable(tableName);
     });
   }
@@ -66,7 +64,10 @@ mixin DiagTools on Root, TableToSql, CommonTools {
 
   // 检查指定表是否存在
   Future<bool> isTableExist(String table) async {
-    var count = firstIntValue(await db.query('sqlite_master', columns: ['COUNT(*)'], where: 'type = ? AND name = ?', whereArgs: ['table', table]));
+    int? count = firstIntValue(await db.query('sqlite_master', columns: ['COUNT(*)'], where: 'type = ? AND name = ?', whereArgs: ['table', table]));
+    if (count == null) {
+      return false;
+    }
     if (count > 0) {
       return true;
     } else {
@@ -131,11 +132,11 @@ mixin Token on Root {
   ///   - [1]: refresh_token
   /// - [return]: string ,不能返回 null, 因为 ""+null 会报错
   ///
-  Future<String> getSqliteToken({@required int tokenTypeCode}) async {
-    String tokenType = tokenTypeCode == 0 ? "access_token" : (tokenTypeCode == 1 ? "refresh_token" : null);
-    String token;
+  Future<String> getSqliteToken({required int tokenTypeCode}) async {
+    String? tokenType = tokenTypeCode == 0 ? "access_token" : (tokenTypeCode == 1 ? "refresh_token" : null);
+    String? token;
     try {
-      token = (await db.query(TToken.getTableName))[0][tokenType];
+      token = (await db.query(TToken.getTableName))[0][tokenType].toString();
     } catch (e) {
       // 获取失败。可能是 query 失败，也可能是 [0] 值为 null
       token = null;
@@ -153,9 +154,9 @@ mixin Token on Root {
   ///   - [failCode]: [1]: tokens 值为 null。 [2]: tokens sqlite 存储失败。
   ///
   Future<void> setSqliteToken({
-    @required Map tokens,
-    @required Function() success,
-    @required Function(int failCode) fail,
+    required Map tokens,
+    required Function() success,
+    required Function(int failCode) fail,
   }) async {
     if (tokens[TToken.access_token] == null || tokens[TToken.refresh_token] == null) {
       await fail(1);
@@ -192,35 +193,40 @@ class GSqlite with Root, TableToSql, CommonTools, DiagTools, Token {
 
   /// 初始化 Sqlite
   Future<SqliteDamagedResult> init() async {
-    /// 罗列全部被需要的表的 sql 语句
-    toSetSql();
+    try {
+      /// 罗列全部被需要的表的 sql 语句
+      toSetSql();
 
-    /// 打开 sqlite 数据库
-    dbPathRoot = await getDatabasesPath();
-    String dbPath = dbPathRoot + dbName;
-    db = await openDatabase(dbPath);
+      /// 打开 sqlite 数据库
+      dbPathRoot = await getDatabasesPath() ?? "";
+      String dbPath = dbPathRoot + dbName;
+      db = await openDatabase(dbPath);
 
-    await clearSqlite();
+      await clearSqlite();
 
-    /// 检测是否数据损坏
-    SqliteDamagedResult sqliteDamagedResult = await _isSqliteDamaged();
-    if (sqliteDamagedResult != SqliteDamagedResult.notDamaged) {
-      return sqliteDamagedResult;
+      /// 检测是否数据损坏
+      SqliteDamagedResult sqliteDamagedResult = await _isSqliteDamaged();
+      if (sqliteDamagedResult != SqliteDamagedResult.notDamaged) {
+        return sqliteDamagedResult;
+      }
+
+      /// 检测是否已经【应用初始化】过
+      if (!await _isAppInited()) {
+        await _createAllTables();
+        dLog(() => "应用初始化成功。");
+      } else {
+        dLog(() => "应用已被初始化过。");
+      }
+
+      // await db.insert(TFragmentPoolNodes.getTableName, TFragmentPoolNodes.toMap(1, 2, "0-0-0", "哈哈哈哈"));
+      List<String> getResult = await _getAllTableNames();
+      dLog(() => "sqlite 包含的表：" + getResult.toString());
+
+      return SqliteDamagedResult.notDamaged;
+    } catch (e) {
+      dLog(() => e.toString());
+      return SqliteDamagedResult.catchError;
     }
-
-    /// 检测是否已经【应用初始化】过
-    if (!await _isAppInited()) {
-      await _createAllTables();
-      dLog(() => "应用初始化成功。");
-    } else {
-      dLog(() => "应用已被初始化过。");
-    }
-
-    // await db.insert(TFragmentPoolNodes.getTableName, TFragmentPoolNodes.toMap(1, 2, "0-0-0", "哈哈哈哈"));
-    List<String> getResult = await _getAllTableNames();
-    dLog(() => "sqlite 包含的表：" + getResult.toString());
-
-    return SqliteDamagedResult.notDamaged;
   }
 
   ///

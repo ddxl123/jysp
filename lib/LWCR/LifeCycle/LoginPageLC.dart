@@ -5,7 +5,7 @@ import 'package:jysp/LWCR/Controller/LoginPageController.dart';
 import 'package:jysp/LWCR/WidgetBuild/LoginPageWB.dart';
 
 class LoginPageLC extends StatefulWidget {
-  LoginPageLC({this.loginPageController});
+  LoginPageLC({required this.loginPageController});
   final LoginPageController loginPageController;
 
   @override
@@ -15,7 +15,10 @@ class LoginPageLC extends StatefulWidget {
 class _LoginPageLCState extends State<LoginPageLC> {
   @override
   void dispose() {
-    (widget.loginPageController.sendEmailButtonRebuildHandler.state["timer"] as Timer)?.cancel();
+    dynamic timer = widget.loginPageController.sendEmailButtonRebuildHandler.state["timer"];
+    if (timer is Timer) {
+      timer.cancel();
+    }
     super.dispose();
   }
 

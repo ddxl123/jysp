@@ -9,8 +9,8 @@ mixin ByEmailRequest {
   ///
 
   Future<void> sendEmailRequest({
-    @required RebuildHandler<SendEmailButtonHandlerEnum> handler,
-    @required TextEditingController emailTextEditingController,
+    required RebuildHandler<SendEmailButtonHandlerEnum> handler,
+    required TextEditingController emailTextEditingController,
   }) async {
     await Future(() async {
       //
@@ -65,8 +65,8 @@ mixin ByEmailRequest {
   }
 
   void verifyEmailRequest({
-    @required TextEditingController qqEmailTextEditingController,
-    @required TextEditingController codeTextEditingController,
+    required TextEditingController qqEmailTextEditingController,
+    required TextEditingController codeTextEditingController,
   }) async {
     await Future(() async {
       //
@@ -108,7 +108,7 @@ mixin ByEmailRequest {
               await G.sqlite.setSqliteToken(
                 tokens: data,
                 success: () {
-                  Navigator.push(G.globalKey.currentContext, MaterialPageRoute(builder: (_) => HomePage()));
+                  Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
                 },
                 fail: (failCode) {},
               );
@@ -121,7 +121,7 @@ mixin ByEmailRequest {
               await G.sqlite.setSqliteToken(
                 tokens: data,
                 success: () {
-                  Navigator.push(G.globalKey.currentContext, MaterialPageRoute(builder: (_) => HomePage()));
+                  Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
                 },
                 fail: (failCode) {},
               );

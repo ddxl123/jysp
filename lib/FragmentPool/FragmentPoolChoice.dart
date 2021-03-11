@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
+import 'package:jysp/Database/both/TFragmentPoolNode.dart';
 import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
 import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
 
@@ -9,7 +9,7 @@ import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
 /// 选项按钮
 ///
 class FragmentPoolChoice extends StatefulWidget {
-  FragmentPoolChoice({@required this.fragmentPoolController, @required this.freeBoxController});
+  FragmentPoolChoice({required this.fragmentPoolController, required this.freeBoxController});
   final FragmentPoolController fragmentPoolController;
   final FreeBoxController freeBoxController;
 
@@ -20,11 +20,11 @@ class FragmentPoolChoice extends StatefulWidget {
 class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      color: Colors.white,
+    return TextButton(
+      style: TextButton.styleFrom(primary: Colors.green),
 
       /// 该文本默认匹配 [currentFragmentPoolType] 的默认值
-      child: Text(widget.fragmentPoolController.getCurrentPoolType.value),
+      child: Text(widget.fragmentPoolController.getCurrentPoolType.text),
       onPressed: () {
         Navigator.push(
           context,
@@ -51,16 +51,16 @@ class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
 ///
 class FragmentPoolChoicePage extends OverlayRoute {
   FragmentPoolChoicePage({
-    @required this.ctx,
-    @required this.mainButtonRebuild,
-    @required this.fragmentPoolController,
-    @required this.freeBoxController,
+    required this.ctx,
+    required this.mainButtonRebuild,
+    required this.fragmentPoolController,
+    required this.freeBoxController,
   });
   final BuildContext ctx;
   final Function mainButtonRebuild;
   final FragmentPoolController fragmentPoolController;
   final FreeBoxController freeBoxController;
-  Size size;
+  late Size size;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
@@ -109,10 +109,10 @@ class FragmentPoolChoicePage extends OverlayRoute {
     );
   }
 
-  Widget _toButton({@required BuildContext ctx, @required PoolType toButtonType}) {
-    return FlatButton(
-      color: Colors.white,
-      child: Text(toButtonType.value),
+  Widget _toButton({required BuildContext ctx, required PoolType toButtonType}) {
+    return TextButton(
+      style: TextButton.styleFrom(primary: Colors.white),
+      child: Text(toButtonType.text),
       onPressed: () async {
         /// 关闭当前路由窗口
         Navigator.removeRoute(ctx, this);

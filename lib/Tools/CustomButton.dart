@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatefulWidget {
   CustomButton({
-    @required this.child,
-    @required this.onPressed,
+    required this.child,
+    required this.onPressed,
     this.upBackgroundColor = Colors.transparent,
     this.downBackgroundColor = Colors.grey,
   });
@@ -18,8 +18,9 @@ class CustomButton extends StatefulWidget {
 }
 
 class _CustomButton extends State<CustomButton> {
-  Color _currentColor;
+  Color? _currentColor;
   bool _isOnMove = false;
+
   @override
   Widget build(BuildContext context) {
     return Listener(

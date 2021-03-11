@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BasePersistentDelegate extends SliverPersistentHeaderDelegate {
-  BasePersistentDelegate({@required this.child, @required this.minHeight, @required this.maxHeight});
+  BasePersistentDelegate({required this.child, required this.minHeight, required this.maxHeight});
   final double minHeight;
   final double maxHeight;
   final Widget child;

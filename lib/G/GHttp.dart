@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast.dart';
@@ -49,14 +48,14 @@ class GHttp {
   ///                              [GeneralRequestInterruptedStatus.localUnknownError]
   ///
   Future<void> sendRequest({
-    @required String method,
-    @required String route,
-    @required bool isAuth,
-    Map<String, dynamic> data,
-    Map<String, dynamic> queryParameters,
-    @required Function({int code, dynamic data}) resultCallback,
-    @required String sameNotConcurrent,
-    @required Function(GeneralRequestInterruptedStatus generalRequestInterruptedStatus) interruptedCallback,
+    required String method,
+    required String route,
+    required bool isAuth,
+    Map<String, dynamic>? data,
+    Map<String, dynamic>? queryParameters,
+    required Function({int? code, dynamic? data}) resultCallback,
+    required String? sameNotConcurrent,
+    required Function(GeneralRequestInterruptedStatus generalRequestInterruptedStatus) interruptedCallback,
   }) async {
     /// 若相同请求被并发，或正处在 refresh token 状态，或正处在 create token 状态，则直接返回。
     if ((sameNotConcurrent != null && sameNotConcurrentMap.containsKey(sameNotConcurrent)) || _isTokenRefreshing || _isTokenCreating) {
@@ -161,10 +160,10 @@ class GHttp {
   /// - [tokenCreateFailCallback]：token 生成失败的回调。**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
   ///
   Future<void> sendCreateTokenRequest({
-    @required String route,
-    @required Map<String, dynamic> willVerifyData,
-    @required Function({int code, dynamic data}) resultCallback,
-    @required Function(CreateTokenInterruptedStatus createTokenInterruptedStatus) tokenCreateFailCallback,
+    required String route,
+    required Map<String, dynamic> willVerifyData,
+    required Function({int? code, dynamic? data}) resultCallback,
+    required Function(CreateTokenInterruptedStatus createTokenInterruptedStatus) tokenCreateFailCallback,
   }) async {
     if (_isTokenCreating) {
       await tokenCreateFailCallback(CreateTokenInterruptedStatus.creating);
@@ -211,8 +210,8 @@ class GHttp {
   /// - [tokenRefreshFailCallback]：token 刷新失败的回调；**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
   ///
   Future<void> sendRefreshTokenRequest({
-    @required Function() tokenRefreshSuccessCallback,
-    @required Function(RefreshTokenInterruptedStatus refreshTokenInterruptedStatus) tokenRefreshFailCallback,
+    required Function() tokenRefreshSuccessCallback,
+    required Function(RefreshTokenInterruptedStatus refreshTokenInterruptedStatus) tokenRefreshFailCallback,
   }) async {
     if (_isTokenRefreshing) {
       await tokenRefreshFailCallback(RefreshTokenInterruptedStatus.refreshing);
@@ -288,14 +287,13 @@ class GHttp {
     dynamic localDioErrorInterruptedStatus,
     dynamic localUnknownErrorInterruptedStatus,
   ) async {
-    dLog(() => onError.toString());
     if (onError.runtimeType == DioError) {
       // 1.可能本地请求的发送异常
       // 2.可能返回的响应码非 200
-      showToast("捕获到本地DioError异常!");
+      dLog(() => "捕获到本地DioError异常!", () => onError);
       await interruptedStatusCallback(localDioErrorInterruptedStatus);
     } else {
-      showToast("捕获到本地未知异常!");
+      dLog(() => "捕获到本地未知异常!", () => onError);
       await interruptedStatusCallback(localUnknownErrorInterruptedStatus);
     }
   }
@@ -334,8 +332,8 @@ enum RefreshTokenInterruptedStatus {
 }
 
 class CodeAndData {
-  int code;
-  dynamic data;
+  int? code;
+  dynamic? data;
 
   /// 将响应的数据转化成 Map 类型
   /// 若 response.data 不是 Map 类型，则转化成 {"code":null,"data":null}

@@ -50,10 +50,10 @@ class HomePageState extends State<HomePage> {
     return Positioned(
       bottom: 50,
       left: 0,
-      child: FlatButton(
+      child: TextButton(
         onPressed: () {
           _freeBoxController.targetSlide(
-            targetOffset: _fragmentPoolController.viewSelectedType[_fragmentPoolController.getCurrentPoolType]["node0"],
+            targetOffset: Offset.zero,
             targetScale: 1.0,
           );
         },
@@ -76,12 +76,6 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("加载中..."),
-                  TextButton(
-                    child: Text("取消"),
-                    onPressed: () {
-                      _fragmentPoolController.isCancelToPool;
-                    },
-                  ),
                 ],
               ),
             ),
@@ -102,15 +96,9 @@ class HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(child: FlatButton(onPressed: () {}, child: Text("发现"))),
+            Expanded(child: TextButton(onPressed: () {}, child: Text("发现"))),
             Expanded(child: FragmentPoolChoice(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController)),
-            Expanded(
-                child: FlatButton(
-                    onPressed: () {
-                      // _fragmentPoolController.fragmentPoolNodes.removeLast();
-                      _fragmentPoolController.cancelToPool();
-                    },
-                    child: Text("我"))),
+            Expanded(child: TextButton(onPressed: () {}, child: Text("我"))),
           ],
         ),
       ),

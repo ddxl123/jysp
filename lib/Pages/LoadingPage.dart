@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 class LoadingPage extends PageRoute {
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get opaque => false;

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class LoadingAnimation extends StatefulWidget {
-  LoadingAnimation({@required this.loadingController});
+  LoadingAnimation({required this.loadingController});
   final LoadingController loadingController;
 
   @override
@@ -11,8 +11,8 @@ class LoadingAnimation extends StatefulWidget {
 }
 
 class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation _animation;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   /// -1表示被dispose,0表示loading,1表示success,2表示fail
   int _stataus = 1;
@@ -83,19 +83,16 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
             width: _animation.value,
           ),
         );
-        break;
       case 1:
         return Container(
           alignment: Alignment.center,
           child: Text("no more"),
         );
-        break;
       case 2:
         return Container(
           alignment: Alignment.center,
           child: Text("fail", style: TextStyle(color: Colors.red)),
         );
-        break;
       default:
         return Container(
           alignment: Alignment.center,

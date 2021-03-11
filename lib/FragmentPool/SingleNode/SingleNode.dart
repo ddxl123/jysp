@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/FragmentPool/NodeType/UnknownNode.dart';
+import 'package:jysp/Database/both/TFragmentPoolNode.dart';
 import 'package:jysp/FragmentPool/SingleNode/SingleNodeLine.dart';
 import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 class SingleNode extends StatefulWidget {
   SingleNode({
-    Key key,
-    @required this.index,
-    @required this.thisBranchName,
-    @required this.fragmentPoolController,
-  }) : super(key: key);
+    required this.index,
+    required this.fragmentPoolController,
+  });
 
   final int index;
-  final String thisBranchName;
   final FragmentPoolController fragmentPoolController;
 
   @override
@@ -23,61 +20,52 @@ class SingleNode extends StatefulWidget {
 class SingleNodeState extends State<SingleNode> {
   ///
 
+  Offset _lastOffset = Offset.zero;
+  Offset _deltaOffset = Offset.zero;
+
   @override
   Widget build(BuildContext context) {
-    _getLayout();
-    _newIndexLayoutPropertyConfig();
     return _buildWidget();
   }
 
-  /// 获取每个 node 的宽高
-  void _getLayout() {
-    if (widget.fragmentPoolController.getPoolRefreshStatus == PoolRefreshStatus.getLayout) {
-      /// 防止被执行多次, 这里不能写这行, 否则第一个 node 就被禁止了, 应该在 end 里写
-      // widget.fragmentPoolController.fragmentPoolRefreshStatus = FragmentPoolRefreshStatus.setLayout;
-
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        Size size = (this.context.findRenderObject() as RenderBox).size;
-
-        /// 给每个 node 的 [nodeLayoutMapTemp] 添加布局属性 ,并重置 [nodeLayoutMapTemp], 在这之前 [nodeLayoutMapTemp] 已被 [clear] 过了。
-        widget.fragmentPoolController.nodeLayoutMapTemp[widget.thisBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: size);
-      });
-    }
-  }
-
-  /// 对新元素的配置，防止没有基本布局属性配置
-  void _newIndexLayoutPropertyConfig() {
-    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(widget.thisBranchName)) {
-      widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
-    }
-    // 若 [fragmentPoolNodes] 不是按照 [{"branch":"0"},{"branch":"0-1"}] 这样的 [先父后子] 的顺序排列，则需将其父同时添加 [nodeLayoutMap] 的默认值，防止之后
-    List<String> split = widget.thisBranchName.split("-");
-    String fatherBranchName = split.sublist(0, split.length - 1).join("-");
-    if (!widget.fragmentPoolController.nodeLayoutMap.containsKey(fatherBranchName)) {
-      widget.fragmentPoolController.nodeLayoutMap[fatherBranchName] = widget.fragmentPoolController.defaultLayoutPropertyMap(size: null);
-    }
-  }
-
   Widget _buildWidget() {
-    return Positioned(
-      left: widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName]["layout_left"],
-      top: widget.fragmentPoolController.nodeLayoutMap[widget.thisBranchName]["layout_top"],
-      child: CustomPaint(
-        painter: SingleNodeLine(widget),
-        child: _child(),
-      ),
+    return StatefulBuilder(
+      builder: (context, rebuild) {
+        return Positioned(
+          left: widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[0],
+          top: widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[1],
+          child: GestureDetector(
+            child: _child(),
+            // onLongPressStart: (details) {
+            //   dLog(() => "onLongPressStart");
+            //   _lastOffset = details.globalPosition;
+            // },
+            onLongPressMoveUpdate: (details) {
+              _deltaOffset = details.globalPosition - _lastOffset;
+              dLog(() => _deltaOffset);
+              dLog(() => "1:", () => widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[0]);
+              widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[0] += _deltaOffset.dx;
+              widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[1] += _deltaOffset.dy;
+              dLog(() => "2:", () => widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.position[0]);
+              rebuild(() {});
+            },
+            // onLongPressEnd: (details) {
+            //   dLog(() => "onLongPressEnd");
+            // },
+          ),
+        );
+      },
     );
   }
 
-  /// 以下使用的全部都是 [fragmentPoolNodes]，而没有使用 [nodeLayoutMap] 的。
   Widget _child() {
-    switch (widget.fragmentPoolController.fragmentPoolNodes[widget.index]["node_type"]) {
-      case -1:
-        return TextButton(child: Text(widget.fragmentPoolController.fragmentPoolNodes[widget.index]["node_type"]), onPressed: () {});
-      case 0:
-        return TextButton(child: Text("普通node"), onPressed: () {});
+    switch (widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.node_type) {
+      case NodeType.pendingFragment:
+        return TextButton(child: Text(widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.name), onPressed: () {});
+      case NodeType.pendingGroup:
+        return TextButton(child: Text(widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.name), onPressed: () {});
       default:
-        return UnknownNode();
+        return TextButton(child: Text(widget.fragmentPoolController.fragmentPoolNodes[widget.index].fragmentPoolNode.name), onPressed: () {});
     }
   }
 }

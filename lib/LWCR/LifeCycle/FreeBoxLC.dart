@@ -4,7 +4,7 @@ import 'package:jysp/LWCR/WidgetBuild/FreeBoxWB.dart';
 
 class FreeBoxLC extends StatefulWidget {
   FreeBoxLC({
-    @required this.freeBoxController,
+    required this.freeBoxController,
     this.freeMoveScaleLayerChild = const SizedBox(),
     this.fixedLayerChild = const SizedBox(),
   });

@@ -30,10 +30,10 @@ mixin _TouchEvent on _Root {
   double _lastTempScale = 1;
   Offset _lastTempTouchPosition = Offset(0, 0);
 
-  AnimationController inertialSlideAnimationController;
-  AnimationController targetSlideAnimationController;
-  Animation _offsetAnimation;
-  Animation _scaleAnimation;
+  late final AnimationController inertialSlideAnimationController;
+  late final AnimationController targetSlideAnimationController;
+  late Animation _offsetAnimation;
+  late Animation _scaleAnimation;
 
   /// 是否禁用触摸
   bool _isDisableTouch = false;
@@ -115,11 +115,10 @@ mixin _CommonTool on _TouchEvent {
   /// 禁用触摸事件
   void isDisableTouch(bool isDisable) {
     _isDisableTouch = isDisable;
-    notifyListeners();
   }
 
   /// 滑动至目标位置
-  void targetSlide({@required Offset targetOffset, @required double targetScale}) {
+  void targetSlide({required Offset targetOffset, required double targetScale}) {
     targetSlideAnimationController.duration = Duration(seconds: 1);
     _offsetAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(
           begin: this.offset,

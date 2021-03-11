@@ -25,8 +25,8 @@ class RebuildHandler<T> {
   RebuildHandler([this._handleCode]);
 
   /// 处理代号
-  T _handleCode;
-  T get handleCode => _handleCode;
+  T? _handleCode;
+  T? get handleCode => _handleCode;
 
   Function() _rebuild = () {};
   Map<dynamic, dynamic> state = {};
@@ -41,7 +41,7 @@ class RebuildHandler<T> {
 }
 
 class RebuildHandleWidget<T> extends StatefulWidget {
-  RebuildHandleWidget({@required this.rebuildHandler, @required this.builder});
+  RebuildHandleWidget({required this.rebuildHandler, required this.builder});
   final RebuildHandler<T> rebuildHandler;
   final Widget Function(RebuildHandler<T>) builder;
   @override

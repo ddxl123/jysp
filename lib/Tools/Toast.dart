@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
 
 void showToast(String text) {
-  OverlayState overlayState = Overlay.of(G.globalKey.currentContext);
+  OverlayState? overlayState = Overlay.of(G.globalKey.currentContext!);
   OverlayEntry entry = OverlayEntry(
     builder: (context) {
       return Toast(text: text);
     },
   );
+  if (overlayState == null) {
+    throw "overlayState is null. 'text value':$text";
+  }
   overlayState.insert(entry);
   Future.delayed(Duration(seconds: 2), () {
     entry.remove();
@@ -18,7 +21,7 @@ void showToast(String text) {
 }
 
 class Toast extends StatefulWidget {
-  Toast({this.text});
+  Toast({required this.text});
   final String text;
 
   @override

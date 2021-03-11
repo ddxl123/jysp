@@ -4,10 +4,10 @@ import 'package:jysp/Pages/SheetPage.dart';
 
 class SheetLoadingArea extends StatefulWidget {
   SheetLoadingArea({
-    @required this.sheetPageController,
-    @required this.wait,
-    @required this.startFuture,
-    @required this.isOnce,
+    required this.sheetPageController,
+    required this.wait,
+    required this.startFuture,
+    required this.isOnce,
   });
   final SheetPageController sheetPageController;
   final Duration wait;

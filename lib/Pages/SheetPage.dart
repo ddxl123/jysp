@@ -10,7 +10,7 @@ import 'package:jysp/Tools/LoadingAnimation.dart';
 ///
 ///
 class SheetRoute extends OverlayRoute {
-  SheetRoute({@required this.slivers});
+  SheetRoute({required this.slivers});
 
   final List<Widget> Function(SheetPageController) slivers;
 
@@ -83,11 +83,11 @@ class SheetRoute extends OverlayRoute {
 ///
 class SheetControl extends StatefulWidget {
   SheetControl({
-    @required this.sheetRoute,
-    @required this.getRemoveAnimation,
+    required this.sheetRoute,
+    required this.getRemoveAnimation,
 
-    ///
-    @required this.slivers,
+    //
+    required this.slivers,
   });
 
   final SheetRoute sheetRoute;
@@ -106,8 +106,8 @@ class _SheetControlState extends State<SheetControl> with SingleTickerProviderSt
   double _maxHeight = MediaQueryData.fromWindow(window).size.height - MediaQueryData.fromWindow(window).padding.top;
 
   /// 动画
-  Animation _animation;
-  AnimationController _animationController;
+  late Animation<double> _animation;
+  late AnimationController _animationController;
 
   /// 内部滑动控制器
   ScrollController _scrollController = ScrollController();

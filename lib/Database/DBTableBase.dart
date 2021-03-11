@@ -95,7 +95,7 @@ mixin TableToSql {
 
 abstract class DBTableBase {
   List<List<dynamic>> get fields;
-  String getTableNameInstance;
+  String getTableNameInstance = "";
 
   static String get created_at => "created_at";
 
@@ -134,7 +134,6 @@ abstract class DBTableBase {
 ///
 ///
 /// 例子
-// ignore_for_file: non_constant_identifier_names
 class TExamples implements DBTableBase {
   @override
   String getTableNameInstance = getTableName;

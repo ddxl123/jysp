@@ -14,9 +14,9 @@ int forceLineCount = -1;
 /// - [messageString] String 类型。 普通日志输出。
 /// - [dataListMap] List 或 Map 类型。需要被格式化的日志输出，比如 List、Map 类型的对象。
 /// - [lineCount] 需要输出栈的行数量。
-void dLog(dynamic Function() messageString, [dynamic Function() indentListMap, int lineCount = 1]) {
+void dLog(dynamic Function()? messageString, [dynamic Function()? indentListMap, int lineCount = 1]) {
   try {
-    List<String> st = StackTrace.current.toString().split("\n").sublist(0, 10);
+    List<String> st = StackTrace.current.toString().split("\n");
 
     // 只留下被 #num 标记的行
     st.removeWhere((item) => item.contains("<asynchronous suspension>"));
@@ -37,7 +37,7 @@ void dLog(dynamic Function() messageString, [dynamic Function() indentListMap, i
     dynamic indent = (ind is List) || (ind is Map) ? ind : ind.toString();
     String message = messageString == null ? "null" : messageString().toString();
 
-    String packageOne;
+    String? packageOne;
     if (finalLineCount == 1) {
       String currentLineAt = st[1];
       packageOne = " " + currentLineAt.substring(currentLineAt.indexOf("(package:"), currentLineAt.length);
@@ -63,7 +63,8 @@ void dLog(dynamic Function() messageString, [dynamic Function() indentListMap, i
       }
     }
   } catch (err) {
-    if (!(err is RangeError)) {
+    if (err is RangeError) {
+    } else {
       log("log err:" + err.toString());
     }
   }
