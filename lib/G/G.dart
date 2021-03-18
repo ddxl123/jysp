@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/GHttp.dart';
+import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/G/GSqlite.dart';
 
 class G {
@@ -8,4 +9,6 @@ class G {
   static final GHttp http = GHttp();
 
   static final GSqlite sqlite = GSqlite();
+
+  static final GNavigatorPush navigatorPush = GNavigatorPush();
 }

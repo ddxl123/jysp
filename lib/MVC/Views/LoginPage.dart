@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/LWCR/LifeCycle/LoginPageLC.dart';
-import 'package:jysp/LWCR/WidgetBuild/WidgetBuildBase.dart';
+import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
+import 'package:provider/provider.dart';
 
-class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
-  LoginPageWB(LoginPageLC widget) : super(widget);
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
 
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +58,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
   Widget _emailInputField() {
     return Flexible(
       child: TextField(
-        controller: widget.loginPageController.emailTextEditingController,
+        controller: context.read<LoginPageController>().emailTextEditingController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.person),
@@ -70,7 +73,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
   Widget _codeInputField() {
     return Expanded(
       child: TextField(
-        controller: widget.loginPageController.codeTextEditingController,
+        controller: context.read<LoginPageController>().codeTextEditingController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.lock),
@@ -84,7 +87,7 @@ class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
 
   Widget _sendEmailButton() {
     return RebuildHandleWidget<SendEmailButtonHandlerEnum>(
-      rebuildHandler: widget.loginPageController.sendEmailButtonRebuildHandler,
+      rebuildHandler: context.read<LoginPageController>().sendEmailButtonRebuildHandler,
       builder: (handler) {
         if (handler.handleCode == SendEmailButtonHandlerEnum.countdown) {
           // 倒计时状态
@@ -122,10 +125,10 @@ class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
               return;
             }
             handler.rebuildHandle(SendEmailButtonHandlerEnum.countdown);
-            widget.loginPageController.sendEmailRequest(
-              handler: handler,
-              emailTextEditingController: widget.loginPageController.emailTextEditingController,
-            );
+            context.read<LoginPageController>().sendEmailRequest(
+                  handler: handler,
+                  emailTextEditingController: context.read<LoginPageController>().emailTextEditingController,
+                );
           },
         );
       },
@@ -142,10 +145,10 @@ class LoginPageWB extends WidgetBuildBase<LoginPageLC> {
           ),
           child: Text("登陆/注册"),
           onPressed: () {
-            widget.loginPageController.verifyEmailRequest(
-              qqEmailTextEditingController: widget.loginPageController.emailTextEditingController,
-              codeTextEditingController: widget.loginPageController.codeTextEditingController,
-            );
+            context.read<LoginPageController>().verifyEmailRequest(
+                  qqEmailTextEditingController: context.read<LoginPageController>().emailTextEditingController,
+                  codeTextEditingController: context.read<LoginPageController>().codeTextEditingController,
+                );
           },
         ),
       ),

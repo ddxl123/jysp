@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/WillToHome.dart';
-import 'package:provider/provider.dart';
+import 'package:jysp/Test/FlutterTest.dart';
+import 'package:jysp/WillToHomePage.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,32 +20,8 @@ class _MyApp extends State<MyApp> {
     return MaterialApp(
       home: Material(
         key: G.globalKey,
-        child: WillToHome(),
+        child: WillToHomePage(),
       ),
     );
   }
 }
-
-// class Test extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         Text(context.watch<Name>().count.toString()),
-//         TextButton(
-//             onPressed: () {
-//               context.read<Name>().add();
-//             },
-//             child: Text("ssssss"))
-//       ],
-//     );
-//   }
-// }
-
-// class Name extends ChangeNotifier {
-//   int count = 0;
-//   void add() {
-//     count++;
-//     notifyListeners();
-//   }
-// }

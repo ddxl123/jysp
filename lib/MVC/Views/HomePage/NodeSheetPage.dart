@@ -9,8 +9,8 @@ import 'package:jysp/Tools/LoadingAnimation.dart';
 ///
 ///
 ///
-class SheetRoute extends OverlayRoute {
-  SheetRoute({required this.slivers});
+class NodeSheetPage extends OverlayRoute {
+  NodeSheetPage({required this.slivers});
 
   final List<Widget> Function(SheetPageController) slivers;
 
@@ -24,7 +24,7 @@ class SheetRoute extends OverlayRoute {
           return Stack(
             children: [
               _backgroundHitTest(),
-              _sheetControl(),
+              _sheet(),
             ],
 
             ///
@@ -38,9 +38,7 @@ class SheetRoute extends OverlayRoute {
     return Positioned(
       top: 0,
       child: Listener(
-        /// 当 [child: Container(color:null)] 时, [HitTestBehavior.translucent] 能触发背景点击事件
-        /// TODO: 而当 [child: Container(color:Colors.transparent)] 时,并不会触发背景点击事件。不知为何原因。
-        behavior: HitTestBehavior.translucent,
+        behavior: HitTestBehavior.deferToChild,
         onPointerMove: (event) {
           print(event);
         },
@@ -53,8 +51,8 @@ class SheetRoute extends OverlayRoute {
     );
   }
 
-  Widget _sheetControl() {
-    return SheetControl(
+  Widget _sheet() {
+    return Sheet(
       sheetRoute: this,
       getRemoveAnimation: (ra) {
         this._removeAnimation = ra;
@@ -81,8 +79,8 @@ class SheetRoute extends OverlayRoute {
 ///
 ///
 ///
-class SheetControl extends StatefulWidget {
-  SheetControl({
+class Sheet extends StatefulWidget {
+  Sheet({
     required this.sheetRoute,
     required this.getRemoveAnimation,
 
@@ -90,16 +88,16 @@ class SheetControl extends StatefulWidget {
     required this.slivers,
   });
 
-  final SheetRoute sheetRoute;
+  final NodeSheetPage sheetRoute;
   final Function getRemoveAnimation;
 
   final List<Widget> Function(SheetPageController) slivers;
 
   @override
-  _SheetControlState createState() => _SheetControlState();
+  _SheetState createState() => _SheetState();
 }
 
-class _SheetControlState extends State<SheetControl> with SingleTickerProviderStateMixin {
+class _SheetState extends State<Sheet> with SingleTickerProviderStateMixin {
   SheetPageController _sheetPageController = SheetPageController();
 
   /// 初始高度占满屏幕

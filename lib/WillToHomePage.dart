@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/LWCR/Controller/LoginPageController.dart';
-import 'package:jysp/LWCR/LifeCycle/LoginPageLC.dart';
+import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 
-class WillToHome extends StatefulWidget {
+class WillToHomePage extends StatefulWidget {
   @override
-  _WillToHomeState createState() => _WillToHomeState();
+  _WillToHomePageState createState() => _WillToHomePageState();
 }
 
-class _WillToHomeState extends State<WillToHome> {
+class _WillToHomePageState extends State<WillToHomePage> {
   LoginPageController loginPageController = LoginPageController();
 
   @override
@@ -50,7 +49,7 @@ class _WillToHomeState extends State<WillToHome> {
         children: [
           TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => LoginPageLC(loginPageController: loginPageController)));
+              G.navigatorPush.pushLoginPage(context);
             },
             child: Text("To home"),
           ),

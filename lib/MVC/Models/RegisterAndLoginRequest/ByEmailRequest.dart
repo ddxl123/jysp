@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GHttp.dart';
-import 'package:jysp/Pages/HomePage.dart';
+import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 

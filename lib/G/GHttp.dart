@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/Tools/TDebug.dart';
-import 'package:jysp/Tools/Toast.dart';
 
 class GHttp {
   /// 全局 [dio]
@@ -18,9 +17,9 @@ class GHttp {
 
   /// 初始化 [http]
   GHttp init() {
-    dio.options.baseUrl = "http://192.168.10.10:80/";
-    dio.options.connectTimeout = 30000; //30s
-    dio.options.receiveTimeout = 30000;
+    dio.options.baseUrl = "http://jysp.free.idcfengye.com/";
+    dio.options.connectTimeout = 20000; //10s
+    dio.options.receiveTimeout = 20000; //10s
     return this;
   }
 
@@ -68,6 +67,8 @@ class GHttp {
     /// 当相同请求未并发时，对当前请求做阻断标记
     sameNotConcurrentMap[sameNotConcurrent] = 1;
 
+    dLog(() => dio.options.baseUrl + route);
+
     // "await Future(() async {" 这段不能放在当前函数内的最顶端，否则并发时出现 sameNotConcurrentMap 未设置的情况
     await Future(() async {
       /// 延迟请求测试，正式版需注释掉
@@ -79,7 +80,6 @@ class GHttp {
         String accessToken = await G.sqlite.getSqliteToken(tokenTypeCode: 0);
         headers["Authorization"] = "Bearer " + accessToken;
       }
-
       await dio
           .request(
         "$route",
@@ -170,6 +170,8 @@ class GHttp {
       return;
     }
     _isTokenCreating = true;
+
+    dLog(() => dio.options.baseUrl + route);
 
     // "await Future(() async {" 这段不能放在当前函数内的最顶端，否则并发时出现 _isTokenCreating 未设置的情况
     await Future(() async {

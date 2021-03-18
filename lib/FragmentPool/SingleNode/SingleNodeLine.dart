@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/SingleNode/SingleNode.dart';
+import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
 
 class SingleNodeLine extends CustomPainter {
   late Path path;

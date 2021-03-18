@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/MVC/Models/FragmentPoolRequest/LayoutNodesRequest.dart';
+import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Database/both/TFragmentPoolNode.dart';
-import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
-import 'package:jysp/LWCR/Request/FragmentPoolRequest/LayoutNodesRequest.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
@@ -35,9 +35,9 @@ class FragmentPoolNode {
   String get name => this.map[TFragmentPoolNode.name];
   NodeType get node_type => NodeType.values[this.map[TFragmentPoolNode.node_type]];
   PoolType get pool_type => PoolType.values[this.map[TFragmentPoolNode.pool_type]];
-  List<double> get position {
+  Offset get position {
     List<String> split = (this.map[TFragmentPoolNode.position] as String).split(",");
-    return [double.parse(split[0]), double.parse(split[1])];
+    return Offset(double.parse(split[0]), double.parse(split[1]));
   }
 
   int get created_at => this.map[TFragmentPoolNode.created_at];
@@ -212,9 +212,9 @@ mixin FragmentPoolControllerRoot on _Init {
     PoolType.wikiPool: {"offset": null, "scale": null, "node0": Offset.zero},
   };
 
-  Function rebuild = () {};
-
   bool isIniting = false;
+
+  bool doRebuild = false;
 
   ///
 }
@@ -274,7 +274,8 @@ mixin _ToPool on LayoutNodesRequest {
           _isToPooling = false;
           _setView(freeBoxController, toPoolType);
           // 根据结果重新刷新布局
-          rebuild();
+          doRebuild = !doRebuild;
+          notifyListeners();
           break;
         case false:
           dLog(() => "获取 fragmentPoolNodes 数据失败。");

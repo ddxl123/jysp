@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
-class _Init extends ChangeNotifier {
-  _Init(
-    this.backgroundColor,
-    this.viewableWidth,
-    this.viewableHeight,
-  );
-
-  final Color backgroundColor;
-  final double viewableWidth;
-  final double viewableHeight;
-}
+class _Init extends ChangeNotifier {}
 
 mixin _Root on _Init {
   ///
@@ -21,19 +12,24 @@ mixin _Root on _Init {
   /// 偏移值,默认必须(0,0)
   Offset offset = Offset(0, 0);
 
+  /// 左上角偏移填充
+  Offset leftTopOffsetFilling = Offset(5000, 5000);
+
+  bool doRebuild = false;
+
   ///
 }
 
 mixin _TouchEvent on _Root {
   ///
 
-  double _lastTempScale = 1;
-  Offset _lastTempTouchPosition = Offset(0, 0);
-
   late final AnimationController inertialSlideAnimationController;
   late final AnimationController targetSlideAnimationController;
   late Animation _offsetAnimation;
   late Animation _scaleAnimation;
+
+  double _lastTempScale = 1;
+  Offset _lastTempTouchPosition = Offset(0, 0);
 
   /// 是否禁用触摸
   bool _isDisableTouch = false;
@@ -51,6 +47,7 @@ mixin _TouchEvent on _Root {
     /// 重置上一次 [临时缩放] 和 [临时触摸位置]
     _lastTempScale = 1;
     _lastTempTouchPosition = details.localFocalPoint;
+    dLog(() => "onScaleStart:" + offset.toString());
     notifyListeners();
   }
 
@@ -75,6 +72,7 @@ mixin _TouchEvent on _Root {
     _lastTempScale = details.scale;
     _lastTempTouchPosition = details.localFocalPoint;
 
+    dLog(() => "onScaleUpdate:" + offset.toString());
     notifyListeners();
   }
 
@@ -92,7 +90,7 @@ mixin _TouchEvent on _Root {
 
     inertialSlideAnimationController.forward(from: 0.0);
     inertialSlideAnimationController.addListener(_inertialSlideListener);
-    notifyListeners();
+    dLog(() => "onScaleEnd:" + offset.toString());
   }
 
   // 惯性滑动监听
@@ -103,6 +101,7 @@ mixin _TouchEvent on _Root {
     if (inertialSlideAnimationController.isDismissed || inertialSlideAnimationController.isCompleted) {
       inertialSlideAnimationController.removeListener(_inertialSlideListener);
     }
+    dLog(() => "_inertialSlideListener:" + offset.toString());
     notifyListeners();
   }
 
@@ -147,6 +146,4 @@ mixin _CommonTool on _TouchEvent {
   ///
 }
 
-class FreeBoxController extends _Init with _Root, _TouchEvent, _CommonTool {
-  FreeBoxController(Color backgroundColor, double viewableWidth, double viewableHeight) : super(backgroundColor, viewableWidth, viewableHeight);
-}
+class FreeBoxController extends _Init with _Root, _TouchEvent, _CommonTool {}

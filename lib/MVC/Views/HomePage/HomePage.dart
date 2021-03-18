@@ -1,38 +1,46 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
+import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
-import 'package:jysp/LWCR/Controller/FragmentPoolController.dart';
-import 'package:jysp/LWCR/Controller/FreeBoxController.dart';
-import 'package:jysp/LWCR/LifeCycle/FragmentPoolLC.dart';
-import 'package:jysp/LWCR/LifeCycle/FreeBoxLC.dart';
+import 'package:jysp/Plugin/FreeBox/FreeBox.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
+import 'package:jysp/Tools/TDebug.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  HomePageState createState() => HomePageState();
-}
-
-class HomePageState extends State<HomePage> {
-  FreeBoxController _freeBoxController = FreeBoxController(Colors.green, double.maxFinite, double.maxFinite);
-  FragmentPoolController _fragmentPoolController = FragmentPoolController();
-
-  @override
-  void dispose() {
-    _freeBoxController.dispose();
-    _fragmentPoolController.dispose();
-    super.dispose();
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FragmentPoolController()),
+        ChangeNotifierProvider(create: (_) => FreeBoxController()),
+      ],
+      child: HomePageProxy(),
+    );
+  }
+}
+
+class HomePageProxy extends StatefulWidget {
+  @override
+  HomePageProxyState createState() => HomePageProxyState();
+}
+
+class HomePageProxyState extends State<HomePageProxy> {
+  @override
+  Widget build(BuildContext context) {
+    dLog(() => "HomePage build");
     return Material(
       child: Stack(
         children: [
-          FreeBoxLC(
-            freeBoxController: _freeBoxController,
-            freeMoveScaleLayerChild: FragmentPoolLC(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController),
-            fixedLayerChild: Stack(
+          FreeBox(
+            backgroundColor: Colors.green,
+            viewableWidth: double.maxFinite,
+            viewableHeight: double.maxFinite,
+            freeMoveScaleLayerBuilder: (_) => FragmentPool(),
+            fixedLayerBuilder: (_) => Stack(
               children: <Widget>[
                 _toZeroButton(),
                 _loadingBarrier(),
@@ -52,10 +60,10 @@ class HomePageState extends State<HomePage> {
       left: 0,
       child: TextButton(
         onPressed: () {
-          _freeBoxController.targetSlide(
-            targetOffset: Offset.zero,
-            targetScale: 1.0,
-          );
+          context.read<FreeBoxController>().targetSlide(
+                targetOffset: Offset.zero,
+                targetScale: 1.0,
+              );
         },
         child: Icon(Icons.adjust),
       ),
@@ -65,7 +73,7 @@ class HomePageState extends State<HomePage> {
   /// 加载屏障
   Widget _loadingBarrier() {
     return RebuildHandleWidget<LoadingBarrierHandlerEnum>(
-      rebuildHandler: _fragmentPoolController.isLoadingBarrierRebuildHandler,
+      rebuildHandler: context.read<FragmentPoolController>().isLoadingBarrierRebuildHandler,
       builder: (handler) {
         if (handler.handleCode == LoadingBarrierHandlerEnum.enabled) {
           return Positioned(
@@ -97,7 +105,7 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(child: TextButton(onPressed: () {}, child: Text("发现"))),
-            Expanded(child: FragmentPoolChoice(fragmentPoolController: _fragmentPoolController, freeBoxController: _freeBoxController)),
+            Expanded(child: FragmentPoolChoice(fragmentPoolController: context.read<FragmentPoolController>(), freeBoxController: context.read<FreeBoxController>())),
             Expanded(child: TextButton(onPressed: () {}, child: Text("我"))),
           ],
         ),
