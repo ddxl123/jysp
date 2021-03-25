@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 import 'package:jysp/MVC/Views/LoginPage.dart';
-import 'package:jysp/MVC/Views/HomePage/NodeSheetPage.dart';
+import 'package:jysp/Plugin/SheetPage/SheetPage.dart';
+import 'package:jysp/Plugin/SheetPage/SheetPageController.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 import 'package:provider/provider.dart';
 
 class GNavigatorPush {
@@ -22,9 +24,63 @@ class GNavigatorPush {
   void pushSheetPage(BuildContext context) {
     Navigator.push(
       context,
-      NodeSheetPage(slivers: (SheetPageController sheetPageController) {
-        return [SliverAppBar()];
-      }),
+      SheetPage(
+        bodyDataFuture: (List<Map> bodyData) async {
+          await Future.delayed(Duration(seconds: 2));
+
+          return BodyDataFutureResult.success;
+        },
+        slivers: ({required sheetPageController, required header, required body, required loadArea}) {
+          return [
+            header(
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 50,
+                  color: Colors.orange,
+                  child: Text("data"),
+                ),
+              ),
+            ),
+            body(
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, index) {
+                    bool isCheck = false;
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.all(0),
+                              backgroundColor: Colors.purple,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {},
+                            child: Text(sheetPageController.bodyData[index].toString()),
+                          ),
+                        ),
+                        StatefulBuilder(
+                          builder: (BuildContext context, rebuild) {
+                            return Checkbox(
+                              value: isCheck,
+                              onChanged: (check) {
+                                isCheck = !isCheck;
+                                rebuild(() {});
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                  childCount: sheetPageController.bodyData.length,
+                ),
+              ),
+            ),
+            loadArea(),
+          ];
+        },
+      ),
     );
   }
 

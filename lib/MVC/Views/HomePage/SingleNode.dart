@@ -40,7 +40,6 @@ class SingleNodeState extends State<SingleNode> {
           context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dy +
           _onLongPressMoveUpdateOffset.dy,
       child: GestureDetector(
-        child: _child(),
         onLongPressStart: (details) {
           dLog(() => "onLongPressStart");
           _lastOffset = details.globalPosition;
@@ -54,6 +53,7 @@ class SingleNodeState extends State<SingleNode> {
         onLongPressEnd: (details) {
           dLog(() => "onLongPressEnd");
         },
+        child: _child(),
       ),
     );
   }
