@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 import 'package:jysp/MVC/Models/FragmentPoolRequest/LayoutNodesRequest.dart';
 import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
-import 'package:jysp/Database/both/TFragmentPoolNode.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 

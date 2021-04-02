@@ -1,7 +1,9 @@
 import 'dart:io';
 
-import 'package:jysp/Database/DBTableBase.dart';
-import 'package:jysp/Database/local/TToken.dart';
+import 'package:jysp/Database/base/DBTableBase.dart';
+import 'package:jysp/Database/base/ParseIntoSqls.dart';
+import 'package:jysp/Database/base/SqliteType.dart';
+import 'package:jysp/Database/models/MToken.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/utils/utils.dart';
@@ -12,10 +14,14 @@ mixin Root {
   late Database db;
   late String dbPathRoot;
   String dbName = "/jysp.db";
+
+  /// 针对 sqlite 的 sql create table 语句
+  /// [key]：表名，[value]：create sqls
+  Map<String, String> sql = {};
 }
 
 /// 通用工具
-mixin CommonTools on Root, TableToSql {
+mixin CommonTools on Root {
   ///
 
   /// 获取全部的表
@@ -40,21 +46,16 @@ mixin CommonTools on Root, TableToSql {
     dLog(() => "清空后的表：" + logGetAllTableNamesAfter.toString());
   }
 
-  /// 创建指定表
-  Future<void> _createTable(String tableName) async {
-    return await db.execute(sql[tableName]!);
-  }
-
   /// 创建全部需要的表
   Future<void> _createAllTables() async {
-    await Future.forEach<String>(sql.keys, (tableName) {
-      return _createTable(tableName);
+    await Future.forEach<String>(sql.keys, (tableName) async {
+      return await db.execute(sql[tableName]!);
     });
   }
 }
 
 /// 诊断工具
-mixin DiagTools on Root, TableToSql, CommonTools {
+mixin DiagTools on Root, CommonTools {
   ///
 
   /// 检测数据库是否存在
@@ -136,7 +137,7 @@ mixin Token on Root {
     String? tokenType = tokenTypeCode == 0 ? "access_token" : (tokenTypeCode == 1 ? "refresh_token" : null);
     String? token;
     try {
-      token = (await db.query(TToken.getTableName))[0][tokenType].toString();
+      token = (await db.query(MToken.getTableName))[0][tokenType].toString();
     } catch (e) {
       // 获取失败。可能是 query 失败，也可能是 [0] 值为 null
       token = null;
@@ -158,7 +159,7 @@ mixin Token on Root {
     required Function() success,
     required Function(int failCode) fail,
   }) async {
-    if (tokens[TToken.access_token] == null || tokens[TToken.refresh_token] == null) {
+    if (tokens[MToken.access_token] == null || tokens[MToken.refresh_token] == null) {
       await fail(1);
       dLog(() => "响应的 tokens 数据异常!");
     } else {
@@ -167,14 +168,22 @@ mixin Token on Root {
       // 先清空表，再插入
       await db.transaction(
         (txn) async {
-          await txn.delete(TToken.getTableName);
-          await txn.insert(TToken.getTableName, TToken.toMap(tokens[TToken.access_token], tokens[TToken.refresh_token]));
+          await txn.delete(MToken.getTableName);
+          await txn.insert(
+            MToken.getTableName,
+            MToken.toMap(
+              access_token_v: tokens[MToken.access_token],
+              refresh_token_v: tokens[MToken.refresh_token],
+              created_at_v: 0,
+              updated_at_v: 0,
+            ),
+          );
         },
       )
           //
           .then((onValue) async {
         await success();
-        List<Map> queryResult = await db.query(TToken.getTableName);
+        List<Map> queryResult = await db.query(MToken.getTableName);
         dLog(() => "sqlite 查询 tokens 成功：", () => queryResult);
       })
           //
@@ -188,14 +197,14 @@ mixin Token on Root {
   ///
 }
 
-class GSqlite with Root, TableToSql, CommonTools, DiagTools, Token {
+class GSqlite with Root, CommonTools, DiagTools, Token {
   ///
 
   /// 初始化 Sqlite
   Future<SqliteDamagedResult> init() async {
     try {
       /// 罗列全部被需要的表的 sql 语句
-      toSetSql();
+      ParseIntoSqls().parseIntoSqls(sql);
 
       /// 打开 sqlite 数据库
       dbPathRoot = await getDatabasesPath() ?? "";

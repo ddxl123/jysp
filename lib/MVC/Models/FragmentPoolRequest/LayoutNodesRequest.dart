@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:jysp/Database/both/TFragmentPoolNode.dart';
+import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GHttp.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController.dart';
