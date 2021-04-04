@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GHttp.dart';
+import 'package:jysp/G/GSqlite/Token.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -22,7 +23,7 @@ mixin ByEmailRequest {
       // 服务器验证：
 
       // TODO: POST /api/register_and_login/by_email/send_email
-      await G.http.sendRequest(
+      await GHttp.sendRequest(
         method: "POST",
         route: "api/register_and_login/by_email/send_email",
         data: {
@@ -77,7 +78,7 @@ mixin ByEmailRequest {
       //
       // 服务器验证
       // TODO: POST /api/register_and_login/by_email/verify_email
-      await G.http.sendCreateTokenRequest(
+      await GHttp.sendCreateTokenRequest(
         route: "api/register_and_login/by_email/verify_email",
         willVerifyData: {
           "email": qqEmailTextEditingController.text,
@@ -105,7 +106,7 @@ mixin ByEmailRequest {
               break;
             case 206:
               dLog(() => "用户 注册 成功并只响应 token!");
-              await G.sqlite.setSqliteToken(
+              await Token().setSqliteToken(
                 tokens: data,
                 success: () {
                   Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
@@ -118,7 +119,7 @@ mixin ByEmailRequest {
               break;
             case 208:
               dLog(() => "用户 登陆 成功并只响应 token!");
-              await G.sqlite.setSqliteToken(
+              await Token().setSqliteToken(
                 tokens: data,
                 success: () {
                   Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
@@ -127,7 +128,7 @@ mixin ByEmailRequest {
               );
               break;
             case 209:
-              dLog(() => "生成 token 异常!");
+              dLog(() => "生成 token 异常!", () => data);
               break;
             default:
               dLog(() => "未知 code!");

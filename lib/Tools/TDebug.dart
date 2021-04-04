@@ -14,7 +14,12 @@ int forceLineCount = -1;
 /// - [messageString] String 类型。 普通日志输出。
 /// - [dataListMap] List 或 Map 类型。需要被格式化的日志输出，比如 List、Map 类型的对象。
 /// - [lineCount] 需要输出栈的行数量。
-void dLog(dynamic Function()? messageString, [dynamic Function()? indentListMap, int lineCount = 1]) {
+Future<void> dLog(
+  dynamic Function()? messageString, [
+  dynamic Function()? indentListMap,
+  Future<dynamic> Function()? futureCallback,
+  int lineCount = 1,
+]) async {
   try {
     List<String> st = StackTrace.current.toString().split("\n");
 
@@ -34,6 +39,9 @@ void dLog(dynamic Function()? messageString, [dynamic Function()? indentListMap,
 
     // 获取将要打印的主内容
     dynamic ind = indentListMap == null ? "null" : indentListMap();
+    if (futureCallback != null) {
+      ind = await futureCallback();
+    }
     dynamic indent = (ind is List) || (ind is Map) ? ind : ind.toString();
     String message = messageString == null ? "null" : messageString().toString();
 

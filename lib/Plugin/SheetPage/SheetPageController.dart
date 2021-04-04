@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:jysp/Plugin/SheetPage/SheetLoadAreaController.dart';
-import 'package:jysp/Plugin/SheetPage/SheetLoadingArea.dart';
+import 'package:jysp/Plugin/SheetPage/SheetLoadArea.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 /// 滚动、触摸方向枚举

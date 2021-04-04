@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class GNavigatorPush {
   ///
 
-  void pushLoginPage(BuildContext context) {
+  static void pushLoginPage(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -20,7 +20,7 @@ class GNavigatorPush {
     );
   }
 
-  void pushSheetPage(BuildContext context) {
+  static void pushSheetPage(BuildContext context) {
     Navigator.push(
       context,
       SheetPage(

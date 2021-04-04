@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Flexible(
                 child: Text(
-                  "登陆",
+                  "登陆/注册",
                   style: TextStyle(fontSize: 18),
                 ),
               ),

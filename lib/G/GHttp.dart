@@ -1,26 +1,25 @@
 import 'package:dio/dio.dart';
-import 'package:jysp/G/G.dart';
+import 'package:jysp/G/GSqlite/Token.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 class GHttp {
   /// 全局 [dio]
-  Dio dio = Dio();
+  static final Dio dio = Dio();
 
   /// 不可并发请求标志
-  Map<dynamic, dynamic> sameNotConcurrentMap = {};
+  static final Map<dynamic, dynamic> _sameNotConcurrentMap = {};
 
   /// 是否处于正在 refresh token 状态
-  bool _isTokenRefreshing = false;
+  static bool _isTokenRefreshing = false;
 
   /// 是否处于正在 get token 状态
-  bool _isTokenCreating = false;
+  static bool _isTokenCreating = false;
 
   /// 初始化 [http]
-  GHttp init() {
+  static void init() {
     dio.options.baseUrl = "http://jysp.free.idcfengye.com/";
     dio.options.connectTimeout = 20000; //10s
     dio.options.receiveTimeout = 20000; //10s
-    return this;
   }
 
   ///
@@ -46,7 +45,7 @@ class GHttp {
   ///     - [isAuth = false] 时：含 [GeneralRequestInterruptedStatus.concurrentBefore]、[GeneralRequestInterruptedStatus.localDioError]、
   ///                              [GeneralRequestInterruptedStatus.localUnknownError]
   ///
-  Future<void> sendRequest({
+  static Future<void> sendRequest({
     required String method,
     required String route,
     required bool isAuth,
@@ -57,15 +56,15 @@ class GHttp {
     required Function(GeneralRequestInterruptedStatus generalRequestInterruptedStatus) interruptedCallback,
   }) async {
     /// 若相同请求被并发，或正处在 refresh token 状态，或正处在 create token 状态，则直接返回。
-    if ((sameNotConcurrent != null && sameNotConcurrentMap.containsKey(sameNotConcurrent)) || _isTokenRefreshing || _isTokenCreating) {
+    if ((sameNotConcurrent != null && _sameNotConcurrentMap.containsKey(sameNotConcurrent)) || _isTokenRefreshing || _isTokenCreating) {
       // 或相同请求并发，或 token 正在刷新，或 token 正在生成
-      dLog(() => "concurrent:$sameNotConcurrentMap");
+      dLog(() => "concurrent:$_sameNotConcurrentMap");
       await interruptedCallback(GeneralRequestInterruptedStatus.concurrentBefore);
       return;
     }
 
     /// 当相同请求未并发时，对当前请求做阻断标记
-    sameNotConcurrentMap[sameNotConcurrent] = 1;
+    _sameNotConcurrentMap[sameNotConcurrent] = 1;
 
     dLog(() => dio.options.baseUrl + route);
 
@@ -77,7 +76,7 @@ class GHttp {
       /// 给请求头设置 token
       Map<String, dynamic> headers = {};
       if (isAuth) {
-        String accessToken = await G.sqlite.getSqliteToken(tokenTypeCode: 0);
+        String accessToken = await Token().getSqliteToken(tokenTypeCode: 0);
         headers["Authorization"] = "Bearer " + accessToken;
       }
       await dio
@@ -141,7 +140,7 @@ class GHttp {
     })
         // whenComplete 要放在最外层
         .whenComplete(() {
-      sameNotConcurrentMap.remove(sameNotConcurrent);
+      _sameNotConcurrentMap.remove(sameNotConcurrent);
     });
   }
 
@@ -159,7 +158,7 @@ class GHttp {
   ///   - [data]：响应的结果码对应的数据
   /// - [tokenCreateFailCallback]：token 生成失败的回调。**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
   ///
-  Future<void> sendCreateTokenRequest({
+  static Future<void> sendCreateTokenRequest({
     required String route,
     required Map<String, dynamic> willVerifyData,
     required Function({int? code, dynamic? data}) resultCallback,
@@ -211,7 +210,7 @@ class GHttp {
   /// - [tokenRefreshSuccessCallback]：token 刷新成功的回调；**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
   /// - [tokenRefreshFailCallback]：token 刷新失败的回调；**注意:返回的结果可以是 Future, 函数内部已嵌套 await**
   ///
-  Future<void> sendRefreshTokenRequest({
+  static Future<void> sendRefreshTokenRequest({
     required Function() tokenRefreshSuccessCallback,
     required Function(RefreshTokenInterruptedStatus refreshTokenInterruptedStatus) tokenRefreshFailCallback,
   }) async {
@@ -228,7 +227,7 @@ class GHttp {
       await Future.delayed(Duration(seconds: 2));
 
       // 从 sqlite 中获取 refresh_token
-      String refreshToken = await G.sqlite.getSqliteToken(tokenTypeCode: 1);
+      String refreshToken = await Token().getSqliteToken(tokenTypeCode: 1);
 
       await dio.request("/api/refresh_token", options: Options(method: "GET", headers: {"Authorization": "Bearer " + refreshToken})).then(
         (Response<dynamic> response) async {
@@ -237,7 +236,7 @@ class GHttp {
           switch (codeAndData.code) {
             case -2:
               // 存储响应的 tokens
-              await G.sqlite.setSqliteToken(
+              await Token().setSqliteToken(
                 tokens: codeAndData.data,
                 success: () async {
                   await tokenRefreshSuccessCallback();
@@ -283,7 +282,7 @@ class GHttp {
   ///
   /// catchError 需要返回 Future<Null> 类型
   ///
-  Future<Null> _catchLocalError(
+  static Future<Null> _catchLocalError(
     dynamic onError,
     Function interruptedStatusCallback,
     dynamic localDioErrorInterruptedStatus,

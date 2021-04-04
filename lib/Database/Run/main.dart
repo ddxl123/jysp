@@ -1,11 +1,16 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:jysp/Database/Run/ModelConfig.dart';
 import 'package:jysp/Database/base/SqliteType.dart';
 
+/// 模型名称、字段
 Map<String, Map<String, List<SqliteType>>> modelContents = {};
+
+/// 下载模块
+List<String> downloadBaseModules = [];
 
 /// 快捷 —— INTEGER 类型，非主键
 List<SqliteType> x_id_integer() => setFieldTypes([SqliteType.INTEGER, SqliteType.UNSIGNED], SqliteType.int);
@@ -178,7 +183,9 @@ String modelListContent(String modelImport, List<String> modelList) {
 import 'package:jysp/Database/base/DBTableBase.dart';
 $modelImport
 class ModelList {
-  List<DBTableBase> models = $modelList;
+  static List<DBTableBase> models = $modelList;
+
+  static List<String> downloadBaseModules = ${JsonEncoder.withIndent("").convert(downloadBaseModules)};
 }
 """;
 }

@@ -12,9 +12,12 @@ import 'package:jysp/Database/base/SqliteType.dart';
 bool isCoverFile = true;
 
 void runCreateModels() {
-  users();
-  curds();
+  version_infos();
   tokens();
+  users();
+  uploads();
+  download_modules();
+  download_rows();
   pn_pending_pool_nodes();
   pn_memory_pool_nodes();
   pn_complete_pool_nodes();
@@ -23,6 +26,34 @@ void runCreateModels() {
   fragments_about_memory_pool_nodes();
   fragments_about_complete_pool_nodes();
   rules();
+  runDownloadModuleField();
+}
+
+void version_infos() {
+  createModel(
+    tableNameWithS: "version_infos",
+    createField: createFields(
+      fields: {
+        "saved_version": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+      },
+      timestamp: true,
+      curd_status: false,
+    ),
+  );
+}
+
+void tokens() {
+  createModel(
+    tableNameWithS: "tokens",
+    createField: createFields(
+      fields: {
+        "access_token": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+        "refresh_token": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+      },
+      timestamp: true,
+      curd_status: false,
+    ),
+  );
 }
 
 void users() {
@@ -41,15 +72,15 @@ void users() {
   );
 }
 
-void curds() {
+void uploads() {
   createModel(
-    tableNameWithS: "curds",
+    tableNameWithS: "uploads",
     createField: createFields(
       fields: {
-        "table": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+        "table_name": setFieldTypes([SqliteType.TEXT], SqliteType.String),
         "row_id": x_id_integer(),
         "row_uuid": x_id_text(),
-        "curd_is_ok": setFieldTypes([SqliteType.INTEGER], SqliteType.int),
+        "upload_is_ok": setFieldTypes([SqliteType.INTEGER], SqliteType.int),
       },
       timestamp: true,
       curd_status: false,
@@ -57,13 +88,28 @@ void curds() {
   );
 }
 
-void tokens() {
+void download_modules() {
   createModel(
-    tableNameWithS: "tokens",
+    tableNameWithS: "download_modules",
     createField: createFields(
       fields: {
-        "access_token": x_id_integer(),
-        "refresh_token": x_id_text(),
+        "module_name": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+        "download_is_ok": setFieldTypes([SqliteType.INTEGER], SqliteType.int), // 0 未下载，1 下载完成
+      },
+      timestamp: true,
+      curd_status: false,
+    ),
+  );
+}
+
+void download_rows() {
+  createModel(
+    tableNameWithS: "download_rows",
+    createField: createFields(
+      fields: {
+        "table_name": setFieldTypes([SqliteType.TEXT], SqliteType.String),
+        "row_id": x_id_integer(),
+        "download_is_ok": setFieldTypes([SqliteType.INTEGER], SqliteType.int),
       },
       timestamp: true,
       curd_status: false,
@@ -217,5 +263,17 @@ void rules() {
       timestamp: true,
       curd_status: true,
     ),
+  );
+}
+
+void runDownloadModuleField() {
+  downloadBaseModules.addAll(
+    [
+      "user_info", // 个人信息
+      "pending_pool_nodes", // 待定池节点
+      "memory_pool_nodes", // 记忆池节点
+      "complete_pool_nodes", // 完成池节点
+      "rule_pool_nodes", // 规则池节点
+    ],
   );
 }

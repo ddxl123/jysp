@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/G/G.dart';
-import 'package:jysp/MVC/Controllers/FragmentPoolController.dart';
 import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
@@ -34,10 +31,10 @@ class SingleNodeState extends State<SingleNode> {
     dLog(() => "build");
     return Positioned(
       left: context.read<FreeBoxController>().leftTopOffsetFilling.dx +
-          context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dx +
+          // context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dx +
           _onLongPressMoveUpdateOffset.dx,
       top: context.read<FreeBoxController>().leftTopOffsetFilling.dy +
-          context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dy +
+          // context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dy +
           _onLongPressMoveUpdateOffset.dy,
       child: GestureDetector(
         onLongPressStart: (details) {
@@ -53,49 +50,49 @@ class SingleNodeState extends State<SingleNode> {
         onLongPressEnd: (details) {
           dLog(() => "onLongPressEnd");
         },
-        child: _child(),
+        child: Text("aaa"),
       ),
     );
   }
 
-  Widget _child() {
-    switch (context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.node_type) {
-      case NodeType.pendingFragment:
-        return TextButton(
-          child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
-          onPressed: () {
-            G.navigatorPush.pushSheetPage(context);
-          },
-          style: TextButton.styleFrom(
-            primary: Colors.red,
-            onSurface: Colors.orange,
-            shadowColor: Colors.purple,
-          ),
-        );
-      case NodeType.pendingGroup:
-        return TextButton(
-          child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
-          onPressed: () {
-            G.navigatorPush.pushSheetPage(context);
-          },
-          style: TextButton.styleFrom(
-            primary: Colors.red,
-            onSurface: Colors.orange,
-            shadowColor: Colors.purple,
-          ),
-        );
-      default:
-        return TextButton(
-          child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
-          onPressed: () {
-            G.navigatorPush.pushSheetPage(context);
-          },
-          style: TextButton.styleFrom(
-            primary: Colors.red,
-            onSurface: Colors.orange,
-            shadowColor: Colors.purple,
-          ),
-        );
-    }
-  }
+  // Widget _child() {
+  //   switch (context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.node_type) {
+  //     case NodeType.pendingFragment:
+  //       return TextButton(
+  //         child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
+  //         onPressed: () {
+  //           G.navigatorPush.pushSheetPage(context);
+  //         },
+  //         style: TextButton.styleFrom(
+  //           primary: Colors.red,
+  //           onSurface: Colors.orange,
+  //           shadowColor: Colors.purple,
+  //         ),
+  //       );
+  //     case NodeType.pendingGroup:
+  //       return TextButton(
+  //         child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
+  //         onPressed: () {
+  //           G.navigatorPush.pushSheetPage(context);
+  //         },
+  //         style: TextButton.styleFrom(
+  //           primary: Colors.red,
+  //           onSurface: Colors.orange,
+  //           shadowColor: Colors.purple,
+  //         ),
+  //       );
+  //     default:
+  //       return TextButton(
+  //         child: Text(context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.name),
+  //         onPressed: () {
+  //           G.navigatorPush.pushSheetPage(context);
+  //         },
+  //         style: TextButton.styleFrom(
+  //           primary: Colors.red,
+  //           onSurface: Colors.orange,
+  //           shadowColor: Colors.purple,
+  //         ),
+  //       );
+  //   }
+  // }
 }

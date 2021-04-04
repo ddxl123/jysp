@@ -7,13 +7,15 @@ class ParseIntoSqls {
   ///
 
   /// 罗列针对 sqlite 的 sql create table 语句
-  void parseIntoSqls(Map<String, String> sql) {
-    sql.clear();
-    ModelList().models.forEach(
+  /// sqls --- [key]：表名，[value]：create sql
+  Map<String, String> parseIntoSqls() {
+    Map<String, String> sqls = {};
+    ModelList.models.forEach(
       (model) {
-        _parseIntoSql(model, sql);
+        _parseIntoSql(model, sqls);
       },
     );
+    return sqls;
   }
 
   /// 设置针对 sqlite 的 sql create table 语句
@@ -44,11 +46,7 @@ class ParseIntoSqls {
     fieldsSql = fieldsSql.substring(0, fieldsSql.length - 1);
 
     // 存入
-    sql[tableName] = """
-      CREATE TABLE $tableName (
-      $fieldsSql
-      )
-    """;
+    sql[tableName] = "CREATE TABLE $tableName ($fieldsSql)";
   }
 
   ///
