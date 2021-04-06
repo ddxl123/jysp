@@ -1,9 +1,9 @@
 import 'package:jysp/AppInit/AppVersionManager.dart';
-import 'package:jysp/Database/models/MDownloadModule.dart';
+import 'package:jysp/Database/models/MDownloadQueueModule.dart';
 import 'package:jysp/Database/models/MVersionInfo.dart';
-import 'package:jysp/Database/models/ModelList.dart';
+import 'package:jysp/Database/models/ParseIntoSqls.dart';
+import 'package:jysp/G/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
-import 'package:jysp/G/GSqlite/ParseIntoSqls.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:sqflite/sqflite.dart';
@@ -27,8 +27,19 @@ class AppInit {
     }
     _isAppInited = true;
 
+    // 关于 sqlite 的初始化
+    Object initResult = await _sqliteInit();
+    if (!(initResult == AppInitStatus.ok)) {
+      return initResult;
+    }
+
+    // 关于其他初始化
+    return await _otherInit();
+  }
+
+  Future<Object> _sqliteInit() async {
     // 解析全部需要的表的 Sql 语句
-    Map<String, String> sqls = ParseIntoSqls().parseIntoSqls();
+    Map<String, String> sqls = ParseIntoSqls().parseIntoSqls;
 
     // 打开数据库
     await GSqlite.openDb();
@@ -53,7 +64,7 @@ class AppInit {
     // 2. 创建 [version_infos] 信息
     await GSqlite.db.update(
       MVersionInfo.getTableName,
-      MVersionInfo.toMap(
+      MVersionInfo.toSqliteMap(
         saved_version_v: (await AppVersionManager().getCurrentAppVersion()),
         created_at_v: DateTime.now().millisecondsSinceEpoch,
         updated_at_v: DateTime.now().millisecondsSinceEpoch,
@@ -62,11 +73,11 @@ class AppInit {
 
     // 3. 为 [download_modules] 表生成 baseModules
     Batch batch = GSqlite.db.batch();
-    for (int i = 0; i < ModelList.downloadBaseModules.length; i++) {
+    for (int i = 0; i < MDownloadQueueModule.downloadQueueBaseModules.length; i++) {
       batch.insert(
-        MDownloadModule.getTableName,
-        MDownloadModule.toMap(
-          module_name_v: ModelList.downloadBaseModules[i],
+        MDownloadQueueModule.getTableName,
+        MDownloadQueueModule.toSqliteMap(
+          module_name_v: MDownloadQueueModule.downloadQueueBaseModules[i],
           download_is_ok_v: 0,
           created_at_v: DateTime.now().millisecondsSinceEpoch,
           updated_at_v: DateTime.now().millisecondsSinceEpoch,
@@ -74,6 +85,10 @@ class AppInit {
       );
     }
     await batch.commit();
+
+    // 4. 其他初始化
+    _otherInit();
+
     return AppInitStatus.ok;
   }
 
@@ -90,6 +105,11 @@ class AppInit {
       return AppInitStatus.tableLost;
     }
 
+    return AppInitStatus.ok;
+  }
+
+  Future<Object> _otherInit() async {
+    GHttp.init();
     return AppInitStatus.ok;
   }
 

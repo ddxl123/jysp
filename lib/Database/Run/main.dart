@@ -6,43 +6,51 @@ import 'dart:io';
 import 'package:jysp/Database/Run/ModelConfig.dart';
 import 'package:jysp/Database/base/SqliteType.dart';
 
-/// 模型名称、字段
-Map<String, Map<String, List<SqliteType>>> modelContents = {};
+List<String> dartType = ["String", "int"];
 
-/// 下载模块
-List<String> downloadBaseModules = [];
+/// 模型名称、字段。eg. {"user_table":{"field1":[SqliteType.TEXT,"int"]}}
+Map<String, Map<String, List<Object>>> modelFields = {};
+
+/// 模型对应的额外内容。eg. {"user_table":"static int id = "123";}
+Map<String, String?> extraContents = {};
+
+/// 模型对应的额外内容。eg. {"user_table":"enum ABC {a,b,c}"}
+Map<String, String?> extraEnumContents = {};
+
+/// 下载队列基础模块。eg. ["用户信息"]
+List<List<String>> downloadBaseModules = [];
 
 /// 快捷 —— INTEGER 类型，非主键
-List<SqliteType> x_id_integer() => setFieldTypes([SqliteType.INTEGER, SqliteType.UNSIGNED], SqliteType.int);
+List<Object> x_id_integer() => setFieldTypes([SqliteType.INTEGER, SqliteType.UNSIGNED], "int");
 
 /// 快捷 —— TEXT 类型，非主键
-List<SqliteType> x_id_text() => setFieldTypes([SqliteType.TEXT], SqliteType.String);
+List<Object> x_id_text() => setFieldTypes([SqliteType.TEXT], "String");
 
 /// 设置字段类型
-List<SqliteType> setFieldTypes(List<SqliteType> sqliteFieldTypes, SqliteType dartFieldType) {
-  List<SqliteType> finalFieldTypes = [];
+List<Object> setFieldTypes(List<Object> sqliteFieldTypes, String dartFieldType) {
+  List<Object> finalFieldTypes = [];
   finalFieldTypes.addAll(sqliteFieldTypes);
   finalFieldTypes.add(dartFieldType);
   return finalFieldTypes;
 }
 
 /// 创建字段
-Map<String, List<SqliteType>> createFields({
-  required Map<String, List<SqliteType>> fields,
+Map<String, List<Object>> createFields({
+  required Map<String, List<Object>> fields,
   required bool timestamp,
   required bool curd_status,
 }) {
-  Map<String, List<SqliteType>> finalFields = {};
+  Map<String, List<Object>> finalFields = {};
   finalFields.addAll(fields);
   if (timestamp) {
     finalFields.addAll({
-      "created_at": [SqliteType.INTEGER, SqliteType.UNSIGNED, SqliteType.NOT_NULL, SqliteType.int],
-      "updated_at": [SqliteType.INTEGER, SqliteType.UNSIGNED, SqliteType.NOT_NULL, SqliteType.int],
+      "created_at": [SqliteType.INTEGER, SqliteType.UNSIGNED, "int"],
+      "updated_at": [SqliteType.INTEGER, SqliteType.UNSIGNED, "int"],
     });
   }
   if (curd_status) {
     finalFields.addAll({
-      "curd_status": [SqliteType.INTEGER, SqliteType.int],
+      "curd_status": [SqliteType.INTEGER, "int"],
     });
   }
   return finalFields;
@@ -51,9 +59,35 @@ Map<String, List<SqliteType>> createFields({
 /// 创建模型
 void createModel({
   required String tableNameWithS,
-  required Map<String, List<SqliteType>> createField,
+  required Map<String, List<Object>> createField,
+  String? extra,
+  String? extraEnum,
 }) {
-  modelContents.addAll({tableNameWithS: createField});
+  modelFields.addAll({tableNameWithS: createField});
+  extraContents.addAll({tableNameWithS: extra});
+  extraEnumContents.addAll({tableNameWithS: extraEnum});
+}
+
+/// 设置额外枚举类成员
+String setExtraEnumMembers({required String enumTypeName, required List<String> members}) {
+  String membersString = "";
+  members.forEach(
+    (member) {
+      membersString += member + ",";
+    },
+  );
+  return "enum $enumTypeName {$membersString}";
+}
+
+/// 创建额外枚举类
+String createExtraEnums(List<String> extraEnums) {
+  String extraEnumsString = "";
+  extraEnums.forEach(
+    (extraEnum) {
+      extraEnumsString += extraEnum;
+    },
+  );
+  return extraEnumsString;
 }
 
 ///
@@ -76,32 +110,43 @@ void createModel({
 void main(List<String> args) async {
   runCreateModels();
   await runWriteModels();
-  await runCreateModelsList();
+  await runParseIntoSqls();
 }
 
 Future<void> runWriteModels() async {
-  for (int i = 0; i < modelContents.length; i++) {
-    String tableNameWithS = modelContents.keys.elementAt(i);
-    Map<String, List<SqliteType>> fields = modelContents[tableNameWithS]!;
+  for (int i = 0; i < modelFields.length; i++) {
+    String tableNameWithS = modelFields.keys.elementAt(i);
+    Map<String, List<Object>> fields = modelFields[tableNameWithS]!;
 
     await File("lib/Database/models/M${toCamelCaseWillRemoveS(tableNameWithS)}.dart").writeAsString(modelContent(tableNameWithS, fields));
     print("Named '$tableNameWithS''s table model file is created successfully!");
   }
 }
 
-Future<void> runCreateModelsList() async {
-  List<String> modelList = [];
-  String modelImport = "";
-  modelContents.forEach(
-    (tableNameWithS, fields) {
-      String modelName = "M${toCamelCaseWillRemoveS(tableNameWithS)}";
-      modelList.add("$modelName()");
-      modelImport += "import 'package:jysp/Database/models/$modelName.dart';";
+Future<void> runParseIntoSqls() async {
+  Map<String, String> rawSqls = {};
+  modelFields.forEach(
+    (tableName, fieldTypes) {
+      String rawFieldsSql = ""; // 最终: "CREATE TABLE table_name (username TEXT UNIQUE,password TEXT,),"
+      fieldTypes.forEach(
+        (fieldName, fieldTypes) {
+          String rawFieldSql = "$fieldName";
+          List<SqliteType> newFieldTypes = fieldTypes.sublist(0, fieldTypes.length - 1) as List<SqliteType>;
+          newFieldTypes.forEach(
+            (fieldType) {
+              rawFieldSql += (" " + fieldType.value); // 形成 "username TEXT UNIQUE,"
+            },
+          );
+          rawFieldsSql += "$rawFieldSql,"; // 形成 "username TEXT UNIQUE,password TEXT,"
+        },
+      );
+      rawFieldsSql = rawFieldsSql.replaceAll(RegExp(r",$"), ""); // 去掉结尾逗号
+      rawSqls.addAll({tableName: "CREATE TABLE $tableName ($rawFieldsSql)"}); // 形成 "CREATE TABLE table_name (username TEXT UNIQUE,password TEXT,),"
     },
   );
 
-  await File("lib/Database/models/ModelList.dart").writeAsString(modelListContent(modelImport, modelList));
-  print("'ModelList' file is created successfully!");
+  await File("lib/Database/models/ParseIntoSqls.dart").writeAsString(parseIntoSqlsContent(rawSqls));
+  print("'ParseIntoSqls' file is created successfully!");
 }
 
 /// 将 demo_texts 形式转化成 DemoText 形式;
@@ -115,12 +160,11 @@ String toCamelCaseWillRemoveS(String demo_texts) {
 }
 
 /// 模型字段对应的快速调用成员字段
-String fieldNameQuickCall(Map<String, List<SqliteType>> fields) {
+String fieldNameQuickCall(Map<String, List<Object>> fields) {
   String quickCall = "";
   fields.forEach(
-    (fieldName, filedTypes) {
+    (fieldName, fieldTypes) {
       quickCall += """
-
   static String get $fieldName => "$fieldName";
 """;
     },
@@ -128,64 +172,111 @@ String fieldNameQuickCall(Map<String, List<SqliteType>> fields) {
   return quickCall;
 }
 
-/// 转化成 SQL 语句，需要把 fields 内的 List 的最后一个移除
-String sql(Map<String, List<SqliteType>> fields) {
-  Map<String, List<SqliteType>> newFields = {};
+/// 模型实例对应的 get 字段
+String instanceFieldValues(Map<String, List<Object>> fields) {
+  String fieldValues = "";
   fields.forEach(
-    (fieldName, fieldTypes) {
-      newFields[fieldName] = fieldTypes.sublist(0, fieldTypes.length - 1);
+    (fieldName, filedTypes) {
+      fieldValues += """
+  ${filedTypes.last}? get get_$fieldName => _rowModel[$fieldName] as ${filedTypes.last}?;
+"""; // eg. int? get name => _row[name] as int?;
     },
   );
-  return newFields.toString();
+  return fieldValues;
 }
 
-/// 字段映射成 Map
-List<String> toMap(Map<String, List<SqliteType>> fields) {
+/// 模型字段组转成 Sqlite 字段组
+List<String> toSqliteMap(Map<String, List<Object>> fields) {
   String input = "";
   String out = "";
   fields.forEach(
     (fieldName, fieldTypes) {
-      input += "required ${fieldTypes[fieldTypes.length - 1].value} ${fieldName}_v,"; // 例子：required int username_v,
-      out += (fieldName + ":" + fieldName + "_v,"); // 例子：username: username_v,
+      input += "required ${fieldTypes[fieldTypes.length - 1]}? ${fieldName}_v,"; // 例子：required int? username_v,
+      out += () {
+        if (dartType.contains(fieldTypes[fieldTypes.length - 1])) {
+          return (fieldName + ":" + fieldName + "_v,"); // 例子：username: username_v,
+        } else {
+          return (fieldName + ":" + fieldName + "_v?.index,"); // 例子：username: username_v?.index --- username: nodeTypeEnum?.index,
+        }
+      }();
     },
   );
   return [input, out];
 }
 
+/// Sqlite 字段组转成模型字段组
+String toModelMap(Map<String, List<Object>> fields) {
+  String out = "";
+  fields.forEach(
+    (fieldName, fieldTypes) {
+      out += () {
+        if (dartType.contains(fieldTypes[fieldTypes.length - 1])) {
+          // eg. username: sqliteMap[username],
+          return (fieldName + ":" + "sqliteMap[$fieldName],");
+        } else {
+          // eg. username: sqliteMap[username] == null ? null : NodeType.values[sqliteMap[username] as int],
+          return (fieldName + ":" + "sqliteMap[$fieldName] == null ? null : ${fieldTypes[fieldTypes.length - 1]}.values[sqliteMap[$fieldName] as int],");
+        }
+      }();
+    },
+  );
+  return out;
+}
+
 /// 模型内容
-String modelContent(String tableNameWithS, Map<String, List<SqliteType>> fields) {
+String modelContent(String tableNameWithS, Map<String, List<Object>> fields) {
   return """
 // ignore_for_file: non_constant_identifier_names
+import 'package:jysp/G/GSqlite/GSqlite.dart';
+${extraEnumContents[tableNameWithS] ?? ""}
+class M${toCamelCaseWillRemoveS(tableNameWithS)} {
 
-import 'package:jysp/Database/base/DBTableBase.dart';
-import 'package:jysp/Database/base/SqliteType.dart';
+  M${toCamelCaseWillRemoveS(tableNameWithS)}();
 
-class M${toCamelCaseWillRemoveS(tableNameWithS)} implements DBTableBase {
-  @override
-  String getTableNameInstance = getTableName;
+  M${toCamelCaseWillRemoveS(tableNameWithS)}.createModel({${toSqliteMap(fields)[0]}}) {
+    _rowModel.addAll({${toSqliteMap(fields)[1]}});
+  }
 
   static String get getTableName => "$tableNameWithS";
-${fieldNameQuickCall(fields)}
-  @override
-  Map<String, List<SqliteType>> get fields => ${sql(fields)};
 
-  static Map<String, dynamic> toMap({${toMap(fields)[0]}}
+${fieldNameQuickCall(fields)}
+
+  static Map<String, Object?> toSqliteMap({${toSqliteMap(fields)[0]}}
   ) {
-    return {${toMap(fields)[1]}};
+    return {${toSqliteMap(fields)[1]}};
   }
+
+  static Map<String, Object?> toModelMap(Map<String, Object?> sqliteMap) {
+    return {${toModelMap(fields)}};
+  }
+
+  static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> getAllRowsAsModel() async {
+    List<Map<String, Object?>> allRows = await GSqlite.db.query(getTableName);
+    List<M${toCamelCaseWillRemoveS(tableNameWithS)}> allRowModels = [];
+    allRows.forEach(
+      (row) {
+        M${toCamelCaseWillRemoveS(tableNameWithS)} newRowModel = M${toCamelCaseWillRemoveS(tableNameWithS)}();
+        newRowModel._rowModel = toModelMap(row);
+        allRowModels.add(newRowModel);
+      },
+    );
+    return allRowModels;
+  }
+
+  Map<String, Object?> _rowModel = {};
+
+${extraContents[tableNameWithS] ?? ""}
+
+${instanceFieldValues(fields)}
 }
 """;
 }
 
-/// 模型列表
-String modelListContent(String modelImport, List<String> modelList) {
+/// raw sqls
+String parseIntoSqlsContent(Map<String, String> rawSqls) {
   return """
-import 'package:jysp/Database/base/DBTableBase.dart';
-$modelImport
-class ModelList {
-  static List<DBTableBase> models = $modelList;
-
-  static List<String> downloadBaseModules = ${JsonEncoder.withIndent("").convert(downloadBaseModules)};
+class ParseIntoSqls {
+  Map<String, String> parseIntoSqls = ${JsonEncoder.withIndent("  ").convert(rawSqls)};
 }
 """;
 }

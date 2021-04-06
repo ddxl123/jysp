@@ -1,25 +1,49 @@
 // ignore_for_file: non_constant_identifier_names
+import 'package:jysp/G/GSqlite/GSqlite.dart';
 
-import 'package:jysp/Database/base/DBTableBase.dart';
-import 'package:jysp/Database/base/SqliteType.dart';
+class MVersionInfo {
 
-class MVersionInfo implements DBTableBase {
-  @override
-  String getTableNameInstance = getTableName;
+  MVersionInfo();
+
+  MVersionInfo.createModel({required String? saved_version_v,required int? created_at_v,required int? updated_at_v,}) {
+    _rowModel.addAll({saved_version:saved_version_v,created_at:created_at_v,updated_at:updated_at_v,});
+  }
 
   static String get getTableName => "version_infos";
 
   static String get saved_version => "saved_version";
-
   static String get created_at => "created_at";
-
   static String get updated_at => "updated_at";
 
-  @override
-  Map<String, List<SqliteType>> get fields => {saved_version: [SqliteType.TEXT], created_at: [SqliteType.INTEGER, SqliteType.UNSIGNED, SqliteType.NOT_NULL], updated_at: [SqliteType.INTEGER, SqliteType.UNSIGNED, SqliteType.NOT_NULL]};
 
-  static Map<String, dynamic> toMap({required String saved_version_v,required int created_at_v,required int updated_at_v,}
+  static Map<String, Object?> toSqliteMap({required String? saved_version_v,required int? created_at_v,required int? updated_at_v,}
   ) {
     return {saved_version:saved_version_v,created_at:created_at_v,updated_at:updated_at_v,};
   }
+
+  static Map<String, Object?> toModelMap(Map<String, Object?> sqliteMap) {
+    return {saved_version:sqliteMap[saved_version],created_at:sqliteMap[created_at],updated_at:sqliteMap[updated_at],};
+  }
+
+  static Future<List<MVersionInfo>> getAllRowsAsModel() async {
+    List<Map<String, Object?>> allRows = await GSqlite.db.query(getTableName);
+    List<MVersionInfo> allRowModels = [];
+    allRows.forEach(
+      (row) {
+        MVersionInfo newRowModel = MVersionInfo();
+        newRowModel._rowModel = toModelMap(row);
+        allRowModels.add(newRowModel);
+      },
+    );
+    return allRowModels;
+  }
+
+  Map<String, Object?> _rowModel = {};
+
+
+
+  String? get get_saved_version => _rowModel[saved_version] as String?;
+  int? get get_created_at => _rowModel[created_at] as int?;
+  int? get get_updated_at => _rowModel[updated_at] as int?;
+
 }

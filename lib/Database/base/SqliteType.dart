@@ -7,10 +7,6 @@ enum SqliteType {
   NOT_NULL,
   UNSIGNED,
   AUTOINCREMENT,
-
-  // Sqlite 对应的 dart 类型
-  int,
-  String,
 }
 
 extension SqliteTypeValue on SqliteType {

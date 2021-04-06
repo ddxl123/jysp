@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/models/MDownloadModule.dart';
+import 'package:jysp/Database/models/MDownloadQueueModule.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/G/GDownloadQueue.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
@@ -143,15 +142,15 @@ class _DownListState extends State<DownList> {
           case ConnectionState.waiting:
             return Center(child: Text("加载中..."));
           case ConnectionState.done:
-            dLog(() => GDownloadQueue.downloadModules);
+            dLog(() => G.downloadQueueModules);
             return ListView(
               physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
               children: [
-                for (int i = 0; i < GDownloadQueue.downloadModules.length; i++)
+                for (int i = 0; i < G.downloadQueueModules.length; i++)
                   //
                   () {
-                    return (GDownloadQueue.downloadModules.values.toList().asMap()[i]!["widget"] as Widget);
+                    return (G.downloadQueueModules.values.toList().asMap()[i]!["widget"] as Widget);
                   }(),
               ],
             );
@@ -165,22 +164,22 @@ class _DownListState extends State<DownList> {
   Future<void> _future() async {
     await Future.delayed(Duration(seconds: 2));
 
-    List<Map<String, Object?>> sqliteDownloadModules = await GSqlite.db.query(MDownloadModule.getTableName);
+    List<Map<String, Object?>> sqliteDownloadModules = await GSqlite.db.query(MDownloadQueueModule.getTableName);
 
     sqliteDownloadModules.forEach(
       (sqliteModule) {
         // 若模块未被列在【下载队列】 Widget 上，则先检查是否已完成过下载。
-        if (!GDownloadQueue.downloadModules.containsKey(sqliteModule[MDownloadModule.module_name])) {
-          String moduleName = sqliteModule[MDownloadModule.module_name] as String;
-          GDownloadQueue.downloadModules[moduleName] = {}; // 赋给模型一个 key 为 moduleName 的对象
-          Map<String, dynamic> moduleObj = GDownloadQueue.downloadModules[moduleName]!;
+        if (!G.downloadQueueModules.containsKey(sqliteModule[MDownloadQueueModule.module_name])) {
+          String moduleName = sqliteModule[MDownloadQueueModule.module_name] as String;
+          G.downloadQueueModules[moduleName] = {}; // 赋给模型一个 key 为 moduleName 的对象
+          Map<String, dynamic> moduleObj = G.downloadQueueModules[moduleName]!;
           // 未被下载完成过
-          if (sqliteModule[MDownloadModule.download_is_ok] == 0) {
+          if (sqliteModule[MDownloadQueueModule.download_is_ok] == 0) {
             moduleObj["progress"] = -1;
             moduleObj["widget"] = _queueWidget(moduleObj, moduleName);
           }
           // 已被下载完成过
-          else if (sqliteModule[MDownloadModule.download_is_ok] == 1) {
+          else if (sqliteModule[MDownloadQueueModule.download_is_ok] == 1) {
             moduleObj["progress"] = -2;
             moduleObj["widget"] = _queueWidget(moduleObj, moduleName);
           }
@@ -211,6 +210,7 @@ class _DownListState extends State<DownList> {
             downloadStatusWidget = TextButton(onPressed: () {}, child: Text(moduleObj["progress"].toString()));
         }
         return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(moduleName),
             downloadStatusWidget,

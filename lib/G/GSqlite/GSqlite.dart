@@ -1,4 +1,3 @@
-import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 
 class GSqlite {

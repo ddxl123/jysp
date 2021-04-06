@@ -14,8 +14,6 @@
 //   /// return true 时：获取数据成功。
 //   ///
 //   /// return false 时：获取数据异常。
-//   ///
-//   /// return null 时：获取数据成功，但 toPool 被中断。
 //   Future<bool?> layoutNodesRequest(PoolType toPoolType) async {
 //     return await _sqlite(toPoolType);
 //   }

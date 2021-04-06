@@ -1,11 +1,3 @@
-enum PoolRefreshStatus {
-  none,
-  refreshLayout,
-  getLayout,
-  setLayout,
-  buildLayout,
-}
-
 enum NodeType {
   root, // 0
 
@@ -63,12 +55,11 @@ extension NodeSelectedTypeExt on NodeType {
 
 /// 1. 当 [PoolType.index] 时，获取的是 [int]。
 /// 2. 当 [PoolType.value] 时，获取的是 [string]。
-/// 3. 当 [PoolType.indexs.toList] 时，获取的是角标数组。
 enum PoolType {
   pendingPool, // 0
   memoryPool, // 1
   completePool, // 2
-  wikiPool, // 3
+  rulePool, // 3
 }
 
 extension PoolSelectedTypeExt on PoolType {
@@ -81,10 +72,18 @@ extension PoolSelectedTypeExt on PoolType {
       case 2:
         return "完成池";
       case 3:
-        return "百科池";
+        return "规则池";
       case 4:
       default:
         throw Exception("Index is unknown!");
     }
   }
+}
+
+enum PoolRefreshStatus {
+  none,
+  refreshLayout,
+  getLayout,
+  setLayout,
+  buildLayout,
 }

@@ -1,7 +1,6 @@
 import 'package:jysp/Database/models/MVersionInfo.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/Helper.dart';
-import 'package:jysp/Tools/TDebug.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 enum VersionStatus {

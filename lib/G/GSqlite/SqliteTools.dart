@@ -1,6 +1,5 @@
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
-import 'package:sqflite/sqflite.dart';
 
 /// 通用工具
 class SqliteTools {

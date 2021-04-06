@@ -2,26 +2,24 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
+import 'package:jysp/Database/models/MPnCompletePoolNode.dart';
+import 'package:jysp/Database/models/MPnMemoryPoolNode.dart';
+import 'package:jysp/Database/models/MPnPendingPoolNode.dart';
+import 'package:jysp/Database/models/MPnRulePoolNode.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
+import 'package:jysp/MVC/Models/FragmentPoolRequest/GetPoolNodesRequest.dart';
 import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-///
-///
-///
-class _Init extends ChangeNotifier {}
-
-mixin FragmentPoolControllerRoot on _Init {
+class FragmentPoolController extends ChangeNotifier {
   ///
 
   /// 需要显示在池内的节点
-  // 标准格式：同 [TFragmentPoolNode] 表结构
-  final List<Map> fragmentPoolNodes = [];
-
-  /// 重复的、没有 father 的、branch=null 的节点
-  // 标准格式：同 [fragmentPoolNodes] 结构，且格外 key="out_type"
-  List<Map> fragmentPoolNodeOuts = [];
+  final List<MPnPendingPoolNode> pendingPoolNodes = [];
+  final List<MPnMemoryPoolNode> memoryPoolNodes = [];
+  final List<MPnCompletePoolNode> completePoolNodes = [];
+  final List<MPnRulePoolNode> rulePoolNodes = [];
 
   /// 当前展现的碎片池类型
   /// 必须设置默认值：
@@ -37,19 +35,16 @@ mixin FragmentPoolControllerRoot on _Init {
     PoolType.pendingPool: {"offset": null, "scale": null, "node0": Offset.zero},
     PoolType.memoryPool: {"offset": null, "scale": null, "node0": Offset.zero},
     PoolType.completePool: {"offset": null, "scale": null, "node0": Offset.zero},
-    PoolType.wikiPool: {"offset": null, "scale": null, "node0": Offset.zero},
+    PoolType.rulePool: {"offset": null, "scale": null, "node0": Offset.zero},
   };
 
-  bool isIniting = false;
+  /// [FragmentPool] 是否正在初始化状态
+  bool needInitStateForIsIniting = false;
 
-  bool doRebuild = false;
+  /// [FragmentPool] 的 setState 函数
+  Function needInitStateForSetState = () {};
 
   ///
-}
-
-mixin _ToPool on FragmentPoolControllerRoot {
-  ///
-
   /// 是否弹出加载屏障
   RebuildHandler<LoadingBarrierHandlerEnum> isLoadingBarrierRebuildHandler = RebuildHandler<LoadingBarrierHandlerEnum>();
 
@@ -61,15 +56,13 @@ mixin _ToPool on FragmentPoolControllerRoot {
   ///
   /// 将进入指定碎片池
   ///
-  /// 每次刷新碎片池时, 需先获取每个 node 的布局宽高, 因此碎片池 widget 需要被 build 2次
-  ///
-  /// - [freeBoxController]：需要用来 setView()。
+  /// - [freeBoxController]：用来设置相机位置。
   /// - [toPoolType]：将要进入池的类型。
   /// - [toPoolTypeResult]：跳转至指定 type of pool 成功与失败。
   ///   - [resultCode]：
-  ///     - 回调带 0：获取数据失败，不跳转到对应的 type
-  ///     - 回调带 1：获取数据成功，自动跳转到对应的 type
-  ///     - 回调带 -1：不跳转到对应的 type。Ⅰ. toPool 并发。
+  ///     - 回调带 0：获取数据失败，不跳转到对应的 type；
+  ///     - 回调带 1：获取数据成功，自动跳转到对应的 type；
+  ///     - 回调带 -1：toPool 并发,，不跳转到对应的 type。
   ///
   /// 先获取数据后，才会调用 [toPoolTypeResult] 回调，最后才刷新碎片池
   ///
@@ -92,8 +85,7 @@ mixin _ToPool on FragmentPoolControllerRoot {
       isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.enabled);
 
       // 获取数据：[toPoolType] 的数据
-      // bool? result = await layoutNodesRequest(toPoolType);
-      bool? result;
+      bool result = await GetPoolNodesRequest().getPoolNodes(this, toPoolType);
 
       switch (result) {
         case true:
@@ -101,10 +93,9 @@ mixin _ToPool on FragmentPoolControllerRoot {
           toPoolTypeResult(0);
           isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.disabled);
           _isToPooling = false;
-          _setView(freeBoxController, toPoolType);
+          _setCurrentPoolType(freeBoxController, toPoolType);
           // 根据结果重新刷新布局
-          doRebuild = !doRebuild;
-          notifyListeners();
+          needInitStateForSetState();
           break;
         case false:
           dLog(() => "获取 fragmentPoolNodes 数据失败。");
@@ -113,14 +104,14 @@ mixin _ToPool on FragmentPoolControllerRoot {
           _isToPooling = false;
           break;
         default:
-          dLog(() => "获取 fragmentPoolNodes 数据成功，但被中断。");
+          dLog(() => "result unknown");
           toPoolTypeResult(-1);
       }
     });
   }
 
-  /// 保存当前 offset/scale , 并设置当前碎片池的为指定池
-  void _setView(FreeBoxController freeBoxController, PoolType toPoolType) {
+  /// 设置当前碎片池的为指定池, 保存当前 offset/scale
+  void _setCurrentPoolType(FreeBoxController freeBoxController, PoolType toPoolType) {
     viewSelectedType[getCurrentPoolType]!["offset"] = freeBoxController.offset;
 
     viewSelectedType[getCurrentPoolType]!["scale"] = freeBoxController.scale;
@@ -130,5 +121,3 @@ mixin _ToPool on FragmentPoolControllerRoot {
 
   ///
 }
-
-class FragmentPoolController extends _Init with FragmentPoolControllerRoot, _ToPool {}

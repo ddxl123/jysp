@@ -53,7 +53,7 @@ class Token {
           await txn.delete(MToken.getTableName);
           await txn.insert(
             MToken.getTableName,
-            MToken.toMap(
+            MToken.toSqliteMap(
               access_token_v: tokens[MToken.access_token],
               refresh_token_v: tokens[MToken.refresh_token],
               created_at_v: 0,

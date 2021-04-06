@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/FragmentPool/FragmentPoolEnum.dart';
-import 'package:jysp/MVC/Controllers/FragmentPoolController.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 
 ///
@@ -103,7 +103,7 @@ class FragmentPoolChoicePage extends OverlayRoute {
           _toButton(ctx: _, toButtonType: PoolType.pendingPool),
           _toButton(ctx: _, toButtonType: PoolType.memoryPool),
           _toButton(ctx: _, toButtonType: PoolType.completePool),
-          _toButton(ctx: _, toButtonType: PoolType.wikiPool),
+          _toButton(ctx: _, toButtonType: PoolType.rulePool),
         ],
       ),
     );

@@ -3,6 +3,6 @@ main(List<String> args) {
 }
 
 void a() {
-  print(DateTime.now().microsecondsSinceEpoch);
-  print(DateTime.now().millisecondsSinceEpoch);
+  List l = [];
+  print(l.first);
 }
