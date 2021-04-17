@@ -47,7 +47,7 @@
 //     return isSuccess;
 //   }
 
-//   /// TODO: GET /api/get_fragment_pool_nodes
+//   /// TODO: GET api/get_fragment_pool_nodes
 //   Future<bool?> _cloud(PoolType toPoolType) async {
 //     bool? isSuccess = false;
 //     await G.http.sendRequest(

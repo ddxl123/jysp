@@ -1,12 +1,10 @@
 import 'package:jysp/AppInit/AppVersionManager.dart';
-import 'package:jysp/Database/models/MDownloadQueueModule.dart';
 import 'package:jysp/Database/models/MVersionInfo.dart';
 import 'package:jysp/Database/models/ParseIntoSqls.dart';
-import 'package:jysp/G/GHttp.dart';
+import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
-import 'package:sqflite/sqflite.dart';
 
 enum AppInitStatus {
   ok,
@@ -71,22 +69,7 @@ class AppInit {
       ),
     );
 
-    // 3. 为 [download_modules] 表生成 baseModules
-    Batch batch = GSqlite.db.batch();
-    for (int i = 0; i < MDownloadQueueModule.downloadQueueBaseModules.length; i++) {
-      batch.insert(
-        MDownloadQueueModule.getTableName,
-        MDownloadQueueModule.toSqliteMap(
-          module_name_v: MDownloadQueueModule.downloadQueueBaseModules[i],
-          download_is_ok_v: 0,
-          created_at_v: DateTime.now().millisecondsSinceEpoch,
-          updated_at_v: DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-    }
-    await batch.commit();
-
-    // 4. 其他初始化
+    // 3. 其他初始化
     _otherInit();
 
     return AppInitStatus.ok;

@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.lock),
-          labelText: "密码",
+          labelText: "验证码",
         ),
         minLines: 1,
         maxLines: 1,

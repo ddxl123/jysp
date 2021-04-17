@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/G/GHttp.dart';
+import 'package:jysp/G/GHttp/GHttp.dart';
+import 'package:jysp/G/GHttp/RequestInterruptedType.dart';
+import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/G/GSqlite/Token.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
@@ -22,15 +24,15 @@ mixin ByEmailRequest {
       //
       // 服务器验证：
 
-      // TODO: POST /api/register_and_login/by_email/send_email
-      await GHttp.sendRequest(
+      // TODO: POST api/register_and_login/by_email/send_email
+      await GHttp.sendRequest<Null>(
         method: "POST",
         route: "api/register_and_login/by_email/send_email",
         data: {
           "email": emailTextEditingController.text,
         },
         isAuth: false,
-        resultCallback: ({code, data}) {
+        resultCallback: (code, data) {
           switch (code) {
             case 100:
               dLog(() => "邮箱发送异常");
@@ -56,8 +58,8 @@ mixin ByEmailRequest {
               handler.rebuildHandle(SendEmailButtonHandlerEnum.unSent);
           }
         },
-        interruptedCallback: (GeneralRequestInterruptedStatus generalRequestInterruptedStatus) {
-          dLog(() => generalRequestInterruptedStatus);
+        interruptedCallback: (RequestInterruptedType requestInterruptedType) {
+          dLog(() => requestInterruptedType);
           handler.rebuildHandle(SendEmailButtonHandlerEnum.unSent);
         },
         sameNotConcurrent: "_sendEmailRequest",
@@ -77,14 +79,14 @@ mixin ByEmailRequest {
       //
       //
       // 服务器验证
-      // TODO: POST /api/register_and_login/by_email/verify_email
-      await GHttp.sendCreateTokenRequest(
+      // TODO: POST api/register_and_login/by_email/verify_email
+      await GHttp.sendCreateTokenRequest<Map<String, dynamic>>(
         route: "api/register_and_login/by_email/verify_email",
         willVerifyData: {
           "email": qqEmailTextEditingController.text,
           "code": codeTextEditingController.text,
         },
-        resultCallback: ({code, data}) async {
+        resultCallback: (code, data) async {
           switch (code) {
             case 200:
               dLog(() => "邮箱验证码错误!");
@@ -109,7 +111,7 @@ mixin ByEmailRequest {
               await Token().setSqliteToken(
                 tokens: data,
                 success: () {
-                  Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
+                  GNavigatorPush.pushInitDownloadPage(G.globalKey.currentContext!);
                 },
                 fail: (failCode) {},
               );
@@ -122,7 +124,7 @@ mixin ByEmailRequest {
               await Token().setSqliteToken(
                 tokens: data,
                 success: () {
-                  Navigator.push(G.globalKey.currentContext!, MaterialPageRoute(builder: (_) => HomePage()));
+                  GNavigatorPush.pushInitDownloadPage(G.globalKey.currentContext!);
                 },
                 fail: (failCode) {},
               );
@@ -134,8 +136,8 @@ mixin ByEmailRequest {
               dLog(() => "未知 code!");
           }
         },
-        tokenCreateFailCallback: (CreateTokenInterruptedStatus createTokenInterruptedStatus) {
-          dLog(() => createTokenInterruptedStatus);
+        tokenCreateFailCallback: (RequestInterruptedType requestInterruptedType) {
+          dLog(() => requestInterruptedType);
         },
       );
     });

@@ -1,39 +1,13 @@
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/G/GSqlite/GSqlite.dart';
-
-enum PendingPoolNodeType {
-  notDownloaded,
-  nodeIsZero,
-  ordinary,
-}
-
+import 'package:jysp/Database/models/GlobalEnum.dart';
+enum PendingPoolNodeType {notDownloaded,nodeIsZero,ordinary,}
 class MPnPendingPoolNode {
+
   MPnPendingPoolNode();
 
-  MPnPendingPoolNode.createModel({
-    required int? pn_pending_pool_node_id_v,
-    required String? pn_pending_pool_node_uuid_v,
-    required int? recommend_raw_rule_id_v,
-    required String? recommend_raw_rule_uuid_v,
-    required PendingPoolNodeType? type_v,
-    required String? name_v,
-    required String? position_v,
-    required int? created_at_v,
-    required int? updated_at_v,
-    required int? curd_status_v,
-  }) {
-    _rowModel.addAll({
-      pn_pending_pool_node_id: pn_pending_pool_node_id_v,
-      pn_pending_pool_node_uuid: pn_pending_pool_node_uuid_v,
-      recommend_raw_rule_id: recommend_raw_rule_id_v,
-      recommend_raw_rule_uuid: recommend_raw_rule_uuid_v,
-      type: type_v?.index,
-      name: name_v,
-      position: position_v,
-      created_at: created_at_v,
-      updated_at: updated_at_v,
-      curd_status: curd_status_v,
-    });
+  MPnPendingPoolNode.createModel({required int? pn_pending_pool_node_id_v,required String? pn_pending_pool_node_uuid_v,required int? recommend_raw_rule_id_v,required String? recommend_raw_rule_uuid_v,required PendingPoolNodeType? type_v,required String? name_v,required String? position_v,required int? created_at_v,required int? updated_at_v,required Curd? curd_status_v,}) {
+    _rowModel.addAll({pn_pending_pool_node_id:pn_pending_pool_node_id_v,pn_pending_pool_node_uuid:pn_pending_pool_node_uuid_v,recommend_raw_rule_id:recommend_raw_rule_id_v,recommend_raw_rule_uuid:recommend_raw_rule_uuid_v,type:type_v?.index,name:name_v,position:position_v,created_at:created_at_v,updated_at:updated_at_v,curd_status:curd_status_v?.index,});
   }
 
   static String get getTableName => "pn_pending_pool_nodes";
@@ -49,54 +23,27 @@ class MPnPendingPoolNode {
   static String get updated_at => "updated_at";
   static String get curd_status => "curd_status";
 
-  static Map<String, Object?> toSqliteMap({
-    required int? pn_pending_pool_node_id_v,
-    required String? pn_pending_pool_node_uuid_v,
-    required int? recommend_raw_rule_id_v,
-    required String? recommend_raw_rule_uuid_v,
-    required PendingPoolNodeType? type_v,
-    required String? name_v,
-    required String? position_v,
-    required int? created_at_v,
-    required int? updated_at_v,
-    required int? curd_status_v,
-  }) {
-    return {
-      pn_pending_pool_node_id: pn_pending_pool_node_id_v,
-      pn_pending_pool_node_uuid: pn_pending_pool_node_uuid_v,
-      recommend_raw_rule_id: recommend_raw_rule_id_v,
-      recommend_raw_rule_uuid: recommend_raw_rule_uuid_v,
-      type: type_v?.index,
-      name: name_v,
-      position: position_v,
-      created_at: created_at_v,
-      updated_at: updated_at_v,
-      curd_status: curd_status_v,
-    };
+
+  static Map<String, Object?> toSqliteMap({required int? pn_pending_pool_node_id_v,required String? pn_pending_pool_node_uuid_v,required int? recommend_raw_rule_id_v,required String? recommend_raw_rule_uuid_v,required PendingPoolNodeType? type_v,required String? name_v,required String? position_v,required int? created_at_v,required int? updated_at_v,required Curd? curd_status_v,}
+  ) {
+    return {pn_pending_pool_node_id:pn_pending_pool_node_id_v,pn_pending_pool_node_uuid:pn_pending_pool_node_uuid_v,recommend_raw_rule_id:recommend_raw_rule_id_v,recommend_raw_rule_uuid:recommend_raw_rule_uuid_v,type:type_v?.index,name:name_v,position:position_v,created_at:created_at_v,updated_at:updated_at_v,curd_status:curd_status_v?.index,};
   }
 
   static Map<String, Object?> toModelMap(Map<String, Object?> sqliteMap) {
-    return {
-      pn_pending_pool_node_id: sqliteMap[pn_pending_pool_node_id],
-      pn_pending_pool_node_uuid: sqliteMap[pn_pending_pool_node_uuid],
-      recommend_raw_rule_id: sqliteMap[recommend_raw_rule_id],
-      recommend_raw_rule_uuid: sqliteMap[recommend_raw_rule_uuid],
-      type: sqliteMap[type] == null ? null : PendingPoolNodeType.values[sqliteMap[type] as int],
-      name: sqliteMap[name],
-      position: sqliteMap[position],
-      created_at: sqliteMap[created_at],
-      updated_at: sqliteMap[updated_at],
-      curd_status: sqliteMap[curd_status],
-    };
+    return {pn_pending_pool_node_id:sqliteMap[pn_pending_pool_node_id],pn_pending_pool_node_uuid:sqliteMap[pn_pending_pool_node_uuid],recommend_raw_rule_id:sqliteMap[recommend_raw_rule_id],recommend_raw_rule_uuid:sqliteMap[recommend_raw_rule_uuid],type:sqliteMap[type] == null ? null : PendingPoolNodeType.values[sqliteMap[type] as int],name:sqliteMap[name],position:sqliteMap[position],created_at:sqliteMap[created_at],updated_at:sqliteMap[updated_at],curd_status:sqliteMap[curd_status] == null ? null : Curd.values[sqliteMap[curd_status] as int],};
+  }
+
+  static Future<List<Map<String, Object?>>> getAllRowsAsSqliteMap() async {
+    return await GSqlite.db.query(getTableName);
   }
 
   static Future<List<MPnPendingPoolNode>> getAllRowsAsModel() async {
-    List<Map<String, Object?>> allRows = await GSqlite.db.query(getTableName);
+    List<Map<String, Object?>> allRows = await getAllRowsAsSqliteMap();
     List<MPnPendingPoolNode> allRowModels = [];
     allRows.forEach(
       (row) {
         MPnPendingPoolNode newRowModel = MPnPendingPoolNode();
-        newRowModel._rowModel = toModelMap(row);
+        newRowModel._rowModel.addAll(toModelMap(row));
         allRowModels.add(newRowModel);
       },
     );
@@ -104,6 +51,8 @@ class MPnPendingPoolNode {
   }
 
   Map<String, Object?> _rowModel = {};
+
+
 
   int? get get_pn_pending_pool_node_id => _rowModel[pn_pending_pool_node_id] as int?;
   String? get get_pn_pending_pool_node_uuid => _rowModel[pn_pending_pool_node_uuid] as String?;
@@ -114,5 +63,6 @@ class MPnPendingPoolNode {
   String? get get_position => _rowModel[position] as String?;
   int? get get_created_at => _rowModel[created_at] as int?;
   int? get get_updated_at => _rowModel[updated_at] as int?;
-  int? get get_curd_status => _rowModel[curd_status] as int?;
+  Curd? get get_curd_status => _rowModel[curd_status] as Curd?;
+
 }

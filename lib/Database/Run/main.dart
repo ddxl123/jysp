@@ -4,7 +4,44 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:jysp/Database/Run/ModelConfig.dart';
-import 'package:jysp/Database/base/SqliteType.dart';
+
+enum SqliteType {
+  // Sqlite 类型
+  TEXT,
+  INTEGER,
+  UNIQUE,
+  PRIMARY_KEY,
+  NOT_NULL,
+  UNSIGNED,
+  AUTOINCREMENT,
+}
+
+extension SqliteTypeValue on SqliteType {
+  String get value {
+    switch (this.index) {
+      case 0:
+        return "TEXT";
+      case 1:
+        return "INTEGER";
+      case 2:
+        return "UNIQUE";
+      case 3:
+        return "PRIMARY_KEY";
+      case 4:
+        return "NOT_NULL";
+      case 5:
+        return "UNSIGNED";
+      case 6:
+        return "AUTO_INCREMENT";
+      case 7:
+        return "int";
+      case 8:
+        return "String";
+      default:
+        throw Exception("Unknown value!");
+    }
+  }
+}
 
 List<String> dartType = ["String", "int"];
 
@@ -17,8 +54,11 @@ Map<String, String?> extraContents = {};
 /// 模型对应的额外内容。eg. {"user_table":"enum ABC {a,b,c}"}
 Map<String, String?> extraEnumContents = {};
 
-/// 下载队列基础模块。eg. ["用户信息"]
-List<List<String>> downloadBaseModules = [];
+/// 全局枚举。eg. ["enum ABC {a,b,c}"]
+List<String> globalEnum = [];
+
+/// 模型是否需要全局枚举。eg. {"user_table":true}
+Map<String, bool> isModelNeedGlobalEnums = {};
 
 /// 快捷 —— INTEGER 类型，非主键
 List<Object> x_id_integer() => setFieldTypes([SqliteType.INTEGER, SqliteType.UNSIGNED], "int");
@@ -50,7 +90,7 @@ Map<String, List<Object>> createFields({
   }
   if (curd_status) {
     finalFields.addAll({
-      "curd_status": [SqliteType.INTEGER, "int"],
+      "curd_status": [SqliteType.INTEGER, "Curd"],
     });
   }
   return finalFields;
@@ -60,12 +100,16 @@ Map<String, List<Object>> createFields({
 void createModel({
   required String tableNameWithS,
   required Map<String, List<Object>> createField,
+  required bool isNeedGlobalEnum,
   String? extra,
   String? extraEnum,
 }) {
   modelFields.addAll({tableNameWithS: createField});
   extraContents.addAll({tableNameWithS: extra});
   extraEnumContents.addAll({tableNameWithS: extraEnum});
+  if (isNeedGlobalEnum) {
+    isModelNeedGlobalEnums.addAll({tableNameWithS: true});
+  }
 }
 
 /// 设置额外枚举类成员
@@ -90,6 +134,22 @@ String createExtraEnums(List<String> extraEnums) {
   return extraEnumsString;
 }
 
+/// 创建全局枚举类
+void createGlobalEnums(List<List<String>> enumNameAndMembers) {
+  enumNameAndMembers.forEach(
+    (element) {
+      String enumString = "enum " + element[0] + "{";
+      for (var i = 0; i < element.length; i++) {
+        if (i != 0) {
+          enumString += element[i] + ",";
+        }
+      }
+      enumString += "}";
+      globalEnum.add(enumString);
+    },
+  );
+}
+
 ///
 ///
 ///
@@ -111,6 +171,7 @@ void main(List<String> args) async {
   runCreateModels();
   await runWriteModels();
   await runParseIntoSqls();
+  await runWriteGlobalEnum();
 }
 
 Future<void> runWriteModels() async {
@@ -131,10 +192,10 @@ Future<void> runParseIntoSqls() async {
       fieldTypes.forEach(
         (fieldName, fieldTypes) {
           String rawFieldSql = "$fieldName";
-          List<SqliteType> newFieldTypes = fieldTypes.sublist(0, fieldTypes.length - 1) as List<SqliteType>;
+          List<Object> newFieldTypes = fieldTypes.sublist(0, fieldTypes.length - 1);
           newFieldTypes.forEach(
             (fieldType) {
-              rawFieldSql += (" " + fieldType.value); // 形成 "username TEXT UNIQUE,"
+              rawFieldSql += (" " + (fieldType as SqliteType).value); // 形成 "username TEXT UNIQUE,"
             },
           );
           rawFieldsSql += "$rawFieldSql,"; // 形成 "username TEXT UNIQUE,password TEXT,"
@@ -147,6 +208,17 @@ Future<void> runParseIntoSqls() async {
 
   await File("lib/Database/models/ParseIntoSqls.dart").writeAsString(parseIntoSqlsContent(rawSqls));
   print("'ParseIntoSqls' file is created successfully!");
+}
+
+Future<void> runWriteGlobalEnum() async {
+  String globalEnumString = "";
+  globalEnum.forEach(
+    (gEnum) {
+      globalEnumString += gEnum;
+    },
+  );
+  await File("lib/Database/models/GlobalEnum.dart").writeAsString(globalEnumString);
+  print("'GlobalEnum' file is created successfully!");
 }
 
 /// 将 demo_texts 形式转化成 DemoText 形式;
@@ -228,6 +300,7 @@ String modelContent(String tableNameWithS, Map<String, List<Object>> fields) {
   return """
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/G/GSqlite/GSqlite.dart';
+${isModelNeedGlobalEnums[tableNameWithS] == true ? "import 'package:jysp/Database/models/GlobalEnum.dart';" : ""}
 ${extraEnumContents[tableNameWithS] ?? ""}
 class M${toCamelCaseWillRemoveS(tableNameWithS)} {
 
@@ -250,13 +323,17 @@ ${fieldNameQuickCall(fields)}
     return {${toModelMap(fields)}};
   }
 
+  static Future<List<Map<String, Object?>>> getAllRowsAsSqliteMap() async {
+    return await GSqlite.db.query(getTableName);
+  }
+
   static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> getAllRowsAsModel() async {
-    List<Map<String, Object?>> allRows = await GSqlite.db.query(getTableName);
+    List<Map<String, Object?>> allRows = await getAllRowsAsSqliteMap();
     List<M${toCamelCaseWillRemoveS(tableNameWithS)}> allRowModels = [];
     allRows.forEach(
       (row) {
         M${toCamelCaseWillRemoveS(tableNameWithS)} newRowModel = M${toCamelCaseWillRemoveS(tableNameWithS)}();
-        newRowModel._rowModel = toModelMap(row);
+        newRowModel._rowModel.addAll(toModelMap(row));
         allRowModels.add(newRowModel);
       },
     );

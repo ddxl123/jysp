@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Plugin/SheetPage/SheetLoadAreaController.dart';
-import 'package:jysp/Plugin/SheetPage/SheetPageController.dart';
+import 'package:jysp/Tools/SheetPage/SheetLoadAreaController.dart';
+import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 
 class SheetLoadArea extends StatefulWidget {
   SheetLoadArea({required this.sheetPageController});

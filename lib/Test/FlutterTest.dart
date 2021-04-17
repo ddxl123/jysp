@@ -1,41 +1,28 @@
-// import 'package:dio/dio.dart';
-// import 'package:flutter/material.dart';
-// import 'package:jysp/G/G.dart';
-// import 'package:jysp/G/GHttp.dart';
-// import 'package:jysp/Tools/TDebug.dart';
+import 'package:flutter/material.dart';
+import 'package:jysp/G/GSqlite/GSqlite.dart';
+import 'package:jysp/G/GSqlite/SqliteTools.dart';
 
-// class FlutterTest extends StatefulWidget {
-//   @override
-//   _FlutterTestState createState() => _FlutterTestState();
-// }
+class FlutterTest extends StatefulWidget {
+  @override
+  _FlutterTestState createState() => _FlutterTestState();
+}
 
-// class _FlutterTestState extends State<FlutterTest> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: TextButton(
-//         child: Text("data"),
-//         onPressed: () {
-//           GHttp.dio = Dio(BaseOptions(baseUrl: "http://jysp.free.idcfengye.com/"));
-//           dLog(() => G.http.dio.options.headers);
-//           G.http.dio.request(
-//             "api/test",
-//             options: Options(method: "GET"),
-//             onReceiveProgress: (a, b) {
-//               print("a:$a,b:$b");
-//             },
-//           ).then(
-//             (value) {
-//               dLog(() => "value:", () => value);
-//               dLog(() => "headers:", () => value.headers.map);
-//             },
-//           ).catchError(
-//             (onErr) {
-//               dLog(() => "onErr:", () => onErr);
-//             },
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
+class _FlutterTestState extends State<FlutterTest> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TextButton(
+        child: Text("data"),
+        onPressed: () async {
+          await GSqlite.openDb();
+          await SqliteTools().clearSqlite();
+          await GSqlite.db.execute("CREATE TABLE a(name,TEXT)");
+          await GSqlite.db.insert("a", {"name": "hhh"});
+          await GSqlite.db.execute("DROP TABLE IF EXISTS a");
+
+          print(await SqliteTools().getAllTableNames());
+        },
+      ),
+    );
+  }
+}

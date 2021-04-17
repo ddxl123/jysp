@@ -1,8 +1,19 @@
+///
+///
+///
+///
+///
+///
+///
+///
+///
+///
+///
+
 main(List<String> args) {
-  a();
+  dynamic dyn = "";
+
+  print(dynamic is Object);
 }
 
-void a() {
-  List l = [];
-  print(l.first);
-}
+extension dyn on Object {}

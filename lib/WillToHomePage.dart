@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/AppInit/AppInit.dart';
 import 'package:jysp/AppInit/AppVersionManager.dart';
-import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
-import 'package:jysp/MVC/Views/DownloadQueuePage.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 class WillToHomePage extends StatefulWidget {
@@ -131,19 +129,13 @@ class _WillToHomePageState extends State<WillToHomePage> {
             onPressed: () {
               GNavigatorPush.pushLoginPage(context);
             },
-            child: Text("To home"),
+            child: Text("To login page"),
           ),
           TextButton(
             onPressed: () {
               SqliteTools().clearSqlite();
             },
             child: Text("deleteDatabase"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.push(G.globalKey.currentContext!, DownloadQueuePage());
-            },
-            child: Text("DownLoadQueuePage"),
           ),
         ],
       ),

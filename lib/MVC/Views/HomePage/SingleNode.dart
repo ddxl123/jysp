@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
+import 'package:jysp/G/GNavigatorPush.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
 class SingleNode extends StatefulWidget {
-  SingleNode({
-    required this.index,
-  });
-
-  final int index;
+  SingleNode({required this.name, required this.position});
+  final String name;
+  final String position;
 
   @override
   SingleNodeState createState() => SingleNodeState();
@@ -28,14 +27,21 @@ class SingleNodeState extends State<SingleNode> {
   }
 
   Widget _buildWidget() {
-    dLog(() => "build");
+    // dLog(() => "build");
+    double left;
+    double top;
+    try {
+      List<String> sp = widget.position.split(",");
+      left = double.parse(sp[0]);
+      top = double.parse(sp[1]);
+    } catch (e) {
+      dLog(() => e);
+      left = 0;
+      top = 0;
+    }
     return Positioned(
-      left: context.read<FreeBoxController>().leftTopOffsetFilling.dx +
-          // context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dx +
-          _onLongPressMoveUpdateOffset.dx,
-      top: context.read<FreeBoxController>().leftTopOffsetFilling.dy +
-          // context.read<FragmentPoolController>().fragmentPoolNodes[widget.index].fragmentPoolNode.position.dy +
-          _onLongPressMoveUpdateOffset.dy,
+      left: context.read<FreeBoxController>().leftTopOffsetFilling.dx + left + _onLongPressMoveUpdateOffset.dx,
+      top: context.read<FreeBoxController>().leftTopOffsetFilling.dy + top + _onLongPressMoveUpdateOffset.dy,
       child: GestureDetector(
         onLongPressStart: (details) {
           dLog(() => "onLongPressStart");
@@ -50,7 +56,21 @@ class SingleNodeState extends State<SingleNode> {
         onLongPressEnd: (details) {
           dLog(() => "onLongPressEnd");
         },
-        child: Text("aaa"),
+        child: _body(),
+      ),
+    );
+  }
+
+  Widget _body() {
+    return TextButton(
+      child: Text(widget.name),
+      onPressed: () {
+        GNavigatorPush.pushSheetPage(context);
+      },
+      style: TextButton.styleFrom(
+        primary: Colors.red,
+        onSurface: Colors.orange,
+        shadowColor: Colors.purple,
       ),
     );
   }

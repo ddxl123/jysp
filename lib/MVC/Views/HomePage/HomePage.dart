@@ -3,32 +3,19 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
-import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
-import 'package:jysp/Plugin/FreeBox/FreeBox.dart';
+import 'package:jysp/Tools/FreeBox/FreeBox.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => FragmentPoolController()),
-        ChangeNotifierProvider(create: (_) => FreeBoxController()),
-      ],
-      child: HomePageProxy(),
-    );
-  }
+  HomePageState createState() => HomePageState();
 }
 
-class HomePageProxy extends StatefulWidget {
-  @override
-  HomePageProxyState createState() => HomePageProxyState();
-}
-
-class HomePageProxyState extends State<HomePageProxy> {
+class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     dLog(() => "HomePage build");
@@ -43,10 +30,14 @@ class HomePageProxyState extends State<HomePageProxy> {
             fixedLayerBuilder: (_) => Stack(
               children: <Widget>[
                 _toZeroButton(),
-                _loadingBarrier(),
+                _addNode(),
                 _bottomWidgets(),
               ],
             ),
+            onLongPressStart: (details) {
+              dLog(() => "details.focalPoint", () => details.focalPoint);
+              context.read<FragmentPoolController>().addNode(context.read<FreeBoxController>().screenToBoxTransform(details.focalPoint));
+            },
           ),
         ],
       ),
@@ -70,28 +61,12 @@ class HomePageProxyState extends State<HomePageProxy> {
     );
   }
 
-  /// 加载屏障
-  Widget _loadingBarrier() {
-    return RebuildHandleWidget<LoadingBarrierHandlerEnum>(
-      rebuildHandler: context.read<FragmentPoolController>().isLoadingBarrierRebuildHandler,
-      builder: (handler) {
-        if (handler.handleCode == LoadingBarrierHandlerEnum.enabled) {
-          return Positioned(
-            child: Container(
-              alignment: Alignment.center,
-              color: Color(0x7fffffff),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("加载中..."),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return Container();
-        }
-      },
+  /// 添加节点
+  Widget _addNode() {
+    return Positioned(
+      top: MediaQueryData.fromWindow(window).padding.top,
+      right: 0,
+      child: TextButton(child: Text("+", style: TextStyle(color: Colors.red, fontSize: 20)), onPressed: () {}),
     );
   }
 

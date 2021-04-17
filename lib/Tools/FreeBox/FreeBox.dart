@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +10,7 @@ class FreeBox extends StatefulWidget {
     required this.viewableHeight,
     required this.freeMoveScaleLayerBuilder,
     required this.fixedLayerBuilder,
+    this.onLongPressStart,
   });
 
   /// 背景颜色
@@ -28,6 +29,8 @@ class FreeBox extends StatefulWidget {
 
   /// 固定层。可使用任意 Widget。freeMoveScaleLayerBuilder(BuildContext freeBoxProxyContext)
   final Widget Function(BuildContext freeBoxProxyContext) fixedLayerBuilder;
+
+  final Function(ScaleStartDetails)? onLongPressStart;
 
   @override
   State<StatefulWidget> createState() {
@@ -48,11 +51,12 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   void initSliding() {
     context.read<FreeBoxController>().inertialSlideAnimationController = AnimationController(vsync: this);
     context.read<FreeBoxController>().targetSlideAnimationController = AnimationController(vsync: this);
+    context.read<FreeBoxController>().onLongPressStart = widget.onLongPressStart;
   }
 
   @override
   Widget build(BuildContext context) {
-    dLog(() => "FreeBox build");
+    // dLog(() => "FreeBox build");
     return _box();
   }
 
@@ -76,8 +80,8 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   Widget _freeMoveScaleLayer() {
     return Positioned(
       // [内容物区] 的左上角是依据该 Positioned 的左上角，因此需设它偏移
-      top: -context.read<FreeBoxController>().leftTopOffsetFilling.dx,
-      left: -context.read<FreeBoxController>().leftTopOffsetFilling.dy,
+      // top: -context.read<FreeBoxController>().leftTopOffsetFilling.dx,
+      // left: -context.read<FreeBoxController>().leftTopOffsetFilling.dy,
 
       width: double.maxFinite,
       height: double.maxFinite,

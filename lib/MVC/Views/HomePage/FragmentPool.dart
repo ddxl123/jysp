@@ -1,8 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
-import 'package:jysp/Plugin/FreeBox/FreeBoxController.dart';
+import 'package:jysp/MVC/Views/HomePage/SnCompletePoolNode.dart';
+import 'package:jysp/MVC/Views/HomePage/SnMemoryPoolNode.dart';
+import 'package:jysp/MVC/Views/HomePage/SnPendingPoolNode.dart';
+import 'package:jysp/MVC/Views/HomePage/SnRulePoolNode.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:provider/provider.dart';
 
 class FragmentPool extends StatefulWidget {
@@ -15,9 +21,7 @@ class _FragmentPoolState extends State<FragmentPool> {
   void initState() {
     super.initState();
     context.read<FragmentPoolController>().needInitStateForIsIniting = true;
-    context.read<FragmentPoolController>().needInitStateForSetState = () {
-      setState(() {});
-    };
+    context.read<FragmentPoolController>().needInitStateForSetState = setState;
     // 初始化 build widget 完成后，进入默认的碎片池中
     WidgetsBinding.instance!.addPostFrameCallback(
       (timeStamp) {
@@ -51,29 +55,42 @@ class _FragmentPoolState extends State<FragmentPool> {
       return Text("initing...");
     }
     // _toPosition();
-    return Stack(
-      children: <Widget>[
-        for (int childrenIndex = 0;
-            childrenIndex <
-                () {
-                  switch (context.read<FragmentPoolController>().getCurrentPoolType) {
-                    case PoolType.pendingPool:
-                      return context.read<FragmentPoolController>().pendingPoolNodes.length;
-                    case PoolType.memoryPool:
-                      return context.read<FragmentPoolController>().memoryPoolNodes.length;
-                    case PoolType.completePool:
-                      return context.read<FragmentPoolController>().completePoolNodes.length;
-                    case PoolType.rulePool:
-                      return context.read<FragmentPoolController>().rulePoolNodes.length;
-                    default:
-                      return 0;
-                  }
-                }();
-            childrenIndex++)
-          () {
-            return SingleNode(index: childrenIndex);
-          }()
-      ],
-    );
+
+    switch (context.read<FragmentPoolController>().getCurrentPoolType) {
+      case PoolType.pendingPool:
+        return Stack(
+          children: [
+            for (var i = 0; i < context.read<FragmentPoolController>().pendingPoolNodes.length; i++) SnPendingPoolNode(index: i),
+          ],
+        );
+      case PoolType.memoryPool:
+        return Stack(
+          children: [
+            for (var i = 0; i < context.read<FragmentPoolController>().memoryPoolNodes.length; i++) SnMemoryPoolNode(index: i),
+          ],
+        );
+      case PoolType.completePool:
+        return Stack(
+          children: [
+            for (var i = 0; i < context.read<FragmentPoolController>().completePoolNodes.length; i++) SnCompletePoolNode(index: i),
+          ],
+        );
+      case PoolType.rulePool:
+        return Stack(
+          children: [
+            for (var i = 0; i < context.read<FragmentPoolController>().rulePoolNodes.length; i++) SnRulePoolNode(index: i),
+          ],
+        );
+      default:
+        return Stack(
+          children: [
+            Positioned(
+              top: MediaQueryData.fromWindow(window).size.height / 2,
+              left: MediaQueryData.fromWindow(window).size.width / 2,
+              child: Text("PoolType unknown"),
+            ),
+          ],
+        );
+    }
   }
 }

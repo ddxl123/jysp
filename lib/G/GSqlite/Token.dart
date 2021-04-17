@@ -38,11 +38,11 @@ class Token {
   ///   - [failCode]: [1]: tokens 值为 null。 [2]: tokens sqlite 存储失败。
   ///
   Future<void> setSqliteToken({
-    required Map tokens,
+    required Map? tokens,
     required Function() success,
     required Function(int failCode) fail,
   }) async {
-    if (tokens[MToken.access_token] == null || tokens[MToken.refresh_token] == null) {
+    if (tokens == null || tokens[MToken.access_token] == null || tokens[MToken.refresh_token] == null) {
       await fail(1);
       dLog(() => "响应的 tokens 数据异常!");
     } else {

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
+import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
+import 'package:jysp/MVC/Views/InitDownloadPage/InitDownloadPage.dart';
 import 'package:jysp/MVC/Views/LoginPage.dart';
-import 'package:jysp/Plugin/SheetPage/SheetPage.dart';
-import 'package:jysp/Plugin/SheetPage/SheetPageController.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/SheetPage/SheetPage.dart';
+import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 import 'package:provider/provider.dart';
 
 class GNavigatorPush {
@@ -15,6 +20,33 @@ class GNavigatorPush {
         builder: (_) => ChangeNotifierProvider<LoginPageController>(
           create: (_) => LoginPageController(),
           child: Builder(builder: (_) => LoginPage()),
+        ),
+      ),
+    );
+  }
+
+  static void pushInitDownloadPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider<InitDownloadController>(
+          create: (_) => InitDownloadController(),
+          child: Builder(builder: (_) => InitDownloadPage()),
+        ),
+      ),
+    );
+  }
+
+  static void pushHomePage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => FragmentPoolController()),
+            ChangeNotifierProvider(create: (_) => FreeBoxController()),
+          ],
+          child: HomePage(),
         ),
       ),
     );

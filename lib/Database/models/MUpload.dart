@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 
+
 class MUpload {
 
   MUpload();
@@ -28,13 +29,17 @@ class MUpload {
     return {table_name:sqliteMap[table_name],row_id:sqliteMap[row_id],row_uuid:sqliteMap[row_uuid],upload_is_ok:sqliteMap[upload_is_ok],created_at:sqliteMap[created_at],updated_at:sqliteMap[updated_at],};
   }
 
+  static Future<List<Map<String, Object?>>> getAllRowsAsSqliteMap() async {
+    return await GSqlite.db.query(getTableName);
+  }
+
   static Future<List<MUpload>> getAllRowsAsModel() async {
-    List<Map<String, Object?>> allRows = await GSqlite.db.query(getTableName);
+    List<Map<String, Object?>> allRows = await getAllRowsAsSqliteMap();
     List<MUpload> allRowModels = [];
     allRows.forEach(
       (row) {
         MUpload newRowModel = MUpload();
-        newRowModel._rowModel = toModelMap(row);
+        newRowModel._rowModel.addAll(toModelMap(row));
         allRowModels.add(newRowModel);
       },
     );

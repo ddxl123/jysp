@@ -1,0 +1,1 @@
+enum Curd{C,U,R,D,}

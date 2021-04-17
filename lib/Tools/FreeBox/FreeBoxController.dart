@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
@@ -10,10 +12,10 @@ mixin _Root on _Init {
   double scale = 1;
 
   /// 偏移值,默认必须(0,0)
-  Offset offset = Offset(0, 0);
+  Offset offset = Offset(0, 0) - Offset(100, 100);
 
   /// 左上角偏移填充
-  Offset leftTopOffsetFilling = Offset(5000, 5000);
+  Offset leftTopOffsetFilling = Offset(100, 100);
 
   bool doRebuild = false;
 
@@ -34,11 +36,25 @@ mixin _TouchEvent on _Root {
   /// 是否禁用触摸
   bool _isDisableTouch = false;
 
+  /// 长按开始的回调
+  Function(ScaleStartDetails)? onLongPressStart;
+
+  /// 触发长按的时长的 Timer
+  Timer? _onLongPressStartTimer;
+
   /// touch 事件
-  void onScaleStart(details) {
+  void onScaleStart(ScaleStartDetails details) {
     if (_isDisableTouch) {
       return;
     }
+    _onLongPressStartTimer = Timer(Duration(milliseconds: 1000), () {
+      dLog(() => "123");
+      if (onLongPressStart != null) {
+        dLog(() => "345");
+        onLongPressStart!(details);
+        dLog(() => "456");
+      }
+    });
 
     /// 停止所有滑动动画
     inertialSlideAnimationController.stop();
@@ -55,6 +71,7 @@ mixin _TouchEvent on _Root {
     if (_isDisableTouch) {
       return;
     }
+    _onLongPressStartTimer?.cancel();
 
     /// 进行缩放
     double deltaScale = details.scale - _lastTempScale;
@@ -72,13 +89,17 @@ mixin _TouchEvent on _Root {
     _lastTempScale = details.scale;
     _lastTempTouchPosition = details.localFocalPoint;
 
-    dLog(() => "onScaleUpdate:" + offset.toString());
+    // dLog(() => "onScaleUpdate:" + offset.toString());
     notifyListeners();
   }
 
   void onScaleEnd(ScaleEndDetails details) {
     if (_isDisableTouch) {
       return;
+    }
+
+    if (_onLongPressStartTimer?.isActive ?? false) {
+      _onLongPressStartTimer?.cancel();
     }
 
     /// 开始惯性滑动
@@ -101,7 +122,7 @@ mixin _TouchEvent on _Root {
     if (inertialSlideAnimationController.isDismissed || inertialSlideAnimationController.isCompleted) {
       inertialSlideAnimationController.removeListener(_inertialSlideListener);
     }
-    dLog(() => "_inertialSlideListener:" + offset.toString());
+    // dLog(() => "_inertialSlideListener:" + offset.toString());
     notifyListeners();
   }
 
@@ -114,6 +135,13 @@ mixin _CommonTool on _TouchEvent {
   /// 禁用触摸事件
   void isDisableTouch(bool isDisable) {
     _isDisableTouch = isDisable;
+  }
+
+  /// 屏幕坐标转盒子坐标
+  Offset screenToBoxTransform(Offset screenPosition) {
+    dLog(() => offset.toString() + ",,," + screenPosition.toString() + ",,," + scale.toString());
+    dLog(() => (screenPosition - offset));
+    return (screenPosition - offset) / scale - Offset(100, 100);
   }
 
   /// 滑动至目标位置
