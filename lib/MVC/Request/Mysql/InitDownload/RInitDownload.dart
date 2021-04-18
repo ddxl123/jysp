@@ -13,7 +13,7 @@ import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-class InitDownloadRequest {
+class RInitDownload {
   ///
 
   String getUserInfoRoute = "api/init_download/get_user_info";

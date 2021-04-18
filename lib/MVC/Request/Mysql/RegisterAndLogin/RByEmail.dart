@@ -8,7 +8,7 @@ import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-mixin ByEmailRequest {
+mixin RByEmail {
   ///
 
   Future<void> sendEmailRequest({

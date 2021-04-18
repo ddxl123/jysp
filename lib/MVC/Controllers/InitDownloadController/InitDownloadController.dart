@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:jysp/Database/models/MDownloadModule.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
-import 'package:jysp/MVC/Models/InitDownloadRequest/InitDownloadRequest.dart';
+import 'package:jysp/MVC/Request/Mysql/InitDownload/RInitDownload.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/DownloadModule.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,55 +17,55 @@ class InitDownloadController extends ChangeNotifier {
     DownloadModule(
       moduleName: "用户信息",
       getData: () async {
-        return await InitDownloadRequest().getUserInfo();
+        return await RInitDownload().getUserInfo();
       },
     ),
     DownloadModule(
       moduleName: "待定池的全部节点",
       getData: () async {
-        return await InitDownloadRequest().getPendingPoolNodes();
+        return await RInitDownload().getPendingPoolNodes();
       },
     ),
     DownloadModule(
       moduleName: "记忆池的全部节点",
       getData: () async {
-        return await InitDownloadRequest().getMemoryPoolNodes();
+        return await RInitDownload().getMemoryPoolNodes();
       },
     ),
     DownloadModule(
       moduleName: "完成池的全部节点",
       getData: () async {
-        return await InitDownloadRequest().getCompletePoolNodes();
+        return await RInitDownload().getCompletePoolNodes();
       },
     ),
     DownloadModule(
       moduleName: "规则池的全部节点",
       getData: () async {
-        return await InitDownloadRequest().getRulePoolNodes();
+        return await RInitDownload().getRulePoolNodes();
       },
     ),
     DownloadModule(
       moduleName: "待定池的全部碎片",
       getData: () async {
-        return await InitDownloadRequest().getPendingPoolNodeFragments();
+        return await RInitDownload().getPendingPoolNodeFragments();
       },
     ),
     DownloadModule(
       moduleName: "记忆池的全部碎片",
       getData: () async {
-        return await InitDownloadRequest().getMemoryPoolNodeFragments();
+        return await RInitDownload().getMemoryPoolNodeFragments();
       },
     ),
     DownloadModule(
       moduleName: "完成池的全部碎片",
       getData: () async {
-        return await InitDownloadRequest().getCompletePoolNodeFragments();
+        return await RInitDownload().getCompletePoolNodeFragments();
       },
     ),
     DownloadModule(
       moduleName: "规则池的全部碎片",
       getData: () async {
-        return await InitDownloadRequest().getRulePoolNodeFragments();
+        return await RInitDownload().getRulePoolNodeFragments();
       },
     ),
   ];

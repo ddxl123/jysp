@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/MVC/Models/RegisterAndLoginRequest/ByEmailRequest.dart';
+import 'package:jysp/MVC/Request/Mysql/RegisterAndLogin/RByEmail.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 
 class _Init extends ChangeNotifier {}
 
-mixin _Root on _Init, ByEmailRequest {
+mixin _Root on _Init, RByEmail {
   ///
   TextEditingController emailTextEditingController = TextEditingController(text: "1033839760@qq.com");
   TextEditingController codeTextEditingController = TextEditingController();
@@ -28,4 +28,4 @@ mixin _Other on _Root {
   /// 其他逻辑
 }
 
-class LoginPageController extends _Init with ByEmailRequest, _Root, _Other {}
+class LoginPageController extends _Init with RByEmail, _Root, _Other {}

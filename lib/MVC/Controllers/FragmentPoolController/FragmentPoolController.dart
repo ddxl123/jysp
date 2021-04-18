@@ -7,7 +7,7 @@ import 'package:jysp/Database/models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/models/MPnPendingPoolNode.dart';
 import 'package:jysp/Database/models/MPnRulePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
-import 'package:jysp/MVC/Models/FragmentPoolRequest/GetPoolNodesRequest.dart';
+import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -55,21 +55,6 @@ class FragmentPoolController extends ChangeNotifier {
   void addNode(Offset boxPosition) {
     switch (_currentPoolType) {
       case PoolType.pendingPool:
-        pendingPoolNodes.add(
-          MPnPendingPoolNode.createModel(
-            pn_pending_pool_node_id_v: null,
-            pn_pending_pool_node_uuid_v: null,
-            recommend_raw_rule_id_v: null,
-            recommend_raw_rule_uuid_v: null,
-            type_v: null,
-            name_v: null,
-            position_v: "${boxPosition.dx.toString()},${boxPosition.dy.toString()}",
-            created_at_v: null,
-            updated_at_v: null,
-            curd_status_v: null,
-          ),
-        );
-        needInitStateForSetState(() {});
         break;
       default:
     }
@@ -109,7 +94,7 @@ class FragmentPoolController extends ChangeNotifier {
       isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.enabled);
 
       // 获取数据：[toPoolType] 的数据
-      bool result = await GetPoolNodesRequest().getPoolNodes(this, toPoolType);
+      bool result = await RPoolNode().getPoolNodes(this, toPoolType);
 
       switch (result) {
         case true:

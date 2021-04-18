@@ -139,8 +139,6 @@ mixin _CommonTool on _TouchEvent {
 
   /// 屏幕坐标转盒子坐标
   Offset screenToBoxTransform(Offset screenPosition) {
-    dLog(() => offset.toString() + ",,," + screenPosition.toString() + ",,," + scale.toString());
-    dLog(() => (screenPosition - offset));
     return (screenPosition - offset) / scale - Offset(100, 100);
   }
 

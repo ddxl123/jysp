@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/G/G.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
@@ -56,32 +57,37 @@ class _FragmentPoolState extends State<FragmentPool> {
     }
     // _toPosition();
 
-    switch (context.read<FragmentPoolController>().getCurrentPoolType) {
-      case PoolType.pendingPool:
+    return G.poolTypeSwitch<Stack>(
+      toPoolType: context.read<FragmentPoolController>().getCurrentPoolType,
+      pendingPoolCB: () {
         return Stack(
           children: [
             for (var i = 0; i < context.read<FragmentPoolController>().pendingPoolNodes.length; i++) SnPendingPoolNode(index: i),
           ],
         );
-      case PoolType.memoryPool:
+      },
+      memoryPoolCB: () {
         return Stack(
           children: [
             for (var i = 0; i < context.read<FragmentPoolController>().memoryPoolNodes.length; i++) SnMemoryPoolNode(index: i),
           ],
         );
-      case PoolType.completePool:
+      },
+      completePoolCB: () {
         return Stack(
           children: [
             for (var i = 0; i < context.read<FragmentPoolController>().completePoolNodes.length; i++) SnCompletePoolNode(index: i),
           ],
         );
-      case PoolType.rulePool:
+      },
+      rulePoolCB: () {
         return Stack(
           children: [
             for (var i = 0; i < context.read<FragmentPoolController>().rulePoolNodes.length; i++) SnRulePoolNode(index: i),
           ],
         );
-      default:
+      },
+      unknownCB: () {
         return Stack(
           children: [
             Positioned(
@@ -91,6 +97,7 @@ class _FragmentPoolState extends State<FragmentPool> {
             ),
           ],
         );
-    }
+      },
+    );
   }
 }

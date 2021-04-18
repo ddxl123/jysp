@@ -3,6 +3,7 @@ import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolControll
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
+import 'package:jysp/MVC/Views/HomePage/NodeJustCreated.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/InitDownloadPage.dart';
 import 'package:jysp/MVC/Views/LoginPage.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
@@ -111,6 +112,22 @@ class GNavigatorPush {
             loadArea(),
           ];
         },
+      ),
+    );
+  }
+
+  static void pushNodeJustCreated({
+    required BuildContext context,
+    required double left,
+    required double top,
+    required Future<void> Function(String) futrue,
+  }) {
+    Navigator.push(
+      context,
+      NodeJustCreated(
+        left: left,
+        top: top,
+        future: futrue,
       ),
     );
   }

@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
+import 'package:jysp/MVC/Views/HomePage/NodeJustCreated.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
@@ -36,7 +38,15 @@ class HomePageState extends State<HomePage> {
             ),
             onLongPressStart: (details) {
               dLog(() => "details.focalPoint", () => details.focalPoint);
-              context.read<FragmentPoolController>().addNode(context.read<FreeBoxController>().screenToBoxTransform(details.focalPoint));
+              GNavigatorPush.pushNodeJustCreated(
+                context: context,
+                left: details.focalPoint.dx,
+                top: details.focalPoint.dy,
+                futrue: (text) async {
+                  await Future.delayed(Duration(seconds: 1));
+                  dLog(() => text);
+                },
+              );
             },
           ),
         ],
