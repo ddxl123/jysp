@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/models/MDownloadModule.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/DownloadModule.dart';
@@ -16,14 +15,14 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<void>(
       future: context.read<InitDownloadController>().getListFuture(),
-      builder: (context, snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return Material(
               child: Stack(
-                children: [
+                children: <Widget>[
                   _background(),
                   _body(true),
                 ],
@@ -32,14 +31,14 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
           case ConnectionState.done:
             return Material(
               child: Stack(
-                children: [
+                children: <Widget>[
                   _background(),
                   _body(false),
                 ],
               ),
             );
           default:
-            return Material(child: Center(child: Text("snapshot unknown")));
+            return const Material(child: Center(child: Text('snapshot unknown')));
         }
       },
     );
@@ -60,16 +59,16 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
           decoration: BoxDecoration(
             color: Colors.yellow,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
+            boxShadow: const <BoxShadow>[
               BoxShadow(offset: Offset(10, 10), blurRadius: 10, spreadRadius: -10),
             ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               // 这里的占比是根据父容器大小的占比
-              Flexible(child: _title(isGetList ? "获取中..." : "正在下载中...")),
+              Flexible(child: _title(isGetList ? '获取中...' : '正在下载中...')),
               Flexible(child: isGetList ? Container() : DownloadList()),
             ],
           ),
@@ -80,14 +79,14 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
 
   Widget _title(String title) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+      padding: const EdgeInsets.fromLTRB(20, 10, 0, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Container(
             child: Text(
               title,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ),
         ],
@@ -112,16 +111,16 @@ class _DownloadListState extends State<DownloadList> {
     getData();
   }
 
-  void getData() async {
+  Future<void> getData() async {
     bool isAllDownloaded = true;
-    for (var i = 0; i < context.read<InitDownloadController>().baseDownloadModuleGroupUse.length; i++) {
+    for (int i = 0; i < context.read<InitDownloadController>().baseDownloadModuleGroupUse.length; i++) {
       GetDataResultType resultType = GetDataResultType.fail;
-      for (var repeat = 0; repeat < 5; repeat++) {
+      for (int repeat = 0; repeat < 5; repeat++) {
         context.read<InitDownloadController>().baseDownloadModuleGroupUse[i].setDownloadStatus(DownloadStatus.downloading);
         resultType = await context.read<InitDownloadController>().baseDownloadModuleGroupUse[i].getData();
         if (resultType == GetDataResultType.fail) {
           context.read<InitDownloadController>().baseDownloadModuleGroupUse[i].setDownloadStatus(DownloadStatus.repeat);
-          await Future.delayed(Duration(seconds: 1));
+          await Future<void>.delayed(const Duration(seconds: 1));
           context.read<InitDownloadController>().baseDownloadModuleGroupUse[i].setDownloadStatus(DownloadStatus.downloading);
         } else {
           break;
@@ -144,10 +143,10 @@ class _DownloadListState extends State<DownloadList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-      physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: context.read<InitDownloadController>().baseDownloadModuleGroupUse.length,
-      itemBuilder: (_, index) {
+      itemBuilder: (_, int index) {
         return context.read<InitDownloadController>().baseDownloadModuleGroupUse[index].widget;
       },
     );

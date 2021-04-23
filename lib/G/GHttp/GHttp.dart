@@ -5,11 +5,13 @@ import 'package:jysp/G/GSqlite/Token.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 class GHttp {
+  int i = 1;
+
   /// 全局 [dio]
   static final Dio dio = Dio();
 
   /// 不可并发请求标志
-  static final Map<dynamic, dynamic> _sameNotConcurrentMap = {};
+  static final Map<String, bool> _sameNotConcurrentMap = <String, bool>{};
 
   /// 是否处于正在 refresh token 状态
   static bool _isTokenRefreshing = false;
@@ -18,11 +20,11 @@ class GHttp {
   static bool _isTokenCreating = false;
 
   /// 是否延迟请求(2s)
-  static bool _isDelay = false;
+  static const bool _isDelay = false;
 
   /// 初始化 [http]
   static void init() {
-    dio.options.baseUrl = "http://jysp.free.idcfengye.com/";
+    dio.options.baseUrl = 'http://jysp.free.idcfengye.com/';
     dio.options.connectTimeout = 20000; //10s
     dio.options.receiveTimeout = 20000; //10s
   }
@@ -62,41 +64,43 @@ class GHttp {
     required Function(RequestInterruptedType requestInterruptedType) interruptedCallback,
   }) async {
     /// 若相同请求被并发，或正处在 refresh token 状态，或正处在 create token 状态，则直接返回。
-    if ((sameNotConcurrent != null && _sameNotConcurrentMap.containsKey(sameNotConcurrent)) || _isTokenRefreshing || _isTokenCreating) {
+    if (_sameNotConcurrentMap.containsKey(sameNotConcurrent) || _isTokenRefreshing || _isTokenCreating) {
       // 或相同请求并发，或 token 正在刷新，或 token 正在生成
-      dLog(() => "concurrent:$_sameNotConcurrentMap");
+      dLog(() => 'concurrent:$_sameNotConcurrentMap');
       await interruptedCallback(RequestInterruptedType.generalConcurrentBefore);
       return;
     }
 
     /// 当相同请求未并发时，对当前请求做阻断标记
-    _sameNotConcurrentMap[sameNotConcurrent] = 1;
+    if (sameNotConcurrent != null) {
+      _sameNotConcurrentMap[sameNotConcurrent] = true;
+    }
 
     dLog(() => dio.options.baseUrl + route);
 
     // "await Future(() async {" 这段不能放在当前函数内的最顶端，否则并发时出现 sameNotConcurrentMap 未设置的情况
-    await Future(() async {
+    await Future<void>(() async {
       /// 延迟请求测试，正式版需注释掉
       if (_isDelay) {
-        await Future.delayed(Duration(seconds: 2));
+        await Future<void>.delayed(const Duration(seconds: 2));
       }
 
       /// 给请求头设置 token
-      Map<String, dynamic> headers = {};
+      final Map<String, dynamic> headers = <String, dynamic>{};
       if (isAuth) {
-        String accessToken = await Token().getSqliteToken(tokenTypeCode: 0);
-        headers["Authorization"] = "Bearer " + accessToken;
+        final String accessToken = await Token().getSqliteToken(tokenTypeCode: 0);
+        headers['Authorization'] = 'Bearer ' + accessToken;
       }
       await dio
-          .request(
-        "$route",
+          .request<Map<String, dynamic>>(
+        route,
         data: data,
         queryParameters: queryParameters,
         options: Options(method: method, headers: headers),
       )
           .then(
-        (Response<dynamic> response) async {
-          CodeAndData<T> codeAndData = CodeAndData<T>(response);
+        (Response<Map<String, dynamic>> response) async {
+          final CodeAndData<T> codeAndData = CodeAndData<T>(response);
 
           switch (codeAndData.resultCode) {
             case -1:
@@ -112,23 +116,23 @@ class GHttp {
                   tokenRefreshFailCallback: (RequestInterruptedType requestInterruptedType) {
                     switch (requestInterruptedType) {
                       case RequestInterruptedType.refreshTokenRefreshing:
-                        dLog(() => "token 正在刷新中，请勿并发");
+                        dLog(() => 'token 正在刷新中，请勿并发');
                         break;
                       case RequestInterruptedType.refreshTokenCodeUnknown:
-                        dLog(() => "未知响应码");
+                        dLog(() => '未知响应码');
                         break;
                       case RequestInterruptedType.refreshTokenTokensIsNull:
-                        dLog(() => "响应 tokens 值为 null");
+                        dLog(() => '响应 tokens 值为 null');
                         break;
                       case RequestInterruptedType.refreshTokenRefreshTokenExpired:
-                        dLog(() => "刷新 token 失败，用户需重新登陆");
+                        dLog(() => '刷新 token 失败，用户需重新登陆');
                         break;
                       default:
-                        dLog(() => "未知InterruptedStatus");
+                        dLog(() => '未知InterruptedStatus');
                     }
                   },
                   tokenRefreshSuccessCallback: () {
-                    dLog(() => "token 刷新成功");
+                    dLog(() => 'token 刷新成功');
                   },
                 );
               }
@@ -137,7 +141,7 @@ class GHttp {
               await resultCallback(codeAndData.resultCode, codeAndData.resultData);
           }
         },
-      ).catchError((onError) async => await _catchLocalError(onError, interruptedCallback));
+      ).catchError((Function onError) async => await _catchLocalError(onError, interruptedCallback));
     })
         // whenComplete 要放在最外层
         .whenComplete(() {
@@ -174,19 +178,19 @@ class GHttp {
     dLog(() => dio.options.baseUrl + route);
 
     // "await Future(() async {" 这段不能放在当前函数内的最顶端，否则并发时出现 _isTokenCreating 未设置的情况
-    await Future(() async {
+    await Future<void>(() async {
       // 延迟请求测试，正式版需注释掉
       if (_isDelay) {
-        await Future.delayed(Duration(seconds: 2));
+        await Future<void>.delayed(const Duration(seconds: 2));
       }
 
-      await dio.request("$route", options: Options(method: "POST"), data: willVerifyData).then(
-        (Response<dynamic> response) async {
-          CodeAndData<T> codeAndData = CodeAndData<T>(response);
+      await dio.request<Map<String, dynamic>>(route, options: Options(method: 'POST'), data: willVerifyData).then(
+        (Response<Map<String, dynamic>> response) async {
+          final CodeAndData<T> codeAndData = CodeAndData<T>(response);
 
           await resultCallback(codeAndData.resultCode, codeAndData.resultData);
         },
-      ).catchError((onError) async => await _catchLocalError(onError, tokenCreateFailCallback));
+      ).catchError((Function onError) async => await _catchLocalError(onError, tokenCreateFailCallback));
     })
         // whenComplete 要放在最外层
         .whenComplete(() {
@@ -215,21 +219,26 @@ class GHttp {
       return;
     }
     _isTokenRefreshing = true;
-    dLog(() => "正在 refresh token");
+    dLog(() => '正在 refresh token');
 
     // "await Future(() async {" 这段不能放在当前函数内的最顶端，否则并发时出现 _isTokenRefreshing 未设置的情况
-    await Future(() async {
+    await Future<void>(() async {
       // 延迟请求测试，正式版需注释掉
       if (_isDelay) {
-        await Future.delayed(Duration(seconds: 2));
+        await Future<void>.delayed(const Duration(seconds: 2));
       }
 
       // 从 sqlite 中获取 refresh_token
-      String refreshToken = await Token().getSqliteToken(tokenTypeCode: 1);
+      final String refreshToken = await Token().getSqliteToken(tokenTypeCode: 1);
 
-      await dio.request("/api/refresh_token", options: Options(method: "GET", headers: {"Authorization": "Bearer " + refreshToken})).then(
-        (Response<dynamic> response) async {
-          CodeAndData<Map<dynamic, dynamic>> codeAndData = CodeAndData<Map<dynamic, dynamic>>(response);
+      await dio
+          .request<Map<String, dynamic>>(
+        '/api/refresh_token',
+        options: Options(method: 'GET', headers: <String, String>{'Authorization': 'Bearer ' + refreshToken}),
+      )
+          .then(
+        (Response<Map<String, dynamic>> response) async {
+          final CodeAndData<Map<String, String>> codeAndData = CodeAndData<Map<String, String>>(response);
 
           switch (codeAndData.resultCode) {
             case -2:
@@ -239,7 +248,7 @@ class GHttp {
                 success: () async {
                   await tokenRefreshSuccessCallback();
                 },
-                fail: (failCode) async {
+                fail: (int failCode) async {
                   if (failCode == 1) {
                     await tokenRefreshFailCallback(RequestInterruptedType.refreshTokenTokensIsNull);
                   } else {
@@ -258,7 +267,7 @@ class GHttp {
               await tokenRefreshFailCallback(RequestInterruptedType.refreshTokenCodeUnknown);
           }
         },
-      ).catchError((onError) async => await _catchLocalError(onError, tokenRefreshFailCallback));
+      ).catchError((Function onError) async => await _catchLocalError(onError, tokenRefreshFailCallback));
     })
         // whenComplete 要放在最外层
         .whenComplete(() {
@@ -273,6 +282,7 @@ class GHttp {
   ///
   /// catchError 需要返回 Future<Null> 类型
   ///
+  // ignore: prefer_void_to_null
   static Future<Null> _catchLocalError(
     dynamic onError,
     Function interruptedStatusCallback,
@@ -280,13 +290,13 @@ class GHttp {
     if (onError is DioError) {
       // 1.可能本地请求的发送异常
       // 2.可能返回的响应码非 200
-      dLog(() => "捕获到本地DioError异常!", () => onError);
+      dLog(() => '捕获到本地DioError异常!', () => onError);
       await interruptedStatusCallback(RequestInterruptedType.localDioError);
     } else if (onError is RequestInterruptedType) {
-      dLog(() => "捕获到 RequestInterruptedType 异常!", () => onError);
+      dLog(() => '捕获到 RequestInterruptedType 异常!', () => onError);
       await interruptedStatusCallback(onError);
     } else {
-      dLog(() => "捕获到本地未知异常!", () => onError);
+      dLog(() => '捕获到本地未知异常!', () => onError);
       await interruptedStatusCallback(RequestInterruptedType.localUnknownError);
     }
   }

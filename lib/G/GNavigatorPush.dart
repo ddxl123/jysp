@@ -3,21 +3,23 @@ import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolControll
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
-import 'package:jysp/MVC/Views/HomePage/NodeJustCreated.dart';
+import 'package:jysp/MVC/Views/HomePage/SmallPage/NodeJustCreated.dart';
+import 'package:jysp/MVC/Views/HomePage/SmallPage/NodeLongPressMenu.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/InitDownloadPage.dart';
 import 'package:jysp/MVC/Views/LoginPage.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/SheetPage/SheetPage.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 class GNavigatorPush {
   ///
 
-  static void pushLoginPage(BuildContext context) {
+  GNavigatorPush.pushLoginPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => ChangeNotifierProvider<LoginPageController>(
           create: (_) => LoginPageController(),
           child: Builder(builder: (_) => LoginPage()),
@@ -26,10 +28,10 @@ class GNavigatorPush {
     );
   }
 
-  static void pushInitDownloadPage(BuildContext context) {
+  GNavigatorPush.pushInitDownloadPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => ChangeNotifierProvider<InitDownloadController>(
           create: (_) => InitDownloadController(),
           child: Builder(builder: (_) => InitDownloadPage()),
@@ -38,14 +40,14 @@ class GNavigatorPush {
     );
   }
 
-  static void pushHomePage(BuildContext context) {
+  GNavigatorPush.pushHomePage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => FragmentPoolController()),
-            ChangeNotifierProvider(create: (_) => FreeBoxController()),
+          providers: <SingleChildWidget>[
+            ChangeNotifierProvider<FragmentPoolController>(create: (_) => FragmentPoolController()),
+            ChangeNotifierProvider<FreeBoxController>(create: (_) => FreeBoxController()),
           ],
           child: HomePage(),
         ),
@@ -53,37 +55,42 @@ class GNavigatorPush {
     );
   }
 
-  static void pushSheetPage(BuildContext context) {
+  GNavigatorPush.pushSheetPage(BuildContext context) {
     Navigator.push(
       context,
       SheetPage(
-        bodyDataFuture: (List<Map> bodyData) async {
-          await Future.delayed(Duration(seconds: 2));
+        bodyDataFuture: (List<Map<String, String>> bodyData) async {
+          await Future<void>.delayed(const Duration(seconds: 2));
 
           return BodyDataFutureResult.success;
         },
-        slivers: ({required sheetPageController, required header, required body, required loadArea}) {
-          return [
+        slivers: ({
+          required SheetPageController sheetPageController,
+          required Widget Function(Widget) header,
+          required Widget Function(Widget) body,
+          required Widget Function() loadArea,
+        }) {
+          return <Widget>[
             header(
               SliverToBoxAdapter(
                 child: Container(
                   height: 50,
                   color: Colors.orange,
-                  child: Text("data"),
+                  child: const Text('data'),
                 ),
               ),
             ),
             body(
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (_, index) {
+                  (_, int index) {
                     bool isCheck = false;
                     return Row(
-                      children: [
+                      children: <Widget>[
                         Expanded(
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              padding: EdgeInsets.all(0),
+                              padding: const EdgeInsets.all(0),
                               backgroundColor: Colors.purple,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -92,10 +99,10 @@ class GNavigatorPush {
                           ),
                         ),
                         StatefulBuilder(
-                          builder: (BuildContext context, rebuild) {
+                          builder: (BuildContext context, void Function(void Function()) rebuild) {
                             return Checkbox(
                               value: isCheck,
-                              onChanged: (check) {
+                              onChanged: (bool? check) {
                                 isCheck = !isCheck;
                                 rebuild(() {});
                               },
@@ -116,7 +123,7 @@ class GNavigatorPush {
     );
   }
 
-  static void pushNodeJustCreated({
+  GNavigatorPush.pushNodeJustCreated({
     required BuildContext context,
     required double left,
     required double top,
@@ -130,6 +137,10 @@ class GNavigatorPush {
         future: futrue,
       ),
     );
+  }
+
+  GNavigatorPush.pushNodeLongPressMenu({required BuildContext context}) {
+    Navigator.push(context, NodeLongPressMenu());
   }
 
   ///

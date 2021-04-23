@@ -18,7 +18,7 @@ class _MyApp extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Material(
-        key: G.globalKey,
+        key: globalKey,
         child: WillToHomePage(),
       ),
     );

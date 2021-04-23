@@ -1,6 +1,6 @@
 import 'package:jysp/AppInit/AppVersionManager.dart';
-import 'package:jysp/Database/models/MVersionInfo.dart';
-import 'package:jysp/Database/models/ParseIntoSqls.dart';
+import 'package:jysp/Database/Models/MVersionInfo.dart';
+import 'package:jysp/Database/Models/ParseIntoSqls.dart';
 import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
@@ -26,7 +26,7 @@ class AppInit {
     _isAppInited = true;
 
     // 关于 sqlite 的初始化
-    Object initResult = await _sqliteInit();
+    final Object initResult = await _sqliteInit();
     if (!(initResult == AppInitStatus.ok)) {
       return initResult;
     }
@@ -37,10 +37,10 @@ class AppInit {
 
   Future<Object> _sqliteInit() async {
     // 解析全部需要的表的 Sql 语句
-    Map<String, String> sqls = ParseIntoSqls().parseIntoSqls;
+    final Map<String, String> sqls = ParseIntoSqls().parseIntoSqls;
 
     // 打开数据库
-    await GSqlite.openDb();
+    await openDb();
 
     // TODO: 先清空，发布版本需要去除
     await SqliteTools().clearSqlite();
@@ -60,10 +60,12 @@ class AppInit {
     await SqliteTools().createAllTables(sqls);
 
     // 2. 创建 [version_infos] 信息
-    await GSqlite.db.update(
+    await db.insert(
       MVersionInfo.getTableName,
-      MVersionInfo.toSqliteMap(
-        saved_version_v: (await AppVersionManager().getCurrentAppVersion()),
+      MVersionInfo.asJsonNoId(
+        atid_v: null,
+        uuid_v: null,
+        saved_version_v: await AppVersionManager().getCurrentAppVersion(),
         created_at_v: DateTime.now().millisecondsSinceEpoch,
         updated_at_v: DateTime.now().millisecondsSinceEpoch,
       ),
@@ -78,7 +80,7 @@ class AppInit {
   /// 不是第一次打开应用. 注意先后顺序
   Future<Object> _notFirstInit(Map<String, String> sqls) async {
     // 检查 app 版本的准确性
-    VersionStatus versionStatus = await AppVersionManager().appVersionCheck();
+    final VersionStatus versionStatus = await AppVersionManager().appVersionCheck();
     if (versionStatus != VersionStatus.keep) {
       return versionStatus;
     }

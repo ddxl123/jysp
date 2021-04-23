@@ -1,6 +1,9 @@
-import 'package:jysp/Database/models/MToken.dart';
+import 'dart:async';
+
+import 'package:jysp/Database/Models/MToken.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
+import 'package:sqflite/sqflite.dart';
 
 class Token {
   ///
@@ -17,17 +20,17 @@ class Token {
   /// - [return]: string ,不能返回 null, 因为 ""+null 会报错
   ///
   Future<String> getSqliteToken({required int tokenTypeCode}) async {
-    String? tokenType = tokenTypeCode == 0 ? "access_token" : (tokenTypeCode == 1 ? "refresh_token" : null);
+    final String? tokenType = tokenTypeCode == 0 ? 'access_token' : (tokenTypeCode == 1 ? 'refresh_token' : null);
     String? token;
     try {
-      token = (await GSqlite.db.query(MToken.getTableName))[0][tokenType].toString();
+      token = (await db.query(MToken.getTableName))[0][tokenType].toString();
     } catch (e) {
       // 获取失败。可能是 query 失败，也可能是 [0] 值为 null
       token = null;
     }
-    dLog(() => "从 sqlite 中获取 $tokenType 的结果：", () => token.toString());
+    dLog(() => '从 sqlite 中获取 $tokenType 的结果：', () => token.toString());
     // 不能返回 null, 因为 ""+null 会报错
-    return token ?? "";
+    return token ?? '';
   }
 
   /// 在 sqlite 存储 access_token 和 refresh_token
@@ -38,22 +41,24 @@ class Token {
   ///   - [failCode]: [1]: tokens 值为 null。 [2]: tokens sqlite 存储失败。
   ///
   Future<void> setSqliteToken({
-    required Map? tokens,
-    required Function() success,
-    required Function(int failCode) fail,
+    required Map<String, String>? tokens,
+    required FutureOr<void> Function() success,
+    required FutureOr<void> Function(int failCode) fail,
   }) async {
     if (tokens == null || tokens[MToken.access_token] == null || tokens[MToken.refresh_token] == null) {
       await fail(1);
-      dLog(() => "响应的 tokens 数据异常!");
+      dLog(() => '响应的 tokens 数据异常!');
     } else {
-      dLog(() => "响应的 tokens 数据正常!");
+      dLog(() => '响应的 tokens 数据正常!');
       // 先清空表，再插入
-      await GSqlite.db.transaction(
-        (txn) async {
+      await db.transaction(
+        (Transaction txn) async {
           await txn.delete(MToken.getTableName);
           await txn.insert(
             MToken.getTableName,
-            MToken.toSqliteMap(
+            MToken.asJsonNoId(
+              atid_v: null,
+              uuid_v: null,
               access_token_v: tokens[MToken.access_token],
               refresh_token_v: tokens[MToken.refresh_token],
               created_at_v: 0,
@@ -63,15 +68,15 @@ class Token {
         },
       )
           //
-          .then((onValue) async {
+          .then((FutureOr<void> onValue) async {
         await success();
-        List<Map> queryResult = await GSqlite.db.query(MToken.getTableName);
-        dLog(() => "sqlite 查询 tokens 成功：", () => queryResult);
+        final List<Map<String, Object?>> queryResult = await db.query(MToken.getTableName);
+        dLog(() => 'sqlite 查询 tokens 成功：', () => queryResult);
       })
           //
-          .catchError((onError) async {
+          .catchError((Function onError) async {
         await fail(2);
-        dLog(() => "token sqlite 存储失败", () => onError);
+        dLog(() => 'token sqlite 存储失败', () => onError);
       });
     }
   }

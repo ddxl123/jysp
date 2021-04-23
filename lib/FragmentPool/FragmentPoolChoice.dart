@@ -9,7 +9,7 @@ import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 /// 选项按钮
 ///
 class FragmentPoolChoice extends StatefulWidget {
-  FragmentPoolChoice({required this.fragmentPoolController, required this.freeBoxController});
+  const FragmentPoolChoice({required this.fragmentPoolController, required this.freeBoxController});
   final FragmentPoolController fragmentPoolController;
   final FreeBoxController freeBoxController;
 
@@ -49,7 +49,7 @@ class _FragmentPoolChoiceState extends State<FragmentPoolChoice> {
 ///
 /// 弹出的选项页
 ///
-class FragmentPoolChoicePage extends OverlayRoute {
+class FragmentPoolChoicePage extends OverlayRoute<void> {
   FragmentPoolChoicePage({
     required this.ctx,
     required this.mainButtonRebuild,
@@ -65,13 +65,13 @@ class FragmentPoolChoicePage extends OverlayRoute {
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
     /// 获取 mainButton 的尺寸
-    size = (ctx.findRenderObject() as RenderBox).size;
-    return [
+    size = (ctx.findRenderObject()! as RenderBox).size;
+    return <OverlayEntry>[
       OverlayEntry(
         builder: (_) {
           return Stack(
             alignment: AlignmentDirectional.center,
-            children: [
+            children: <Widget>[
               /// 背景
               _background(_),
 
@@ -88,7 +88,7 @@ class FragmentPoolChoicePage extends OverlayRoute {
     return Positioned(
       child: Listener(
         child: Container(color: Colors.black12),
-        onPointerUp: (event) {
+        onPointerUp: (PointerUpEvent event) {
           Navigator.removeRoute(_, this);
         },
       ),
@@ -99,7 +99,7 @@ class FragmentPoolChoicePage extends OverlayRoute {
     return Positioned(
       bottom: size.height,
       child: Column(
-        children: [
+        children: <Widget>[
           _toButton(ctx: _, toButtonType: PoolType.pendingPool),
           _toButton(ctx: _, toButtonType: PoolType.memoryPool),
           _toButton(ctx: _, toButtonType: PoolType.completePool),
@@ -120,7 +120,7 @@ class FragmentPoolChoicePage extends OverlayRoute {
         fragmentPoolController.toPool(
           freeBoxController: freeBoxController,
           toPoolType: toButtonType,
-          toPoolTypeResult: (resultCode) {
+          toPoolTypeResult: (int resultCode) {
             if (resultCode == 1) {
               mainButtonRebuild();
             }

@@ -12,13 +12,13 @@ class _FlutterTestState extends State<FlutterTest> {
   Widget build(BuildContext context) {
     return Center(
       child: TextButton(
-        child: Text("data"),
+        child: const Text('data'),
         onPressed: () async {
-          await GSqlite.openDb();
+          await openDb();
           await SqliteTools().clearSqlite();
-          await GSqlite.db.execute("CREATE TABLE a(name,TEXT)");
-          await GSqlite.db.insert("a", {"name": "hhh"});
-          await GSqlite.db.execute("DROP TABLE IF EXISTS a");
+          await db.execute('CREATE TABLE a(name,TEXT)');
+          await db.insert('a', <String, String>{'name': 'hhh'});
+          await db.execute('DROP TABLE IF EXISTS a');
 
           print(await SqliteTools().getAllTableNames());
         },

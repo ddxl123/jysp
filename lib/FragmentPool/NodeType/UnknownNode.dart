@@ -14,6 +14,6 @@ class UnknownNode extends StatefulWidget {
 class _UnknownNodeState extends State<UnknownNode> {
   @override
   Widget build(BuildContext context) {
-    return TextButton(child: Text("未知类型node"), onPressed: () {});
+    return TextButton(child: const Text('未知类型node'), onPressed: () {});
   }
 }

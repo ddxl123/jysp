@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatefulWidget {
-  CustomButton({
+  const CustomButton({
     required this.child,
     required this.onPressed,
     this.upBackgroundColor = Colors.transparent,
@@ -32,17 +32,17 @@ class _CustomButton extends State<CustomButton> {
           child: widget.child,
         ),
       ),
-      onPointerDown: (details) {
+      onPointerDown: (PointerDownEvent details) {
         _isOnMove = false;
         toOnDownStatus();
       },
-      onPointerUp: (details) {
+      onPointerUp: (PointerUpEvent details) {
         if (_isOnMove == false) {
           widget.onPressed();
         }
         toNormalStatus();
       },
-      onPointerMove: (event) {
+      onPointerMove: (PointerMoveEvent event) {
         if (_isOnMove == false && (event.delta.dx > 0.5 || event.delta.dy > 0.5 || event.delta.dx < -0.5 || event.delta.dy < -0.5)) {
           _isOnMove = true;
           toNormalStatus();

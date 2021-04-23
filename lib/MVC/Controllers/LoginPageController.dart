@@ -8,7 +8,7 @@ class _Init extends ChangeNotifier {}
 
 mixin _Root on _Init, RByEmail {
   ///
-  TextEditingController emailTextEditingController = TextEditingController(text: "1033839760@qq.com");
+  TextEditingController emailTextEditingController = TextEditingController(text: '1033839760@qq.com');
   TextEditingController codeTextEditingController = TextEditingController();
 
   /// 触发 [rebuild], 同时返回代码, 根据代码进行处理。
@@ -16,7 +16,7 @@ mixin _Root on _Init, RByEmail {
 
   @override
   void dispose() {
-    dynamic timer = sendEmailButtonRebuildHandler.state["timer"];
+    final dynamic timer = sendEmailButtonRebuildHandler.state['timer'];
     if (timer is Timer) {
       timer.cancel();
     }

@@ -3,12 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
-import 'package:jysp/MVC/Views/HomePage/NodeJustCreated.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
-import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
@@ -20,10 +19,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    dLog(() => "HomePage build");
+    dLog(() => 'HomePage build');
     return Material(
       child: Stack(
-        children: [
+        children: <Widget>[
           FreeBox(
             backgroundColor: Colors.green,
             viewableWidth: double.maxFinite,
@@ -36,15 +35,33 @@ class HomePageState extends State<HomePage> {
                 _bottomWidgets(),
               ],
             ),
-            onLongPressStart: (details) {
-              dLog(() => "details.focalPoint", () => details.focalPoint);
+            onLongPressStart: (ScaleStartDetails details) {
+              dLog(() => 'details.focalPoint', () => details.focalPoint);
               GNavigatorPush.pushNodeJustCreated(
                 context: context,
                 left: details.focalPoint.dx,
                 top: details.focalPoint.dy,
-                futrue: (text) async {
-                  await Future.delayed(Duration(seconds: 1));
-                  dLog(() => text);
+                futrue: (String text) async {
+                  // 若输入为空，则不进行插入
+                  if (text == '') {
+                    dLog(() => 'text: ', () => text);
+                    return;
+                  }
+
+                  // 若输入不为空，才进行插入
+                  await Future<void>.delayed(const Duration(seconds: 1));
+                  dLog(() => 'text: ', () => text);
+
+                  final bool result = await RPoolNode().insertNewNode(
+                    fragmentPoolController: context.read<FragmentPoolController>(),
+                    name: text,
+                    position: context.read<FreeBoxController>().screenToBoxTransform(details.focalPoint),
+                  );
+
+                  // 插入成功，插入失败不进行任何操作
+                  if (result) {
+                    context.read<FragmentPoolController>().needInitStateForSetState(() {});
+                  }
                 },
               );
             },
@@ -66,7 +83,7 @@ class HomePageState extends State<HomePage> {
                 targetScale: 1.0,
               );
         },
-        child: Icon(Icons.adjust),
+        child: const Icon(Icons.adjust),
       ),
     );
   }
@@ -76,7 +93,7 @@ class HomePageState extends State<HomePage> {
     return Positioned(
       top: MediaQueryData.fromWindow(window).padding.top,
       right: 0,
-      child: TextButton(child: Text("+", style: TextStyle(color: Colors.red, fontSize: 20)), onPressed: () {}),
+      child: TextButton(child: const Text('+', style: TextStyle(color: Colors.red, fontSize: 20)), onPressed: () {}),
     );
   }
 
@@ -88,10 +105,10 @@ class HomePageState extends State<HomePage> {
         width: MediaQueryData.fromWindow(window).size.width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(child: TextButton(onPressed: () {}, child: Text("发现"))),
+          children: <Widget>[
+            Expanded(child: TextButton(onPressed: () {}, child: const Text('发现'))),
             Expanded(child: FragmentPoolChoice(fragmentPoolController: context.read<FragmentPoolController>(), freeBoxController: context.read<FreeBoxController>())),
-            Expanded(child: TextButton(onPressed: () {}, child: Text("我"))),
+            Expanded(child: TextButton(onPressed: () {}, child: const Text('我'))),
           ],
         ),
       ),

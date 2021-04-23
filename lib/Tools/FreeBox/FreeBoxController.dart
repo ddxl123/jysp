@@ -12,10 +12,10 @@ mixin _Root on _Init {
   double scale = 1;
 
   /// 偏移值,默认必须(0,0)
-  Offset offset = Offset(0, 0) - Offset(100, 100);
+  Offset offset = const Offset(0, 0) - const Offset(100, 100);
 
   /// 左上角偏移填充
-  Offset leftTopOffsetFilling = Offset(100, 100);
+  Offset leftTopOffsetFilling = const Offset(100, 100);
 
   bool doRebuild = false;
 
@@ -27,14 +27,17 @@ mixin _TouchEvent on _Root {
 
   late final AnimationController inertialSlideAnimationController;
   late final AnimationController targetSlideAnimationController;
-  late Animation _offsetAnimation;
-  late Animation _scaleAnimation;
+  late Animation<Offset> _offsetAnimation;
+  late Animation<double> _scaleAnimation;
 
   double _lastTempScale = 1;
-  Offset _lastTempTouchPosition = Offset(0, 0);
+  Offset _lastTempTouchPosition = const Offset(0, 0);
 
-  /// 是否禁用触摸
+  /// 是否禁用触摸事件
   bool _isDisableTouch = false;
+
+  /// 是否禁用 end 触摸事件
+  bool _isDisableEndTouch = false;
 
   /// 长按开始的回调
   Function(ScaleStartDetails)? onLongPressStart;
@@ -47,12 +50,12 @@ mixin _TouchEvent on _Root {
     if (_isDisableTouch) {
       return;
     }
-    _onLongPressStartTimer = Timer(Duration(milliseconds: 1000), () {
-      dLog(() => "123");
+    _onLongPressStartTimer = Timer(const Duration(milliseconds: 1000), () {
+      dLog(() => '123');
       if (onLongPressStart != null) {
-        dLog(() => "345");
+        dLog(() => '345');
         onLongPressStart!(details);
-        dLog(() => "456");
+        dLog(() => '456');
       }
     });
 
@@ -63,27 +66,26 @@ mixin _TouchEvent on _Root {
     /// 重置上一次 [临时缩放] 和 [临时触摸位置]
     _lastTempScale = 1;
     _lastTempTouchPosition = details.localFocalPoint;
-    dLog(() => "onScaleStart:" + offset.toString());
     notifyListeners();
   }
 
-  void onScaleUpdate(details) {
+  void onScaleUpdate(ScaleUpdateDetails details) {
     if (_isDisableTouch) {
       return;
     }
     _onLongPressStartTimer?.cancel();
 
     /// 进行缩放
-    double deltaScale = details.scale - _lastTempScale;
-    this.scale *= 1 + deltaScale;
+    final double deltaScale = details.scale - _lastTempScale;
+    scale *= 1 + deltaScale;
 
     /// 缩放后的位置偏移
-    Offset pivotDeltaOffset = (this.offset - details.localFocalPoint) * deltaScale;
-    this.offset += pivotDeltaOffset;
+    final Offset pivotDeltaOffset = (offset - details.localFocalPoint) * deltaScale;
+    offset += pivotDeltaOffset;
 
     /// 非缩放的位置偏移
-    Offset deltaOffset = details.localFocalPoint - _lastTempTouchPosition;
-    this.offset += deltaOffset;
+    final Offset deltaOffset = details.localFocalPoint - _lastTempTouchPosition;
+    offset += deltaOffset;
 
     /// 变换上一次 [临时缩放] 和 [临时触摸位置]
     _lastTempScale = details.scale;
@@ -94,7 +96,8 @@ mixin _TouchEvent on _Root {
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    if (_isDisableTouch) {
+    if (_isDisableTouch || _isDisableEndTouch) {
+      _isDisableEndTouch = false;
       return;
     }
 
@@ -103,20 +106,19 @@ mixin _TouchEvent on _Root {
     }
 
     /// 开始惯性滑动
-    inertialSlideAnimationController.duration = Duration(milliseconds: 500);
-    _offsetAnimation = inertialSlideAnimationController.drive(CurveTween(curve: Curves.easeOutCubic)).drive(Tween(
-          begin: this.offset,
-          end: this.offset + Offset(details.velocity.pixelsPerSecond.dx / 10, details.velocity.pixelsPerSecond.dy / 10),
+    inertialSlideAnimationController.duration = const Duration(milliseconds: 500);
+    _offsetAnimation = inertialSlideAnimationController.drive(CurveTween(curve: Curves.easeOutCubic)).drive(Tween<Offset>(
+          begin: offset,
+          end: offset + Offset(details.velocity.pixelsPerSecond.dx / 10, details.velocity.pixelsPerSecond.dy / 10),
         ));
 
     inertialSlideAnimationController.forward(from: 0.0);
     inertialSlideAnimationController.addListener(_inertialSlideListener);
-    dLog(() => "onScaleEnd:" + offset.toString());
   }
 
   // 惯性滑动监听
   void _inertialSlideListener() {
-    this.offset = _offsetAnimation.value;
+    offset = _offsetAnimation.value;
 
     /// 被 stop() 或 动画播放完成 时, removeListener()
     if (inertialSlideAnimationController.isDismissed || inertialSlideAnimationController.isCompleted) {
@@ -132,25 +134,31 @@ mixin _TouchEvent on _Root {
 mixin _CommonTool on _TouchEvent {
   ///
 
-  /// 禁用触摸事件
-  void isDisableTouch(bool isDisable) {
-    _isDisableTouch = isDisable;
+  /// 禁用触摸事件。
+  /// [_isDisableEndTouch] 的目的是为了防止接触禁用后，end 函数体内任务仍然被触发
+  void disableTouch(bool isDisable) {
+    if (isDisable) {
+      _isDisableTouch = true;
+      _isDisableEndTouch = true;
+    } else {
+      _isDisableTouch = false;
+    }
   }
 
   /// 屏幕坐标转盒子坐标
   Offset screenToBoxTransform(Offset screenPosition) {
-    return (screenPosition - offset) / scale - Offset(100, 100);
+    return (screenPosition - offset) / scale - const Offset(100, 100);
   }
 
   /// 滑动至目标位置
   void targetSlide({required Offset targetOffset, required double targetScale}) {
-    targetSlideAnimationController.duration = Duration(seconds: 1);
-    _offsetAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(
-          begin: this.offset,
+    targetSlideAnimationController.duration = const Duration(seconds: 1);
+    _offsetAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween<Offset>(
+          begin: offset,
           end: targetOffset,
         ));
-    _scaleAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween(
-          begin: this.scale,
+    _scaleAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween<double>(
+          begin: scale,
           end: targetScale,
         ));
     targetSlideAnimationController.forward(from: 0.4);
@@ -159,8 +167,8 @@ mixin _CommonTool on _TouchEvent {
 
   /// 滑动至目标位置监听
   void _targetSlideListener() {
-    this.offset = _offsetAnimation.value;
-    this.scale = _scaleAnimation.value;
+    offset = _offsetAnimation.value;
+    scale = _scaleAnimation.value;
 
     /// 被 stop() 或 动画播放完成 时, removeListener()
     if (targetSlideAnimationController.isDismissed || targetSlideAnimationController.isCompleted) {

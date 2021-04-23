@@ -21,10 +21,10 @@ Future<void> dLog(
   int lineCount = 1,
 ]) async {
   try {
-    List<String> st = StackTrace.current.toString().split("\n");
+    final List<String> st = StackTrace.current.toString().split('\n');
 
     // 只留下被 #num 标记的行
-    st.removeWhere((item) => item.contains("<asynchronous suspension>"));
+    st.removeWhere((String item) => item.contains('<asynchronous suspension>'));
 
     // 最终需要的 lineCount
     int finalLineCount;
@@ -38,42 +38,42 @@ Future<void> dLog(
     }
 
     // 获取将要打印的主内容
-    dynamic ind = indentListMap == null ? "null" : indentListMap();
+    dynamic ind = indentListMap == null ? 'null' : indentListMap();
     if (futureCallback != null) {
       ind = await futureCallback();
     }
-    dynamic indent = (ind is List) || (ind is Map) ? ind : ind.toString();
-    String message = messageString == null ? "null" : messageString().toString();
+    final dynamic indent = (ind is List) || (ind is Map) ? ind : ind.toString();
+    final String message = messageString == null ? 'null' : messageString().toString();
 
     String? packageOne;
     if (finalLineCount == 1) {
-      String currentLineAt = st[1];
-      packageOne = " " + currentLineAt.substring(currentLineAt.indexOf("(package:"), currentLineAt.length);
+      final String currentLineAt = st[1];
+      packageOne = ' ' + currentLineAt.substring(currentLineAt.indexOf('(package:'), currentLineAt.length);
     }
 
     // 打印主内容
-    if (indent != "null") {
-      log("> " + message + (packageOne == null ? "" : packageOne));
-      log(JsonEncoder.withIndent("  ").convert(indent));
+    if (indent != 'null') {
+      log('> ' + message + (packageOne ?? ''));
+      log(const JsonEncoder.withIndent('  ').convert(indent));
     } else {
       // 可能 [indentListMap()] 的返回值是 null ，也可能是 [indentListMap] 为 null
-      log("> " + message + (packageOne == null ? "" : packageOne));
-      log(ind == "null" ? "" : "null");
+      log('> ' + message + (packageOne ?? ''));
+      log(ind == 'null' ? '' : 'null');
     }
 
     // 打印调用 dLog() 函数的 package，加个空格才能让其靠在最右边
     if (finalLineCount != 1) {
-      for (var i = 0; i < finalLineCount; i++) {
-        String currentLineAt = st[i + 1];
+      for (int i = 0; i < finalLineCount; i++) {
+        final String currentLineAt = st[i + 1];
         String packages;
-        packages = " " + currentLineAt.substring(currentLineAt.indexOf("(package:"), currentLineAt.length);
-        log(" ·" + i.toString() + packages);
+        packages = ' ' + currentLineAt.substring(currentLineAt.indexOf('(package:'), currentLineAt.length);
+        log(' ·' + i.toString() + packages);
       }
     }
   } catch (err) {
     if (err is RangeError) {
     } else {
-      log("log err:" + err.toString());
+      log('log err:' + err.toString());
     }
   }
 }

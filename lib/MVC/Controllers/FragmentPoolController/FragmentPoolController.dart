@@ -2,10 +2,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/models/MPnCompletePoolNode.dart';
-import 'package:jysp/Database/models/MPnMemoryPoolNode.dart';
-import 'package:jysp/Database/models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/models/MPnRulePoolNode.dart';
+import 'package:jysp/Database/Base/MBase.dart';
+import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
+import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
+import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
+import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
@@ -16,10 +17,10 @@ class FragmentPoolController extends ChangeNotifier {
   ///
 
   /// 需要显示在池内的节点
-  final List<MPnPendingPoolNode> pendingPoolNodes = [];
-  final List<MPnMemoryPoolNode> memoryPoolNodes = [];
-  final List<MPnCompletePoolNode> completePoolNodes = [];
-  final List<MPnRulePoolNode> rulePoolNodes = [];
+  final List<MPnPendingPoolNode> pendingPoolNodes = <MPnPendingPoolNode>[];
+  final List<MPnMemoryPoolNode> memoryPoolNodes = <MPnMemoryPoolNode>[];
+  final List<MPnCompletePoolNode> completePoolNodes = <MPnCompletePoolNode>[];
+  final List<MPnRulePoolNode> rulePoolNodes = <MPnRulePoolNode>[];
 
   /// 当前展现的碎片池类型
   /// 必须设置默认值：
@@ -31,11 +32,11 @@ class FragmentPoolController extends ChangeNotifier {
 
   /// 每个碎片池的视口位置和缩放, 以及对应池默认的视口位置
   /// 这里必须把子类型写清楚了, 不然会报错:"type 'Offset' is not a subtype of type 'String' of 'value'"
-  Map<PoolType, Map<String, dynamic>> viewSelectedType = {
-    PoolType.pendingPool: {"offset": null, "scale": null, "node0": Offset.zero},
-    PoolType.memoryPool: {"offset": null, "scale": null, "node0": Offset.zero},
-    PoolType.completePool: {"offset": null, "scale": null, "node0": Offset.zero},
-    PoolType.rulePool: {"offset": null, "scale": null, "node0": Offset.zero},
+  Map<PoolType, Map<String, Object?>> viewSelectedType = <PoolType, Map<String, Object?>>{
+    PoolType.pendingPool: <String, Object?>{'offset': null, 'scale': null, 'node0': Offset.zero},
+    PoolType.memoryPool: <String, Object?>{'offset': null, 'scale': null, 'node0': Offset.zero},
+    PoolType.completePool: <String, Object?>{'offset': null, 'scale': null, 'node0': Offset.zero},
+    PoolType.rulePool: <String, Object?>{'offset': null, 'scale': null, 'node0': Offset.zero},
   };
 
   /// [FragmentPool] 是否正在初始化状态
@@ -51,13 +52,62 @@ class FragmentPoolController extends ChangeNotifier {
   /// 是否处于 toPooling
   bool _isToPooling = false;
 
-  /// 添加节点
-  void addNode(Offset boxPosition) {
-    switch (_currentPoolType) {
+  /// 异步类型的选择。函数内没有 try catch。
+  Future<T> poolTypeSwitchFuture<T>({
+    PoolType? toPoolType,
+    required Future<T> Function() pendingPoolCB,
+    required Future<T> Function() memoryPoolCB,
+    required Future<T> Function() completePoolCB,
+    required Future<T> Function() rulePoolCB,
+  }) async {
+    final PoolType poolType = toPoolType ?? getCurrentPoolType;
+    switch (poolType) {
       case PoolType.pendingPool:
-        break;
+        return await pendingPoolCB();
+      case PoolType.memoryPool:
+        return await memoryPoolCB();
+      case PoolType.completePool:
+        return await completePoolCB();
+      case PoolType.rulePool:
+        return await rulePoolCB();
       default:
+        throw 'unknown poolType: $poolType';
     }
+  }
+
+  /// 非异步类型的选择。函数内没有 try catch。
+  T poolTypeSwitch<T>({
+    PoolType? toPoolType,
+    required T Function() pendingPoolCB,
+    required T Function() memoryPoolCB,
+    required T Function() completePoolCB,
+    required T Function() rulePoolCB,
+  }) {
+    final PoolType poolType = toPoolType ?? getCurrentPoolType;
+    switch (poolType) {
+      case PoolType.pendingPool:
+        return pendingPoolCB();
+      case PoolType.memoryPool:
+        return memoryPoolCB();
+      case PoolType.completePool:
+        return completePoolCB();
+      case PoolType.rulePool:
+        return rulePoolCB();
+      default:
+        throw 'unknown poolType: $poolType';
+    }
+  }
+
+  /// 对指定 nodes 统一操作：
+  List<MBase> getPoolTypeNodesList([PoolType? toPoolType]) {
+    final PoolType poolType = toPoolType ?? getCurrentPoolType;
+    return poolTypeSwitch<List<MBase>>(
+      toPoolType: poolType,
+      pendingPoolCB: () => pendingPoolNodes,
+      memoryPoolCB: () => memoryPoolNodes,
+      completePoolCB: () => completePoolNodes,
+      rulePoolCB: () => rulePoolNodes,
+    );
   }
 
   ///
@@ -82,23 +132,23 @@ class FragmentPoolController extends ChangeNotifier {
   }) async {
     if (_isToPooling) {
       toPoolTypeResult(-1);
-      dLog(() => "toPool 并发");
+      dLog(() => 'toPool 并发');
       return;
     }
     _isToPooling = true;
 
-    await Future(() async {
-      dLog(() => "正在获取 fragmentPoolNodes 数据，并进入${toPoolType.text}中...");
+    await Future<void>(() async {
+      dLog(() => '正在获取 fragmentPoolNodes 数据，并进入${toPoolType.text}中...');
 
       // 打开加载屏障
       isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.enabled);
 
       // 获取数据：[toPoolType] 的数据
-      bool result = await RPoolNode().getPoolNodes(this, toPoolType);
+      final bool result = await RPoolNode().retrievePoolNodes(this, toPoolType);
 
       switch (result) {
         case true:
-          dLog(() => "获取 fragmentPoolNodes 数据成功。");
+          dLog(() => '获取 fragmentPoolNodes 数据成功。');
           toPoolTypeResult(0);
           isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.disabled);
           _isToPooling = false;
@@ -107,13 +157,13 @@ class FragmentPoolController extends ChangeNotifier {
           needInitStateForSetState(() {});
           break;
         case false:
-          dLog(() => "获取 fragmentPoolNodes 数据失败。");
+          dLog(() => '获取 fragmentPoolNodes 数据失败。');
           toPoolTypeResult(1);
           isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.disabled);
           _isToPooling = false;
           break;
         default:
-          dLog(() => "result unknown");
+          dLog(() => 'result unknown');
           toPoolTypeResult(-1);
       }
     });
@@ -121,9 +171,9 @@ class FragmentPoolController extends ChangeNotifier {
 
   /// 设置当前碎片池的为指定池, 保存当前 offset/scale
   void _setCurrentPoolType(FreeBoxController freeBoxController, PoolType toPoolType) {
-    viewSelectedType[getCurrentPoolType]!["offset"] = freeBoxController.offset;
+    viewSelectedType[getCurrentPoolType]!['offset'] = freeBoxController.offset;
 
-    viewSelectedType[getCurrentPoolType]!["scale"] = freeBoxController.scale;
+    viewSelectedType[getCurrentPoolType]!['scale'] = freeBoxController.scale;
 
     setCurrentPoolType = toPoolType; // 必须放到设置 viewSelectedType 的后面
   }

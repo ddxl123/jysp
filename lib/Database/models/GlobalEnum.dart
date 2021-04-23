@@ -1,1 +1,1 @@
-enum Curd{C,U,R,D,}
+enum CurdStatus{C,U,R,D,}

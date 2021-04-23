@@ -29,19 +29,19 @@ class RebuildHandler<T> {
   T? get handleCode => _handleCode;
 
   Function() _rebuild = () {};
-  Map<dynamic, dynamic> state = {};
+  Map<dynamic, dynamic> state = <dynamic, dynamic>{};
 
   void rebuildHandle(T handleCode, [bool isClearState = false]) {
     if (isClearState) {
       state.clear();
     }
-    this._handleCode = handleCode;
+    _handleCode = handleCode;
     _rebuild();
   }
 }
 
 class RebuildHandleWidget<T> extends StatefulWidget {
-  RebuildHandleWidget({required this.rebuildHandler, required this.builder});
+  const RebuildHandleWidget({required this.rebuildHandler, required this.builder});
   final RebuildHandler<T> rebuildHandler;
   final Widget Function(RebuildHandler<T>) builder;
   @override
@@ -59,6 +59,6 @@ class _RebuildHandleWidgetState<T> extends State<RebuildHandleWidget<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder((widget.rebuildHandler));
+    return widget.builder(widget.rebuildHandler);
   }
 }

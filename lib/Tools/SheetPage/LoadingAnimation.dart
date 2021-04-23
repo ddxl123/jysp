@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class LoadingAnimation extends StatefulWidget {
-  LoadingAnimation({required this.loadingController});
+  const LoadingAnimation({required this.loadingController});
   final LoadingController loadingController;
 
   @override
@@ -27,15 +27,15 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: Duration(seconds: 1), vsync: this);
+    _animationController = AnimationController(duration: const Duration(seconds: 1), vsync: this);
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.linear);
-    _animation = Tween(begin: 0.0, end: MediaQueryData.fromWindow(window).size.width).animate(_animation);
+    _animation = Tween<double>(begin: 0.0, end: MediaQueryData.fromWindow(window).size.width).animate(_animation);
     widget.loadingController.toLoading = _toLoading;
     widget.loadingController.toSuccess = _toSuccess;
     widget.loadingController.toFail = _toFail;
   }
 
-  void _toLoading(Duration wait, Function(LoadingController) startFuture) async {
+  Future<void> _toLoading(Duration wait, Function(LoadingController) startFuture) async {
     /// 保证了仅触发一次
     if (_stataus == 0 || _stataus == -1) {
       return;
@@ -50,7 +50,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
       }
     });
     // 触发异步操作后的进一步指令
-    await Future.delayed(wait);
+    await Future<void>.delayed(wait);
     startFuture(widget.loadingController);
   }
 
@@ -86,24 +86,24 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
       case 1:
         return Container(
           alignment: Alignment.center,
-          child: Text("no more"),
+          child: const Text('no more'),
         );
       case 2:
         return Container(
           alignment: Alignment.center,
-          child: Text("fail", style: TextStyle(color: Colors.red)),
+          child: const Text('fail', style: TextStyle(color: Colors.red)),
         );
       default:
         return Container(
           alignment: Alignment.center,
-          child: Text("发生了异常"),
+          child: const Text('发生了异常'),
         );
     }
   }
 }
 
 class LoadingController {
-  Function(Duration wait, Function(LoadingController) startFuture) toLoading = (wait, startFuture) {};
+  Function(Duration wait, Function(LoadingController) startFuture) toLoading = (Duration wait, Function(LoadingController) startFuture) {};
   Function toSuccess = () {};
   Function toFail = () {};
 }

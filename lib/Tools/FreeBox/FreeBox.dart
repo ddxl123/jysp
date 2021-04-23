@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
-import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
 class FreeBox extends StatefulWidget {
-  FreeBox({
+  const FreeBox({
     required this.backgroundColor,
     required this.viewableWidth,
     required this.viewableHeight,
@@ -68,7 +67,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
       width: widget.viewableWidth,
       height: widget.viewableHeight,
       child: Stack(
-        children: [
+        children: <Widget>[
           /// 自由移动缩放层
           _freeMoveScaleLayer(),
           _fixedLayer(),
@@ -92,10 +91,10 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
         onScaleUpdate: context.read<FreeBoxController>().onScaleUpdate,
         onScaleEnd: context.read<FreeBoxController>().onScaleEnd,
         child: Transform.translate(
-          offset: context.select<FreeBoxController, Offset>((value) => value.offset),
+          offset: context.select<FreeBoxController, Offset>((FreeBoxController value) => value.offset),
           child: Transform.scale(
             alignment: Alignment.topLeft,
-            scale: context.select<FreeBoxController, double>((value) => value.scale),
+            scale: context.select<FreeBoxController, double>((FreeBoxController value) => value.scale),
 
             // [内容物区]。要比 [FreeBox可视区域] 宽高大，必须无限大，因为若可视区域很大，但可触发区域却很小，会把溢出部分切除，虽然仍可视，但不可触发Transform。
             child: widget.freeMoveScaleLayerBuilder(context),

@@ -24,7 +24,7 @@ typedef Slivers = List<Widget> Function({
   required Widget Function() loadArea,
 });
 
-typedef BodyDataFuture = Future<BodyDataFutureResult> Function(List<Map> bodyData);
+typedef BodyDataFuture = Future<BodyDataFutureResult> Function(List<Map<String, String>> bodyData);
 
 /// 控制器
 class SheetPageController extends ChangeNotifier {
@@ -37,21 +37,22 @@ class SheetPageController extends ChangeNotifier {
   late final BodyDataFuture bodyDataFuture;
 
   /// 内部滑动的数据数组
-  final List<Map> bodyData = [
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
+  final List<Map<String, String>> bodyData = <Map<String, String>>[
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
+    <String, String>{},
   ];
 
   /// 当前 [sheetRoute]。
-  late final Route sheetRoute;
+  late final Route<void> sheetRoute;
 
   /// [sheet] 中的 [context]。
   late final BuildContext sheetContext;
@@ -107,9 +108,9 @@ class SheetPageController extends ChangeNotifier {
   /// [header] 位置的 widget
   Widget header(Widget content) {
     return StatefulBuilder(
-      builder: (_, rebuild) {
-        if (this.headerSetState != rebuild) {
-          this.headerSetState = rebuild;
+      builder: (_, void Function(void Function()) rebuild) {
+        if (headerSetState != rebuild) {
+          headerSetState = rebuild;
         }
         return content;
       },
@@ -119,9 +120,9 @@ class SheetPageController extends ChangeNotifier {
   /// [body] 位置的 widget
   Widget body(Widget content) {
     return StatefulBuilder(
-      builder: (_, rebuild) {
-        if (this.bodySetState != rebuild) {
-          this.bodySetState = rebuild;
+      builder: (_, void Function(void Function()) rebuild) {
+        if (bodySetState != rebuild) {
+          bodySetState = rebuild;
         }
         return content;
       },
@@ -131,9 +132,9 @@ class SheetPageController extends ChangeNotifier {
   /// [loadArea] 位置的 widget
   Widget loadArea() {
     return StatefulBuilder(
-      builder: (_, rebuild) {
-        if (this.loadAreaSetState != rebuild) {
-          this.loadAreaSetState = rebuild;
+      builder: (_, void Function(void Function()) rebuild) {
+        if (loadAreaSetState != rebuild) {
+          loadAreaSetState = rebuild;
         }
         return SheetLoadArea(sheetPageController: this);
       },
@@ -142,43 +143,43 @@ class SheetPageController extends ChangeNotifier {
 
   /// 移除当前 route, 同时附带 animation
   void removeRouteWithAnimation() {
-    if (!this._isWillRemoveOnce) {
-      this._isWillRemoveOnce = true;
+    if (!_isWillRemoveOnce) {
+      _isWillRemoveOnce = true;
 
-      this.animationController.animateTo(0).whenCompleteOrCancel(() {
+      animationController.animateTo(0).whenCompleteOrCancel(() {
         /// [removeRoute(currentRoute)] 后,会调用 [dispose] ,以及当中的 [controller.dispose()] [removeListener()]
         /// 不能使用 [pop] ,因为当 [sheet] 已被打开时，再打开新的 [sheet] 时， [pop] 的话会把新打开的 [sheet] [pop] 了,而并不会把旧 [sheet] 关闭
-        Navigator.of(this.sheetContext).removeRoute(this.sheetRoute);
-        dLog(() => "removeRouteWithAnimation success");
+        Navigator.of(sheetContext).removeRoute(sheetRoute);
+        dLog(() => 'removeRouteWithAnimation success');
       });
     }
   }
 
   void onPointerDown(PointerDownEvent event) {
-    if (this._isWillRemoveOnce || this.animationController.isAnimating) {
+    if (_isWillRemoveOnce || animationController.isAnimating) {
       return;
     }
   }
 
   void onPointerMove(PointerMoveEvent event) {
-    if (this._isWillRemoveOnce || this.animationController.isAnimating) {
+    if (_isWillRemoveOnce || animationController.isAnimating) {
       return;
     }
 
     // 监听触摸方向，给 [_onPointerUp] 使用。如果 [touchDirection>0.0] 则正在向上滚动,如果 [touchDirection<0.0] 则正在向下滚动。
-    this.touchDirection = event.delta.dy > 0.0 ? Direction.down : (event.delta.dy < 0.0 ? Direction.up : Direction.idle);
+    touchDirection = event.delta.dy > 0.0 ? Direction.down : (event.delta.dy < 0.0 ? Direction.up : Direction.idle);
 
     // 1、未满屏时，内部不滑动，外部滑动。
-    if (this.animation.value < this.maxHeight) {
-      this.animationController.value -= event.delta.dy / this.maxHeight;
-      this.scrollController.jumpTo(0);
+    if (animation.value < maxHeight) {
+      animationController.value -= event.delta.dy / maxHeight;
+      scrollController.jumpTo(0);
     }
 
     // 2、满屏时，内部滑动，外部不滑动。
-    else if (this.animation.value >= this.maxHeight) {
+    else if (animation.value >= maxHeight) {
       // 当 [offset <= 0.0] 时，可向下 [touch_move] ，回到 [步骤1] 。
-      if (this.scrollController.offset <= 0.0) {
-        this.animationController.value -= event.delta.dy / this.maxHeight;
+      if (scrollController.offset <= 0.0) {
+        animationController.value -= event.delta.dy / maxHeight;
       }
     }
 
@@ -187,30 +188,30 @@ class SheetPageController extends ChangeNotifier {
   }
 
   void onPointerUp(PointerUpEvent event) {
-    if (this._isWillRemoveOnce || this.animationController.isAnimating) {
+    if (_isWillRemoveOnce || animationController.isAnimating) {
       return;
     }
 
     // (-∞ , _reboundRatio) 范围：
-    if (this.animationController.value < this.initHeightRatio * this.reboundRatio) {
-      if (this.touchDirection == Direction.up) {
-        this.animationController.animateTo(this.initHeightRatio, curve: Curves.easeInOutCirc);
+    if (animationController.value < initHeightRatio * reboundRatio) {
+      if (touchDirection == Direction.up) {
+        animationController.animateTo(initHeightRatio, curve: Curves.easeInOutCirc);
       } else {
-        this.removeRouteWithAnimation();
+        removeRouteWithAnimation();
       }
     }
 
     // [_reboundRatio , _initHeightRatio) 范围：
-    if (this.animationController.value >= this.initHeightRatio * this.reboundRatio && this.animationController.value < this.initHeightRatio) {
-      this.animationController.animateTo(this.initHeightRatio, duration: Duration(milliseconds: 100), curve: Curves.easeInOutCirc);
+    if (animationController.value >= initHeightRatio * reboundRatio && animationController.value < initHeightRatio) {
+      animationController.animateTo(initHeightRatio, duration: const Duration(milliseconds: 100), curve: Curves.easeInOutCirc);
     }
 
     // (_initHeightRatio , 1) 范围：
-    if (this.animationController.value > this.initHeightRatio && this.animationController.value != 1) {
-      if (this.touchDirection == Direction.up) {
-        this.animationController.animateTo(1, duration: Duration(milliseconds: 100), curve: Curves.easeInOutCirc);
+    if (animationController.value > initHeightRatio && animationController.value != 1) {
+      if (touchDirection == Direction.up) {
+        animationController.animateTo(1, duration: const Duration(milliseconds: 100), curve: Curves.easeInOutCirc);
       } else {
-        this.animationController.animateTo(this.initHeightRatio, curve: Curves.easeInOutCirc);
+        animationController.animateTo(initHeightRatio, curve: Curves.easeInOutCirc);
       }
     }
   }
@@ -219,84 +220,84 @@ class SheetPageController extends ChangeNotifier {
     // 上一次 animationController.value。范围：0 ~ 1。
     double lastAnimationControllerValue = 0.0;
 
-    this.animationController.addListener(() {
+    animationController.addListener(() {
       //
       // 当前滚动方向。非手势滑动方向。
-      if (this.animationController.value > lastAnimationControllerValue) {
-        this.scrollDirection = Direction.up;
-      } else if (this.animationController.value < lastAnimationControllerValue) {
-        this.scrollDirection = Direction.down;
+      if (animationController.value > lastAnimationControllerValue) {
+        scrollDirection = Direction.up;
+      } else if (animationController.value < lastAnimationControllerValue) {
+        scrollDirection = Direction.down;
       } else {
-        this.scrollDirection = Direction.idle;
+        scrollDirection = Direction.idle;
       }
-      lastAnimationControllerValue = this.animationController.value;
+      lastAnimationControllerValue = animationController.value;
 
       //
       // 低于 initHeightRatio 时，往下滑动透明度变化
-      if (this.animationController.value <= this.initHeightRatio) {
-        this.sheetOpacity = this.animationController.value * (1 / this.initHeightRatio);
+      if (animationController.value <= initHeightRatio) {
+        sheetOpacity = animationController.value * (1 / initHeightRatio);
       }
 
       //
       // 处在 [LoadingArea] 且向上滚动时，会触发 loading 操作
-      if (this.animation.value >= this.scrollController.position.maxScrollExtent && this.scrollDirection == Direction.up) {
+      if (animation.value >= scrollController.position.maxScrollExtent && scrollDirection == Direction.up) {
         dataLoad();
       }
 
-      this.sheetSetState(() {});
+      sheetSetState(() {});
     });
   }
 
   void scrollControllerAddListener() {
-    this.scrollController.addListener(() {
+    scrollController.addListener(() {
       //
       // 当前滚动方向。非手势滑动方向。
-      if (this.scrollController.position.userScrollDirection == ScrollDirection.forward) {
-        this.scrollDirection = Direction.down;
-      } else if (this.scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-        this.scrollDirection = Direction.up;
+      if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
+        scrollDirection = Direction.down;
+      } else if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+        scrollDirection = Direction.up;
       } else {
-        this.scrollDirection = Direction.idle;
+        scrollDirection = Direction.idle;
       }
 
       //
       // 处在 [LoadingArea] 且向上滚动时，会触发 loading 操作
-      if (this.maxHeight + this.scrollController.position.pixels >= this.scrollController.position.maxScrollExtent && this.scrollDirection == Direction.up) {
+      if (maxHeight + scrollController.position.pixels >= scrollController.position.maxScrollExtent && scrollDirection == Direction.up) {
         dataLoad();
       }
     });
   }
 
   /// 异步加载数据
-  void dataLoad() async {
+  Future<void> dataLoad() async {
     if (_isDataLoading) {
       return;
     }
     _isDataLoading = true;
 
-    dLog(() => "loading...");
+    dLog(() => 'loading...');
 
     // 处于正在加载中
-    this.loadAreaSetState(() {
-      this.sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
+    loadAreaSetState(() {
+      sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
     });
 
-    BodyDataFutureResult bodyDataFutureResult = await this.bodyDataFuture(this.bodyData);
+    final BodyDataFutureResult bodyDataFutureResult = await bodyDataFuture(bodyData);
 
     switch (bodyDataFutureResult) {
       case BodyDataFutureResult.success:
-        this.sheetSetState(() {});
-        this.loadAreaSetState(() {
-          this.sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
+        sheetSetState(() {});
+        loadAreaSetState(() {
+          sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
         });
         break;
       case BodyDataFutureResult.fail:
-        this.loadAreaSetState(() {
-          this.sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.fail;
+        loadAreaSetState(() {
+          sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.fail;
         });
         break;
       default:
-        throw "BodyDataFutureResult err";
+        throw 'BodyDataFutureResult err';
     }
 
     _isDataLoading = false;

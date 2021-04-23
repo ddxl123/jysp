@@ -1,4 +1,4 @@
-import 'package:jysp/Database/models/MVersionInfo.dart';
+import 'package:jysp/Database/Models/MVersionInfo.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/Helper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -25,31 +25,31 @@ class AppVersionManager {
 
   /// 获取被保存在本地应用版本
   Future<String?> _getSavedAppVersion() async {
-    Object? savedVersion = (await GSqlite.db.query(MVersionInfo.getTableName, limit: 1)).first[MVersionInfo.saved_version];
+    final Object? savedVersion = (await db.query(MVersionInfo.getTableName, limit: 1)).first[MVersionInfo.saved_version];
     if (savedVersion == null) {
-      throw "savedVersion is null";
+      throw 'savedVersion is null';
     }
     return savedVersion.toString();
   }
 
   /// 获取当前应用版本
   Future<String> getCurrentAppVersion() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     return packageInfo.version;
   }
 
   /// 应用版本检查
   /// - **前提: sqlite 数据库中必须存在 version_infos 表**
   Future<VersionStatus> appVersionCheck() async {
-    String currentAppVersion = await getCurrentAppVersion();
-    String saveAppVersion = (await _getSavedAppVersion())!;
+    final String currentAppVersion = await getCurrentAppVersion();
+    final String saveAppVersion = (await _getSavedAppVersion())!;
 
-    List<String> currentAppVersionString = currentAppVersion.split(".");
-    List<String> saveAppVersionString = saveAppVersion.split(".");
+    final List<String> currentAppVersionString = currentAppVersion.split('.');
+    final List<String> saveAppVersionString = saveAppVersion.split('.');
 
-    Compare zeroCompare = Helper.compare(int.parse(currentAppVersionString[0]), int.parse(saveAppVersionString[0]));
-    Compare oneCompare = Helper.compare(int.parse(currentAppVersionString[1]), int.parse(saveAppVersionString[1]));
-    Compare twoCompare = Helper.compare(int.parse(currentAppVersionString[2]), int.parse(saveAppVersionString[2]));
+    final Compare zeroCompare = Helper.compare(int.parse(currentAppVersionString[0]), int.parse(saveAppVersionString[0]));
+    final Compare oneCompare = Helper.compare(int.parse(currentAppVersionString[1]), int.parse(saveAppVersionString[1]));
+    final Compare twoCompare = Helper.compare(int.parse(currentAppVersionString[2]), int.parse(saveAppVersionString[2]));
 
     if (zeroCompare == Compare.frontBig) {
       return VersionStatus.changeDbAfterUpload;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/models/MDownloadModule.dart';
+import 'package:jysp/Database/Models/MDownloadModule.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
 
 enum DownloadStatus { waiting, downloading, success, fail, repeat }
@@ -7,7 +7,7 @@ enum DownloadStatus { waiting, downloading, success, fail, repeat }
 class DownloadModule {
   /// 因为前三个对 MDownloadQueueModule 来说可能获取为空（即使必然不为空）
   DownloadModule({required this.moduleName, required this.getData}) {
-    this.widget = _setWidget();
+    widget = _setWidget();
   }
 
   ///
@@ -38,23 +38,23 @@ class DownloadModule {
 
   Widget _setWidget() {
     return StatefulBuilder(
-      builder: (BuildContext context, rebuild) {
-        if (!(this.setState == rebuild)) {
-          this.setState = rebuild;
+      builder: (BuildContext context, void Function(void Function()) rebuild) {
+        if (!(setState == rebuild)) {
+          setState = rebuild;
         }
         switch (downloadStatus) {
           case DownloadStatus.waiting:
-            return _row(moduleName, Text("等待中..."));
+            return _row(moduleName, const Text('等待中...'));
           case DownloadStatus.downloading:
-            return _row(moduleName, TextButton(onPressed: () {}, child: Text(downloadProgress.toString() + " %")));
+            return _row(moduleName, TextButton(onPressed: () {}, child: Text(downloadProgress.toString() + ' %')));
           case DownloadStatus.repeat:
-            return _row(moduleName, Text("重试中..."));
+            return _row(moduleName, const Text('重试中...'));
           case DownloadStatus.fail:
-            return _row(moduleName, Text("下载失败"));
+            return _row(moduleName, const Text('下载失败'));
           case DownloadStatus.success:
-            return _row(moduleName, Text("下载成功"));
+            return _row(moduleName, const Text('下载成功'));
           default:
-            throw "downloadStatus${downloadStatus.toString()}";
+            throw 'downloadStatus${downloadStatus.toString()}';
         }
       },
     );
@@ -63,23 +63,19 @@ class DownloadModule {
   Widget _row(String moduleName, Widget selectWidget) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+      children: <Widget>[
         Expanded(child: Text(moduleName)),
         selectWidget,
       ],
     );
   }
 
-  String moduleNameString() {
-    return moduleName.toString();
-  }
-
   @override
   String toString() {
-    return {
+    return <String, Object?>{
       MDownloadModule.module_name: moduleName,
       MDownloadModule.download_status: sqliteDownloadStatus,
-      "downloadProgress": downloadProgress,
+      'downloadProgress': downloadProgress,
     }.toString();
   }
 }

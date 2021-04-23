@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 
-class SheetPage extends OverlayRoute {
+class SheetPage extends OverlayRoute<void> {
   ///
-
-  final SheetPageController sheetPageController = SheetPageController();
 
   /// [slivers]：内部滑动的 Widget 数据。
   ///
@@ -15,18 +13,20 @@ class SheetPage extends OverlayRoute {
   ///
   /// [sliverFillRemaining]：若为 false，则多余部分为透明；若为 false，则多余部分为 [LoadingArea]。
   SheetPage({required Slivers slivers, required BodyDataFuture bodyDataFuture}) {
-    this.sheetPageController.sheetRoute = this;
-    this.sheetPageController.slivers = slivers;
-    this.sheetPageController.bodyDataFuture = bodyDataFuture;
+    sheetPageController.sheetRoute = this;
+    sheetPageController.slivers = slivers;
+    sheetPageController.bodyDataFuture = bodyDataFuture;
   }
+
+  final SheetPageController sheetPageController = SheetPageController();
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
-    return [
+    return <OverlayEntry>[
       OverlayEntry(
         builder: (_) {
           return Stack(
-            children: [
+            children: <Widget>[
               _backgroundHitTest(),
               _sheet(),
             ],
@@ -41,7 +41,7 @@ class SheetPage extends OverlayRoute {
       top: 0,
       child: Listener(
         behavior: HitTestBehavior.deferToChild,
-        onPointerMove: (event) {
+        onPointerMove: (PointerMoveEvent event) {
           print(event);
         },
         child: Container(
@@ -54,7 +54,7 @@ class SheetPage extends OverlayRoute {
   }
 
   Widget _sheet() {
-    return Sheet(sheetPageController: this.sheetPageController);
+    return Sheet(sheetPageController: sheetPageController);
   }
 
   /// 返回监听:
@@ -64,8 +64,8 @@ class SheetPage extends OverlayRoute {
   /// 若在 [_removeAnimation] 中调用 [Navigator.pop] 则会循环的调用 [removePageWithAnimation] ,当然 [removePageWithAnimation] 中有仅执行一次的判断。
   @override
   // ignore: must_call_super
-  bool didPop(result) {
-    this.sheetPageController.removeRouteWithAnimation();
+  bool didPop(Object? result) {
+    sheetPageController.removeRouteWithAnimation();
     return false;
   }
 
@@ -84,7 +84,7 @@ class SheetPage extends OverlayRoute {
 ///
 ///
 class Sheet extends StatefulWidget {
-  Sheet({required this.sheetPageController});
+  const Sheet({required this.sheetPageController});
 
   final SheetPageController sheetPageController;
 
@@ -98,16 +98,16 @@ class _SheetState extends State<Sheet> with SingleTickerProviderStateMixin {
     super.initState();
 
     // 为了绑定返回键
-    widget.sheetPageController.sheetContext = this.context;
+    widget.sheetPageController.sheetContext = context;
 
     // 绑定该 [Sheet] Widget 的 [setState]
-    widget.sheetPageController.sheetSetState = this.setState;
+    widget.sheetPageController.sheetSetState = setState;
 
-    widget.sheetPageController.animationController = AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+    widget.sheetPageController.animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
 
     // 设置整个 sheet 的高度，并关联控制器
     widget.sheetPageController.animation =
-        Tween(begin: 0.0, end: widget.sheetPageController.maxHeight).animate(CurvedAnimation(parent: widget.sheetPageController.animationController, curve: Curves.linear));
+        Tween<double>(begin: 0.0, end: widget.sheetPageController.maxHeight).animate(CurvedAnimation(parent: widget.sheetPageController.animationController, curve: Curves.linear));
 
     // 初始化上升
     widget.sheetPageController.animationController.animateTo(widget.sheetPageController.initHeightRatio);
@@ -135,7 +135,7 @@ class _SheetState extends State<Sheet> with SingleTickerProviderStateMixin {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(widget.sheetPageController.circular), // 圆角
               child: CustomScrollView(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 controller: widget.sheetPageController.scrollController,
                 slivers: widget.sheetPageController.slivers(
                   sheetPageController: widget.sheetPageController,

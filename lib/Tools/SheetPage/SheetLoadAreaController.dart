@@ -2,15 +2,15 @@ enum SheetLoadAreaStatus { loading, noMore, fail }
 
 extension SheetLoadAreaStatusExtension on SheetLoadAreaStatus {
   String get text {
-    switch (this.index) {
+    switch (index) {
       case 0:
-        return "loading";
+        return 'loading';
       case 1:
-        return "noMore";
+        return 'noMore';
       case 2:
-        return "fail";
+        return 'fail';
       default:
-        throw "SheetLoadAreaStatusExtension err";
+        throw 'SheetLoadAreaStatusExtension err';
     }
   }
 }

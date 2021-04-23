@@ -7,7 +7,7 @@ class SqliteDiag {
 
   /// 检查表是否完整
   Future<bool> isTableComplete(Map<String, String> sqls) async {
-    List<String> neededSqls = sqls.keys.toList();
+    final List<String> neededSqls = sqls.keys.toList();
     for (int i = 0; i < neededSqls.length; i++) {
       if (!await isTableExist(neededSqls[i])) {
         return false;
@@ -18,7 +18,14 @@ class SqliteDiag {
 
   /// 检查指定表是否存在
   Future<bool> isTableExist(String table) async {
-    int? count = firstIntValue(await GSqlite.db.query('sqlite_master', columns: ['COUNT(*)'], where: 'type = ? AND name = ?', whereArgs: ['table', table]));
+    final int? count = firstIntValue(
+      await db.query(
+        'sqlite_master',
+        columns: <String>['COUNT(*)'],
+        where: 'type = ? AND name = ?',
+        whereArgs: <Object?>['table', table],
+      ),
+    );
     if (count == null) {
       return false;
     }

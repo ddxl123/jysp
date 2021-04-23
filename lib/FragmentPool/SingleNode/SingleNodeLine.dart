@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
 
 class SingleNodeLine extends CustomPainter {
-  late Path path;
-  SingleNodeLine(SingleNode widget) {
+  SingleNodeLine() {
     /// 以下皆相对 path
-    this.path = Path();
+    path = Path();
     return;
   }
+  late Path path;
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();

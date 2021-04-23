@@ -19,34 +19,34 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: Container(
           width: 300,
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 5),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
           decoration: BoxDecoration(
             color: Colors.yellow,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
+            boxShadow: const <BoxShadow>[
               BoxShadow(offset: Offset(10, 10), blurRadius: 10, spreadRadius: -10),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
+            children: <Widget>[
+              const Flexible(
                 child: Text(
-                  "登陆/注册",
+                  '登陆/注册',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
               _emailInputField(),
-              Flexible(child: SizedBox(height: 10)),
+              const Flexible(child: SizedBox(height: 10)),
               Flexible(
                 child: Row(
-                  children: [
+                  children: <Widget>[
                     _codeInputField(),
                     _sendEmailButton(),
                   ],
                 ),
               ),
-              Flexible(child: SizedBox(height: 10)),
+              const Flexible(child: SizedBox(height: 10)),
               _verifyEmailButton(),
             ],
           ),
@@ -59,10 +59,10 @@ class _LoginPageState extends State<LoginPage> {
     return Flexible(
       child: TextField(
         controller: context.read<LoginPageController>().emailTextEditingController,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.person),
-          labelText: "邮箱",
+          labelText: '邮箱',
         ),
         minLines: 1,
         maxLines: 1,
@@ -74,10 +74,10 @@ class _LoginPageState extends State<LoginPage> {
     return Expanded(
       child: TextField(
         controller: context.read<LoginPageController>().codeTextEditingController,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           contentPadding: EdgeInsets.zero,
           icon: Icon(Icons.lock),
-          labelText: "验证码",
+          labelText: '验证码',
         ),
         minLines: 1,
         maxLines: 1,
@@ -88,40 +88,40 @@ class _LoginPageState extends State<LoginPage> {
   Widget _sendEmailButton() {
     return RebuildHandleWidget<SendEmailButtonHandlerEnum>(
       rebuildHandler: context.read<LoginPageController>().sendEmailButtonRebuildHandler,
-      builder: (handler) {
+      builder: (RebuildHandler<SendEmailButtonHandlerEnum> handler) {
         if (handler.handleCode == SendEmailButtonHandlerEnum.countdown) {
           // 倒计时状态
-          handler.state["banOnPressed"] = true;
-          handler.state["time"] ??= 10;
-          handler.state["text"] = "${handler.state["time"]} s";
-          handler.state["timer"] ??= Timer.periodic(
-            Duration(seconds: 1),
-            (timer) {
-              if (handler.state["time"] == 0) {
-                (handler.state["timer"] as Timer).cancel();
+          handler.state['banOnPressed'] = true;
+          handler.state['time'] ??= 10;
+          handler.state['text'] = "${handler.state["time"]} s";
+          handler.state['timer'] ??= Timer.periodic(
+            const Duration(seconds: 1),
+            (Timer timer) {
+              if (handler.state['time'] == 0) {
+                (handler.state['timer'] as Timer).cancel();
                 handler.rebuildHandle(SendEmailButtonHandlerEnum.unSent, true);
               } else {
-                handler.state["time"] -= 1;
+                handler.state['time'] -= 1;
                 handler.rebuildHandle(SendEmailButtonHandlerEnum.countdown);
               }
             },
           );
         } else if (handler.handleCode == SendEmailButtonHandlerEnum.unSent) {
           // 未发送状态
-          handler.state["timer"]?.cancel();
+          handler.state['timer']?.cancel();
           handler.state.clear();
-          handler.state["banOnPressed"] = false;
-          handler.state["text"] = "发送验证码";
+          handler.state['banOnPressed'] = false;
+          handler.state['text'] = '发送验证码';
         }
 
         return TextButton(
           style: ButtonStyle(
-            side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
+            side: MaterialStateProperty.all(const BorderSide(color: Colors.green)),
           ),
-          child: Text(handler.state["text"]),
+          child: Text(handler.state['text'] as String),
           onPressed: () {
-            if (handler.state["banOnPressed"] == true) {
-              dLog(() => "banOnPressed");
+            if (handler.state['banOnPressed'] == true) {
+              dLog(() => 'banOnPressed');
               return;
             }
             handler.rebuildHandle(SendEmailButtonHandlerEnum.countdown);
@@ -141,9 +141,9 @@ class _LoginPageState extends State<LoginPage> {
         width: double.maxFinite,
         child: TextButton(
           style: ButtonStyle(
-            side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
+            side: MaterialStateProperty.all(const BorderSide(color: Colors.green)),
           ),
-          child: Text("登陆/注册"),
+          child: const Text('登陆/注册'),
           onPressed: () {
             context.read<LoginPageController>().verifyEmailRequest(
                   qqEmailTextEditingController: context.read<LoginPageController>().emailTextEditingController,

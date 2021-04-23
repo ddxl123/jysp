@@ -1,13 +1,12 @@
-import 'package:jysp/Database/models/GlobalEnum.dart';
-import 'package:jysp/Database/models/MFragmentsAboutCompletePoolNode.dart';
-import 'package:jysp/Database/models/MFragmentsAboutMemoryPoolNode.dart';
-import 'package:jysp/Database/models/MFragmentsAboutPendingPoolNode.dart';
-import 'package:jysp/Database/models/MPnCompletePoolNode.dart';
-import 'package:jysp/Database/models/MPnMemoryPoolNode.dart';
-import 'package:jysp/Database/models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/models/MPnRulePoolNode.dart';
-import 'package:jysp/Database/models/MRule.dart';
-import 'package:jysp/Database/models/MUser.dart';
+import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';
+import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';
+import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
+import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
+import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
+import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
+import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
+import 'package:jysp/Database/Models/MRule.dart';
+import 'package:jysp/Database/Models/MUser.dart';
 import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
@@ -16,51 +15,51 @@ import 'package:jysp/Tools/TDebug.dart';
 class RInitDownload {
   ///
 
-  String getUserInfoRoute = "api/init_download/get_user_info";
-  String getPendingPoolNodesRoute = "api/init_download/get_pending_pool_nodes";
-  String getMemoryPoolNodesRoute = "api/init_download/get_memory_pool_nodes";
-  String getCompletePoolNodesRoute = "api/init_download/get_complete_pool_nodes";
-  String getRulePoolNodesRoute = "api/init_download/get_rule_pool_nodes";
-  String getPendingPoolNodeFragmentRoute = "api/init_download/get_pending_pool_node_fragments";
-  String getMemoryPoolNodeFragmentRoute = "api/init_download/get_memory_pool_node_fragments";
-  String getCompletePoolNodeFragmentRoute = "api/init_download/get_complete_pool_node_fragments";
-  String getRulePoolNodeFragmentRoute = "api/init_download/get_rule_pool_node_fragments";
+  String getUserInfoRoute = 'api/init_download/get_user_info';
+  String getPendingPoolNodesRoute = 'api/init_download/get_pending_pool_nodes';
+  String getMemoryPoolNodesRoute = 'api/init_download/get_memory_pool_nodes';
+  String getCompletePoolNodesRoute = 'api/init_download/get_complete_pool_nodes';
+  String getRulePoolNodesRoute = 'api/init_download/get_rule_pool_nodes';
+  String getPendingPoolNodeFragmentRoute = 'api/init_download/get_pending_pool_node_fragments';
+  String getMemoryPoolNodeFragmentRoute = 'api/init_download/get_memory_pool_node_fragments';
+  String getCompletePoolNodeFragmentRoute = 'api/init_download/get_complete_pool_node_fragments';
+  String getRulePoolNodeFragmentRoute = 'api/init_download/get_rule_pool_node_fragments';
 
   /// 获取用户信息
   Future<GetDataResultType> getUserInfo() async {
     GetDataResultType getDataResultType = GetDataResultType.fail;
-    // TODO: GET api/init_download/get_user_info
+    // TODO: api/init_download/get_user_info
     await GHttp.sendRequest<Map<String, dynamic>>(
-      method: "GET",
+      method: 'GET',
       route: getUserInfoRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, Map<String, dynamic> data) async {
         switch (code) {
           case 300:
-            await GSqlite.db.delete(MUser.getTableName);
-            await GSqlite.db.insert(
+            await db.delete(MUser.getTableName);
+            await db.insert(
               MUser.getTableName,
-              MUser.toSqliteMap(
-                user_id_v: data["id"],
-                username_v: data[MUser.username],
-                email_v: data[MUser.email],
-                created_at_v: data[MUser.created_at],
-                updated_at_v: data[MUser.updated_at],
-                curd_status_v: Curd.R,
+              MUser.asJsonNoId(
+                atid_v: data['id'] as int?,
+                uuid_v: null,
+                username_v: data[MUser.username] as String?,
+                email_v: data[MUser.email] as String?,
+                created_at_v: data[MUser.created_at] as int?,
+                updated_at_v: data[MUser.updated_at] as int?,
               ),
             );
-            dLog(() => "getUserInfo:", null, () async => await GSqlite.db.query(MUser.getTableName));
+            dLog(() => 'getUserInfo:', null, () async => await db.query(MUser.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "code is unknown";
+            throw 'code is unknown';
         }
       },
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
       },
-      sameNotConcurrent: "getUserInfo",
+      sameNotConcurrent: 'getUserInfo',
     );
     return getDataResultType;
   }
@@ -70,47 +69,46 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_pending_pool_nodes
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getPendingPoolNodesRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 302:
-            await GSqlite.db.delete(MPnPendingPoolNode.getTableName);
+            await db.delete(MPnPendingPoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MPnPendingPoolNode.getTableName,
-                  MPnPendingPoolNode.toSqliteMap(
-                    pn_pending_pool_node_id_v: element["id"],
-                    pn_pending_pool_node_uuid_v: null,
-                    recommend_raw_rule_id_v: element[MPnPendingPoolNode.recommend_raw_rule_id],
+                  MPnPendingPoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    recommend_raw_rule_atid_v: element[MPnPendingPoolNode.recommend_raw_rule_atid] as int?,
                     recommend_raw_rule_uuid_v: null,
-                    type_v: PendingPoolNodeType.values[element[MPnPendingPoolNode.type]],
-                    name_v: element[MPnPendingPoolNode.name],
-                    position_v: element[MPnPendingPoolNode.position],
-                    created_at_v: element[MPnPendingPoolNode.created_at],
-                    updated_at_v: element[MPnPendingPoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    type_v: element[MPnPendingPoolNode.type] == null ? null : PendingPoolNodeType.values[element[MPnPendingPoolNode.type] as int],
+                    name_v: element[MPnPendingPoolNode.name] as String?,
+                    position_v: element[MPnPendingPoolNode.position] as String?,
+                    created_at_v: element[MPnPendingPoolNode.created_at] as int?,
+                    updated_at_v: element[MPnPendingPoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
 
-            dLog(() => "getPendingPoolNodes:", null, () async => await GSqlite.db.query(MPnPendingPoolNode.getTableName));
+            dLog(() => 'getPendingPoolNodes:', null, () async => await db.query(MPnPendingPoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
       },
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
       },
-      sameNotConcurrent: "getPendingPoolNodes",
+      sameNotConcurrent: 'getPendingPoolNodes',
     );
     return getDataResultType;
   }
@@ -120,43 +118,42 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_memory_pool_nodes
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getMemoryPoolNodesRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 304:
-            await GSqlite.db.delete(MPnMemoryPoolNode.getTableName);
+            await db.delete(MPnMemoryPoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MPnMemoryPoolNode.getTableName,
-                  MPnMemoryPoolNode.toSqliteMap(
-                    pn_memory_pool_node_id_v: element["id"],
-                    pn_memory_pool_node_uuid_v: null,
-                    using_raw_rule_id_v: element[MPnMemoryPoolNode.using_raw_rule_id],
+                  MPnMemoryPoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    using_raw_rule_atid_v: element[MPnMemoryPoolNode.using_raw_rule_atid] as int?,
                     using_raw_rule_uuid_v: null,
-                    type_v: element[MPnMemoryPoolNode.type],
-                    name_v: element[MPnMemoryPoolNode.name],
-                    position_v: element[MPnMemoryPoolNode.position],
-                    created_at_v: element[MPnMemoryPoolNode.created_at],
-                    updated_at_v: element[MPnMemoryPoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    type_v: element[MPnMemoryPoolNode.type] == null ? null : MemoryPoolNodeType.values[element[MPnMemoryPoolNode.type] as int],
+                    name_v: element[MPnMemoryPoolNode.name] as String?,
+                    position_v: element[MPnMemoryPoolNode.position] as String?,
+                    created_at_v: element[MPnMemoryPoolNode.created_at] as int?,
+                    updated_at_v: element[MPnMemoryPoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
 
-            dLog(() => "getMemoryPoolNodes:", null, () async => await GSqlite.db.query(MPnMemoryPoolNode.getTableName));
+            dLog(() => 'getMemoryPoolNodes:', null, () async => await db.query(MPnMemoryPoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
       },
-      sameNotConcurrent: "getMemoryPoolNodes",
+      sameNotConcurrent: 'getMemoryPoolNodes',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -170,43 +167,42 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_complete_pool_nodes
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getCompletePoolNodesRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 306:
-            await GSqlite.db.delete(MPnCompletePoolNode.getTableName);
+            await db.delete(MPnCompletePoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MPnCompletePoolNode.getTableName,
-                  MPnCompletePoolNode.toSqliteMap(
-                    pn_complete_pool_node_id_v: element["id"],
-                    pn_complete_pool_node_uuid_v: null,
-                    used_raw_rule_id_v: element[MPnCompletePoolNode.used_raw_rule_id],
+                  MPnCompletePoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    used_raw_rule_atid_v: element[MPnCompletePoolNode.used_raw_rule_atid] as int?,
                     used_raw_rule_uuid_v: null,
-                    type_v: element[MPnCompletePoolNode.type],
-                    name_v: element[MPnCompletePoolNode.name],
-                    position_v: element[MPnCompletePoolNode.position],
-                    created_at_v: element[MPnCompletePoolNode.created_at],
-                    updated_at_v: element[MPnCompletePoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    type_v: element[MPnCompletePoolNode.type] == null ? null : CompletePoolNodeType.values[element[MPnCompletePoolNode.type] as int],
+                    name_v: element[MPnCompletePoolNode.name] as String?,
+                    position_v: element[MPnCompletePoolNode.position] as String?,
+                    created_at_v: element[MPnCompletePoolNode.created_at] as int?,
+                    updated_at_v: element[MPnCompletePoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
 
-            dLog(() => "getCompletePoolNodes:", null, () async => await GSqlite.db.query(MPnCompletePoolNode.getTableName));
+            dLog(() => 'getCompletePoolNodes:', null, () async => await db.query(MPnCompletePoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
       },
-      sameNotConcurrent: "getCompletePoolNodes",
+      sameNotConcurrent: 'getCompletePoolNodes',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -220,41 +216,40 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_rule_pool_nodes
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getRulePoolNodesRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 308:
-            await GSqlite.db.delete(MPnRulePoolNode.getTableName);
+            await db.delete(MPnRulePoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MPnRulePoolNode.getTableName,
-                  MPnRulePoolNode.toSqliteMap(
-                    pn_rule_pool_node_id_v: element["id"],
-                    pn_rule_pool_node_uuid_v: null,
-                    type_v: element[MPnRulePoolNode.type],
-                    name_v: element[MPnRulePoolNode.name],
-                    position_v: element[MPnRulePoolNode.position],
-                    created_at_v: element[MPnRulePoolNode.created_at],
-                    updated_at_v: element[MPnRulePoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                  MPnRulePoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    type_v: element[MPnRulePoolNode.type] == null ? null : RulePoolNodeType.values[element[MPnRulePoolNode.type] as int],
+                    name_v: element[MPnRulePoolNode.name] as String?,
+                    position_v: element[MPnRulePoolNode.position] as String?,
+                    created_at_v: element[MPnRulePoolNode.created_at] as int?,
+                    updated_at_v: element[MPnRulePoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
 
-            dLog(() => "getRulePoolNodes:", null, () async => await GSqlite.db.query(MPnRulePoolNode.getTableName));
+            dLog(() => 'getRulePoolNodes:', null, () async => await db.query(MPnRulePoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
       },
-      sameNotConcurrent: "getRulePoolNodes",
+      sameNotConcurrent: 'getRulePoolNodes',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -268,44 +263,43 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_pending_pool_node_fragments
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getPendingPoolNodeFragmentRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 310:
-            await GSqlite.db.delete(MFragmentsAboutPendingPoolNode.getTableName);
+            await db.delete(MFragmentsAboutPendingPoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MFragmentsAboutPendingPoolNode.getTableName,
-                  MFragmentsAboutPendingPoolNode.toSqliteMap(
-                    fragments_about_pending_pool_node_id_v: element["id"],
-                    fragments_about_pending_pool_node_uuid_v: null,
-                    raw_fragment_id_v: element["belongs_to_raw_fragment"] == null ? null : element["belongs_to_raw_fragment"]["id"],
+                  MFragmentsAboutPendingPoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    raw_fragment_atid_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['id'] as int?,
                     raw_fragment_id_uuid_v: null,
-                    pn_pending_pool_node_id_v: element[MFragmentsAboutPendingPoolNode.pn_pending_pool_node_id],
+                    pn_pending_pool_node_atid_v: element[MFragmentsAboutPendingPoolNode.pn_pending_pool_node_atid] as int?,
                     pn_pending_pool_node_uuid_v: null,
-                    recommend_raw_rule_id_v: element[MFragmentsAboutPendingPoolNode.recommend_raw_rule_id],
+                    recommend_raw_rule_atid_v: element[MFragmentsAboutPendingPoolNode.recommend_raw_rule_atid] as int?,
                     recommend_raw_rule_uuid_v: null,
-                    title_v: element["belongs_to_raw_fragment"] == null ? null : element["belongs_to_raw_fragment"]["title"],
-                    created_at_v: element[MFragmentsAboutPendingPoolNode.created_at],
-                    updated_at_v: element[MFragmentsAboutPendingPoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    title_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['title'] as String?,
+                    created_at_v: element[MFragmentsAboutPendingPoolNode.created_at] as int?,
+                    updated_at_v: element[MFragmentsAboutPendingPoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
-            dLog(() => "getPendingPoolNodeFragments:", null, () async => await GSqlite.db.query(MFragmentsAboutPendingPoolNode.getTableName));
+            dLog(() => 'getPendingPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutPendingPoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
       },
-      sameNotConcurrent: "getPendingPoolNodeFragments",
+      sameNotConcurrent: 'getPendingPoolNodeFragments',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -319,44 +313,43 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_memory_pool_node_fragments
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getMemoryPoolNodeFragmentRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 312:
-            await GSqlite.db.delete(MFragmentsAboutMemoryPoolNode.getTableName);
+            await db.delete(MFragmentsAboutMemoryPoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MFragmentsAboutMemoryPoolNode.getTableName,
-                  MFragmentsAboutMemoryPoolNode.toSqliteMap(
-                    fragments_about_memory_pool_node_id_v: element["id"],
-                    fragments_about_memory_pool_node_uuid_v: null,
-                    fragments_about_pending_pool_node_id_v: element["fragment_owner_about_pending_pool_node_id"],
+                  MFragmentsAboutMemoryPoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    fragments_about_pending_pool_node_atid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
                     fragments_about_pending_pool_node_uuid_v: null,
-                    using_raw_rule_id_v: element[MFragmentsAboutMemoryPoolNode.using_raw_rule_id],
+                    using_raw_rule_atid_v: element[MFragmentsAboutMemoryPoolNode.using_raw_rule_atid] as int?,
                     using_raw_rule_uuid_v: null,
-                    pn_memory_pool_node_id_v: element[MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_id],
+                    pn_memory_pool_node_atid_v: element[MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_atid] as int?,
                     pn_memory_pool_node_uuid_v: null,
-                    created_at_v: element[MFragmentsAboutMemoryPoolNode.created_at],
-                    updated_at_v: element[MFragmentsAboutMemoryPoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    created_at_v: element[MFragmentsAboutMemoryPoolNode.created_at] as int?,
+                    updated_at_v: element[MFragmentsAboutMemoryPoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
-            dLog(() => "getMemoryPoolNodeFragments:", null, () async => await GSqlite.db.query(MFragmentsAboutMemoryPoolNode.getTableName));
+            dLog(() => 'getMemoryPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutMemoryPoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
         getDataResultType = GetDataResultType.ok;
       },
-      sameNotConcurrent: "getMemoryPoolNodeFragments",
+      sameNotConcurrent: 'getMemoryPoolNodeFragments',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -370,44 +363,43 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_complete_pool_node_fragments
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getCompletePoolNodeFragmentRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 313:
-            await GSqlite.db.delete(MFragmentsAboutCompletePoolNode.getTableName);
+            await db.delete(MFragmentsAboutCompletePoolNode.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MFragmentsAboutCompletePoolNode.getTableName,
-                  MFragmentsAboutCompletePoolNode.toSqliteMap(
-                    fragments_about_complete_pool_node_id_v: element["id"],
-                    fragments_about_complete_pool_node_uuid_v: null,
-                    fragments_about_pending_pool_node_id_v: element["fragment_owner_about_pending_pool_node_id"],
+                  MFragmentsAboutCompletePoolNode.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    fragments_about_pending_pool_node_atid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
                     fragments_about_pending_pool_node_uuid_v: null,
-                    used_raw_rule_id_v: element[MFragmentsAboutCompletePoolNode.used_raw_rule_id],
+                    used_raw_rule_atid_v: element[MFragmentsAboutCompletePoolNode.used_raw_rule_atid] as int?,
                     used_raw_rule_uuid_v: null,
-                    pn_complete_pool_node_id_v: element[MFragmentsAboutCompletePoolNode.pn_complete_pool_node_id],
+                    pn_complete_pool_node_atid_v: element[MFragmentsAboutCompletePoolNode.pn_complete_pool_node_atid] as int?,
                     pn_complete_pool_node_uuid_v: null,
-                    created_at_v: element[MPnCompletePoolNode.created_at],
-                    updated_at_v: element[MPnCompletePoolNode.updated_at],
-                    curd_status_v: Curd.R,
+                    created_at_v: element[MPnCompletePoolNode.created_at] as int?,
+                    updated_at_v: element[MPnCompletePoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
-            dLog(() => "getCompletePoolNodeFragments:", null, () async => await GSqlite.db.query(MFragmentsAboutCompletePoolNode.getTableName));
+            dLog(() => 'getCompletePoolNodeFragments:', null, () async => await db.query(MFragmentsAboutCompletePoolNode.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
         getDataResultType = GetDataResultType.ok;
       },
-      sameNotConcurrent: "getCompletePoolNodeFragments",
+      sameNotConcurrent: 'getCompletePoolNodeFragments',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
@@ -421,42 +413,41 @@ class RInitDownload {
     GetDataResultType getDataResultType = GetDataResultType.fail;
     // TODO: GET api/init_download/get_rule_pool_node_fragments
     await GHttp.sendRequest<List<Map<String, dynamic>>>(
-      method: "GET",
+      method: 'GET',
       route: getRulePoolNodeFragmentRoute,
       isAuth: true,
-      resultCallback: (code, data) async {
+      resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 315:
-            await GSqlite.db.delete(MRule.getTableName);
+            await db.delete(MRule.getTableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
-              (element) async {
-                await GSqlite.db.insert(
+              (Map<String, dynamic> element) async {
+                await db.insert(
                   MRule.getTableName,
-                  MRule.toSqliteMap(
-                    rule_id_v: element["id"],
-                    rule_uuid_v: null,
-                    raw_rule_id_v: element["belongs_to_raw_rule"] == null ? null : element["belongs_to_raw_rule"]["id"],
+                  MRule.asJsonNoId(
+                    atid_v: element['id'] as int?,
+                    uuid_v: null,
+                    raw_rule_atid_v: element['belongs_to_raw_rule'] == null ? null : element['belongs_to_raw_rule']['id'] as int?,
                     raw_rule_uuid_v: null,
-                    pn_rule_pool_node_id_v: element[MRule.pn_rule_pool_node_id],
+                    pn_rule_pool_node_atid_v: element[MRule.pn_rule_pool_node_atid] as int?,
                     pn_rule_pool_node_uuid_v: null,
-                    created_at_v: element[MRule.created_at],
-                    updated_at_v: element[MRule.updated_at],
-                    curd_status_v: Curd.R,
+                    created_at_v: element[MRule.created_at] as int?,
+                    updated_at_v: element[MRule.updated_at] as int?,
                   ),
                 );
               },
             );
-            dLog(() => "getRulePoolNodeFragments:", null, () async => await GSqlite.db.query(MRule.getTableName));
+            dLog(() => 'getRulePoolNodeFragments:', null, () async => await db.query(MRule.getTableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
-            throw "unknown code: $code";
+            throw 'unknown code: $code';
         }
         getDataResultType = GetDataResultType.ok;
       },
-      sameNotConcurrent: "getRulePoolNodeFragments",
+      sameNotConcurrent: 'getRulePoolNodeFragments',
       interruptedCallback: (_) {
         dLog(() => _);
         getDataResultType = GetDataResultType.fail;
