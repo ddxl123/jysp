@@ -53,16 +53,32 @@ class MUpload implements MBase{
     return allRowModels;
   }
 
-  /// 值只有 int String bool null 类型，没有枚举类型，而是枚举的 int 值
-  final Map<String, Object?> _rowJson = <String, Object?>{};
+  @override
+  Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, Object?> get getRowJson=> _rowJson;
+  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+
+  @override
+  List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
+
+  @override
+  List<String> get getDeleteFatherFollowChilds => _deleteFatherFollowChilds;
+
+  final Map<String, Object?> _rowJson = <String, Object?>{};
+
+  final Map<String, String?> _foreignKeyTables = <String, String?>{
+  'row_id': null,
+  'row_atid': null,
+  'row_uuid': null
+};
+
+  final List<String> _deleteChildFollowFathers = <String>[];
+
+  final List<String> _deleteFatherFollowChilds =<String>[];
 
   @override
   String get getCurrentTableName => getTableName;
-
-
 
 @override int? get get_id => _rowJson[id] as int?;@override int? get get_atid => _rowJson[atid] as int?;@override String? get get_uuid => _rowJson[uuid] as String?; String? get get_table_name => _rowJson[table_name] as String?; int? get get_row_id => _rowJson[row_id] as int?; int? get get_row_atid => _rowJson[row_atid] as int?; String? get get_row_uuid => _rowJson[row_uuid] as String?; String? get get_updated_columns => _rowJson[updated_columns] as String?; CurdStatus? get get_curd_status => _rowJson[curd_status] == null ? null : CurdStatus.values[_rowJson[curd_status]! as int]; UploadStatus? get get_upload_status => _rowJson[upload_status] == null ? null : UploadStatus.values[_rowJson[upload_status]! as int];@override int? get get_created_at => _rowJson[created_at] as int?;@override int? get get_updated_at => _rowJson[updated_at] as int?;
 }

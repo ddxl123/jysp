@@ -52,16 +52,35 @@ class MFragmentsAboutCompletePoolNode implements MBase{
     return allRowModels;
   }
 
-  /// 值只有 int String bool null 类型，没有枚举类型，而是枚举的 int 值
-  final Map<String, Object?> _rowJson = <String, Object?>{};
+  @override
+  Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, Object?> get getRowJson=> _rowJson;
+  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+
+  @override
+  List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
+
+  @override
+  List<String> get getDeleteFatherFollowChilds => _deleteFatherFollowChilds;
+
+  final Map<String, Object?> _rowJson = <String, Object?>{};
+
+  final Map<String, String?> _foreignKeyTables = <String, String?>{
+  'fragments_about_pending_pool_node_atid': 'fragments_about_pending_pool_nodes',
+  'fragments_about_pending_pool_node_uuid': 'fragments_about_pending_pool_nodes',
+  'used_raw_rule_atid': 'rules',
+  'used_raw_rule_uuid': 'rules',
+  'pn_complete_pool_node_atid': 'pn_complete_pool_nodes',
+  'pn_complete_pool_node_uuid': 'pn_complete_pool_nodes'
+};
+
+  final List<String> _deleteChildFollowFathers = <String>[];
+
+  final List<String> _deleteFatherFollowChilds =<String>[fragments_about_pending_pool_node_atid,fragments_about_pending_pool_node_uuid,pn_complete_pool_node_atid,pn_complete_pool_node_uuid,];
 
   @override
   String get getCurrentTableName => getTableName;
-
-
 
 @override int? get get_id => _rowJson[id] as int?;@override int? get get_atid => _rowJson[atid] as int?;@override String? get get_uuid => _rowJson[uuid] as String?; int? get get_fragments_about_pending_pool_node_atid => _rowJson[fragments_about_pending_pool_node_atid] as int?; String? get get_fragments_about_pending_pool_node_uuid => _rowJson[fragments_about_pending_pool_node_uuid] as String?; int? get get_used_raw_rule_atid => _rowJson[used_raw_rule_atid] as int?; String? get get_used_raw_rule_uuid => _rowJson[used_raw_rule_uuid] as String?; int? get get_pn_complete_pool_node_atid => _rowJson[pn_complete_pool_node_atid] as int?; String? get get_pn_complete_pool_node_uuid => _rowJson[pn_complete_pool_node_uuid] as String?;@override int? get get_created_at => _rowJson[created_at] as int?;@override int? get get_updated_at => _rowJson[updated_at] as int?;
 }

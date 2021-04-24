@@ -280,7 +280,7 @@ class RInitDownload {
                     atid_v: element['id'] as int?,
                     uuid_v: null,
                     raw_fragment_atid_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['id'] as int?,
-                    raw_fragment_id_uuid_v: null,
+                    raw_fragment_uuid_v: null,
                     pn_pending_pool_node_atid_v: element[MFragmentsAboutPendingPoolNode.pn_pending_pool_node_atid] as int?,
                     pn_pending_pool_node_uuid_v: null,
                     recommend_raw_rule_atid_v: element[MFragmentsAboutPendingPoolNode.recommend_raw_rule_atid] as int?,

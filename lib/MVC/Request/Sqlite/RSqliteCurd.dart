@@ -5,43 +5,44 @@ import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// Sqlite 专属表（没有对应可匹配的 mysql 表）不可用当前类
 class RSqliteCurd {
   ///
 
-  /// 对 [model] 的 [update] 操作。
-  /// - [model]：被更新的 [model] —— [sqlite] 映射过来的。
-  /// - [updateContent]：更新的内容。
-  /// - 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
-  Future<bool> update(MBase model, Map<String, Object?> updateContent) async {
-    try {
-      // TODO: 检查该 model 是否仍然存在
+  /// [model]：被 CURD 的 [model]。
+  RSqliteCurd(this.model);
 
-      // 从 MUpload 中查询当前 model。
+  /// 需要 CURD 的 [model]。
+  late MBase model;
+
+  /// 为 R 时代表 [MUpload] 表中不存在当前 [model]。
+  late CurdStatus currentCurdStatus;
+
+  /// 为 [ ] 或 存在一个及以上元素。
+  late List<String> currentUpdatedColumns;
+
+  /// 当前 [model] 的上传状态。
+  late UploadStatus currentUploadStatus;
+
+  /// 从 [MUpload] 中查询当前 [model]。
+  Future<void> findFromUploadModel() async {
+    try {
       final List<Map<String, Object?>> uploadResult = await db.query(
         MUpload.getTableName,
         where: '${MUpload.row_id} = ?',
         whereArgs: <Object?>[model.get_id],
       );
 
-      // 为 R 时代表 MUpload 中不存在当前 model
-      CurdStatus currentStatus;
-
-      // 为 [] 或 存在一个及以上元素
-      List<String> currentUpdatedColumns;
-
-      // 当前 model 的上传状态
-      UploadStatus uploadStatus;
-
       // 若不存在时，代表只进行过 R
       if (uploadResult.isEmpty) {
-        currentStatus = CurdStatus.R;
+        currentCurdStatus = CurdStatus.R;
         currentUpdatedColumns = <String>[];
-        uploadStatus = UploadStatus.uploaded;
+        currentUploadStatus = UploadStatus.uploaded;
       } else {
         if (uploadResult.first[MUpload.curd_status] == null) {
           throw 'curd_status is null';
         } else {
-          currentStatus = uploadResult.first[MUpload.curd_status]! as CurdStatus;
+          currentCurdStatus = uploadResult.first[MUpload.curd_status]! as CurdStatus;
         }
 
         if (uploadResult.first[MUpload.updated_columns] == null) {
@@ -53,11 +54,27 @@ class RSqliteCurd {
         if (uploadResult.first[MUpload.upload_status] == null) {
           throw 'upload_status is null';
         } else {
-          uploadStatus = uploadResult.first[MUpload.upload_status]! as UploadStatus;
+          currentUploadStatus = uploadResult.first[MUpload.upload_status]! as UploadStatus;
         }
       }
+    } catch (e) {
+      dLog(() => 'findFromUploadModel err: ', () => e);
+      throw 'findFromUploadModel err';
+    }
+  }
 
-      if (uploadStatus == UploadStatus.uploading) {
+  /// 对 [model] 的 [update] 操作。
+  ///
+  /// - [updateContent]：更新的内容。
+  ///
+  /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
+  Future<bool> update(Map<String, Object?> updateContent) async {
+    try {
+      // TODO: 检查该 model 是否仍然存在
+
+      await findFromUploadModel();
+
+      if (currentUploadStatus == UploadStatus.uploading) {
         // TODO: 需要先重新进行上传后才能继续
       }
 
@@ -73,7 +90,7 @@ class RSqliteCurd {
       };
 
       // R
-      if (currentStatus == CurdStatus.R) {
+      if (currentCurdStatus == CurdStatus.R) {
         await toUpdate(
           (Batch batch) {
             batch.insert(
@@ -98,7 +115,7 @@ class RSqliteCurd {
       }
 
       // C
-      if (currentStatus == CurdStatus.C) {
+      if (currentCurdStatus == CurdStatus.C) {
         await toUpdate(
           (Batch batch) {
             batch.update(
@@ -115,7 +132,7 @@ class RSqliteCurd {
       }
 
       // U
-      else if (currentStatus == CurdStatus.U) {
+      else if (currentCurdStatus == CurdStatus.U) {
         await toUpdate(
           (Batch batch) {
             batch.update(
@@ -132,9 +149,7 @@ class RSqliteCurd {
         return true;
       }
 
-      // 其他
-      dLog(() => 'unkown currentStatus: ', () => currentStatus);
-      return false;
+      throw 'unkown currentCurdStatus: $currentCurdStatus';
     } catch (e) {
       dLog(() => 'update err: ', () => e);
       return false;
@@ -142,8 +157,7 @@ class RSqliteCurd {
   }
 
   /// 对 [model] 的 [insert] 操作。
-  /// - [model]：将被插入的 [model]
-  Future<bool> insert(MBase model) async {
+  Future<bool> insert() async {
     // TODO: 检查模型是否已存在，根据 atid 和 uuid 来检查
 
     try {
@@ -175,7 +189,24 @@ class RSqliteCurd {
 
   /// 对 [model] 的 [delete] 操作。
   /// - [model]：将被删除的 [model]
-  Future<bool> delete() async {}
+  Future<bool> delete() async {
+    // TODO: 检查该 model 是否存在
+
+    await findFromUploadModel();
+
+    // final Future<void> Function() toDelete = () async {};
+
+    if (currentCurdStatus == CurdStatus.C) {
+      final Batch batch = db.batch();
+      // 删除本体
+      batch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+      // 删除本体对应的 MUpload
+      batch.delete(MUpload.getTableName, where: '${MUpload.row_id} = ?', whereArgs: <Object?>[model.get_id]);
+      // 删除外键为本体且 isDeleteFatherFollowChild = true 的 row
+
+      // 删除本体的外键且 isDeleteChildFollowFather = true 的 row
+    }
+  }
 
   ///
 }

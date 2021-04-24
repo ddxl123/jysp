@@ -98,11 +98,11 @@ class RPoolNode {
 
       final Batch batch = db.batch();
       // 插入 new node
-      batch.insert(model.getCurrentTableName, model.getRowSqlite);
+      batch.insert(model.getCurrentTableName, model.getRowJson);
       // 插入 upload
       batch.insert(
         MUpload.getTableName,
-        MUpload.toSqliteMapNoId(
+        MUpload.asJsonNoId(
           atid_v: null,
           uuid_v: null,
           table_name_v: model.getCurrentTableName,

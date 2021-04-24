@@ -49,16 +49,28 @@ class MPnRulePoolNode implements MBase{
     return allRowModels;
   }
 
-  /// 值只有 int String bool null 类型，没有枚举类型，而是枚举的 int 值
-  final Map<String, Object?> _rowJson = <String, Object?>{};
+  @override
+  Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, Object?> get getRowJson=> _rowJson;
+  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+
+  @override
+  List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
+
+  @override
+  List<String> get getDeleteFatherFollowChilds => _deleteFatherFollowChilds;
+
+  final Map<String, Object?> _rowJson = <String, Object?>{};
+
+  final Map<String, String?> _foreignKeyTables = <String, String?>{};
+
+  final List<String> _deleteChildFollowFathers = <String>[];
+
+  final List<String> _deleteFatherFollowChilds =<String>[];
 
   @override
   String get getCurrentTableName => getTableName;
-
-
 
 @override int? get get_id => _rowJson[id] as int?;@override int? get get_atid => _rowJson[atid] as int?;@override String? get get_uuid => _rowJson[uuid] as String?; RulePoolNodeType? get get_type => _rowJson[type] == null ? null : RulePoolNodeType.values[_rowJson[type]! as int]; String? get get_name => _rowJson[name] as String?; String? get get_position => _rowJson[position] as String?;@override int? get get_created_at => _rowJson[created_at] as int?;@override int? get get_updated_at => _rowJson[updated_at] as int?;
 }
