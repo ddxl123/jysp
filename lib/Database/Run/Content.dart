@@ -126,26 +126,32 @@ ${fieldNameQuickCall(fields)}
     return <String, Object?>{${asModelNoId(fields)}};
   }
 
-  static Future<List<Map<String, Object?>>> getAllRowsAsJson() async {
-    return await db.query(getTableName);
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons([int? byId]) async {
+    if (byId == null) {
+      return await db.query(getTableName);
+    } else {
+      return await db.query(getTableName, where: 'id = ?', whereArgs: <int>[byId]);
+    }
   }
 
-  static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> getAllRowsAsModel() async {
-    final List<Map<String, Object?>> allRows = await getAllRowsAsJson();
-    final List<M${toCamelCaseWillRemoveS(tableNameWithS)}> allRowModels = <M${toCamelCaseWillRemoveS(tableNameWithS)}>[];
-    for (final Map<String, Object?> row in allRows) {
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> queryRowsAsModels([int? byId]) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(byId);
+    final List<M${toCamelCaseWillRemoveS(tableNameWithS)}> rowModels = <M${toCamelCaseWillRemoveS(tableNameWithS)}>[];
+    for (final Map<String, Object?> row in rows) {
         final M${toCamelCaseWillRemoveS(tableNameWithS)} newRowModel = M${toCamelCaseWillRemoveS(tableNameWithS)}();
         newRowModel._rowJson.addAll(row);
-        allRowModels.add(newRowModel);
+        rowModels.add(newRowModel);
     }
-    return allRowModels;
+    return rowModels;
   }
 
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+  Map<String, String?> get getForeignKeyTableNames => _foreignKeyTableNames;
 
   @override
   List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
@@ -155,7 +161,7 @@ ${fieldNameQuickCall(fields)}
 
   final Map<String, Object?> _rowJson = <String, Object?>{};
 
-  final Map<String, String?> _foreignKeyTables = <String, String?>${foreignKeyTableNames[tableNameWithS] == null ? '{}' : const JsonEncoder.withIndent('  ').convert(foreignKeyTableNames[tableNameWithS]).replaceAll(RegExp(r'"'), '\'')};
+  final Map<String, String?> _foreignKeyTableNames = <String, String?>${foreignKeyTableNames[tableNameWithS] == null ? '{}' : const JsonEncoder.withIndent('  ').convert(foreignKeyTableNames[tableNameWithS]).replaceAll(RegExp(r'"'), '\'')};
 
   final List<String> _deleteChildFollowFathers = <String>${deleteChildFollowFathers[tableNameWithS] == null ? '[]' : '[' + deleteChildFollowFathers[tableNameWithS]!.join(',') + ',]'};
 
@@ -176,4 +182,69 @@ class ParseIntoSqls {
   Map<String, String> parseIntoSqls = <String, String>${const JsonEncoder.withIndent('  ').convert(rawSqls).replaceAll(RegExp(r'"'), '\'')};
 }
 """;
+}
+
+/// MBase
+String baseModelContent() {
+  String importContent = '';
+  String queryByTableNameAsModelsContent = '';
+  String queryByTableNameAsJsonsContent = '';
+  for (int i = 0; i < modelFields.keys.length; i++) {
+    importContent += """import 'package:jysp/Database/Models/M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.dart';""";
+    queryByTableNameAsModelsContent += """
+        case '${modelFields.keys.elementAt(i)}':
+        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsModels(byId);""";
+    queryByTableNameAsJsonsContent += """
+        case '${modelFields.keys.elementAt(i)}':
+        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsJsons(byId);""";
+  }
+
+  return """
+// ignore_for_file: non_constant_identifier_names
+$importContent
+
+abstract class MBase {
+  ///
+
+  /// 值只有 int String bool null 类型，没有枚举类型（而是枚举的 int 值）
+  Map<String, Object?> get getRowJson;
+
+  /// 外键对应的表。key: 外键名；value: 对应的表名
+  Map<String, String?> get getForeignKeyTableNames;
+
+  /// 当删除当前 row 时，需要同时删除对应 row 的外键名
+  List<String> get getDeleteChildFollowFathers;
+
+  /// 当删除外键时，需要同时删除当前 row 的外键名
+  List<String> get getDeleteFatherFollowChilds;
+
+  String get getCurrentTableName;
+  int? get get_id;
+  int? get get_atid;
+  String? get get_uuid;
+  int? get get_updated_at;
+  int? get get_created_at;
+
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<MBase>> queryByTableNameAsModels(String tableName, [int? byId]) async {
+    switch (tableName) {
+      $queryByTableNameAsModelsContent
+      default:
+        throw 'tableName is unknown';
+    }
+  }
+
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<Map<String, Object?>>> queryByTableNameAsJsons(String tableName, [int? byId]) async {
+    switch (tableName) {
+      $queryByTableNameAsJsonsContent
+      default:
+        throw 'tableName is unknown';
+    }
+  }
+
+  ///
+}
+
+  """;
 }

@@ -6,14 +6,16 @@ import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Sqlite 专属表（没有对应可匹配的 mysql 表）不可用当前类
-class RSqliteCurd {
+///
+/// T MBase 类型
+class RSqliteCurd<T> {
   ///
 
   /// [model]：被 CURD 的 [model]。
-  RSqliteCurd(this.model);
+  RSqliteCurd.byModel(this.model);
 
   /// 需要 CURD 的 [model]。
-  late MBase model;
+  MBase model;
 
   /// 为 R 时代表 [MUpload] 表中不存在当前 [model]。
   late CurdStatus currentCurdStatus;
@@ -24,9 +26,10 @@ class RSqliteCurd {
   /// 当前 [model] 的上传状态。
   late UploadStatus currentUploadStatus;
 
-  /// 从 [MUpload] 中查询当前 [model]。
-  Future<void> findFromUploadModel() async {
+  /// 从 [MUpload] 中查询当前 [row]。
+  Future<void> findRowFromUpload() async {
     try {
+      // 通过 MUpload 的 row_id 进行 find
       final List<Map<String, Object?>> uploadResult = await db.query(
         MUpload.getTableName,
         where: '${MUpload.row_id} = ?',
@@ -72,7 +75,7 @@ class RSqliteCurd {
     try {
       // TODO: 检查该 model 是否仍然存在
 
-      await findFromUploadModel();
+      await findRowFromUpload();
 
       if (currentUploadStatus == UploadStatus.uploading) {
         // TODO: 需要先重新进行上传后才能继续
@@ -200,11 +203,13 @@ class RSqliteCurd {
       final Batch batch = db.batch();
       // 删除本体
       batch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+
       // 删除本体对应的 MUpload
       batch.delete(MUpload.getTableName, where: '${MUpload.row_id} = ?', whereArgs: <Object?>[model.get_id]);
-      // 删除外键为本体且 isDeleteFatherFollowChild = true 的 row
 
-      // 删除本体的外键且 isDeleteChildFollowFather = true 的 row
+      // 删除需要删除外键为本体的 row
+
+      // 删除需要删除本体的外键的 row
     }
   }
 

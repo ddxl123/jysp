@@ -38,26 +38,32 @@ class MUpload implements MBase{
     return <String, Object?>{atid:json[atid],uuid:json[uuid],table_name:json[table_name],row_id:json[row_id],row_atid:json[row_atid],row_uuid:json[row_uuid],updated_columns:json[updated_columns],curd_status:json[curd_status] == null ? null : CurdStatus.values[json[curd_status]! as int],upload_status:json[upload_status] == null ? null : UploadStatus.values[json[upload_status]! as int],created_at:json[created_at],updated_at:json[updated_at],};
   }
 
-  static Future<List<Map<String, Object?>>> getAllRowsAsJson() async {
-    return await db.query(getTableName);
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons([int? byId]) async {
+    if (byId == null) {
+      return await db.query(getTableName);
+    } else {
+      return await db.query(getTableName, where: 'id = ?', whereArgs: <int>[byId]);
+    }
   }
 
-  static Future<List<MUpload>> getAllRowsAsModel() async {
-    final List<Map<String, Object?>> allRows = await getAllRowsAsJson();
-    final List<MUpload> allRowModels = <MUpload>[];
-    for (final Map<String, Object?> row in allRows) {
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<MUpload>> queryRowsAsModels([int? byId]) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(byId);
+    final List<MUpload> rowModels = <MUpload>[];
+    for (final Map<String, Object?> row in rows) {
         final MUpload newRowModel = MUpload();
         newRowModel._rowJson.addAll(row);
-        allRowModels.add(newRowModel);
+        rowModels.add(newRowModel);
     }
-    return allRowModels;
+    return rowModels;
   }
 
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+  Map<String, String?> get getForeignKeyTableNames => _foreignKeyTableNames;
 
   @override
   List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
@@ -67,7 +73,7 @@ class MUpload implements MBase{
 
   final Map<String, Object?> _rowJson = <String, Object?>{};
 
-  final Map<String, String?> _foreignKeyTables = <String, String?>{
+  final Map<String, String?> _foreignKeyTableNames = <String, String?>{
   'row_id': null,
   'row_atid': null,
   'row_uuid': null

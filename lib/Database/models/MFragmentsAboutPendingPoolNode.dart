@@ -38,26 +38,32 @@ class MFragmentsAboutPendingPoolNode implements MBase{
     return <String, Object?>{atid:json[atid],uuid:json[uuid],raw_fragment_atid:json[raw_fragment_atid],raw_fragment_uuid:json[raw_fragment_uuid],pn_pending_pool_node_atid:json[pn_pending_pool_node_atid],pn_pending_pool_node_uuid:json[pn_pending_pool_node_uuid],recommend_raw_rule_atid:json[recommend_raw_rule_atid],recommend_raw_rule_uuid:json[recommend_raw_rule_uuid],title:json[title],created_at:json[created_at],updated_at:json[updated_at],};
   }
 
-  static Future<List<Map<String, Object?>>> getAllRowsAsJson() async {
-    return await db.query(getTableName);
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons([int? byId]) async {
+    if (byId == null) {
+      return await db.query(getTableName);
+    } else {
+      return await db.query(getTableName, where: 'id = ?', whereArgs: <int>[byId]);
+    }
   }
 
-  static Future<List<MFragmentsAboutPendingPoolNode>> getAllRowsAsModel() async {
-    final List<Map<String, Object?>> allRows = await getAllRowsAsJson();
-    final List<MFragmentsAboutPendingPoolNode> allRowModels = <MFragmentsAboutPendingPoolNode>[];
-    for (final Map<String, Object?> row in allRows) {
+  /// 若 [byId] 为 null，则 query 的是全部 row。
+  static Future<List<MFragmentsAboutPendingPoolNode>> queryRowsAsModels([int? byId]) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(byId);
+    final List<MFragmentsAboutPendingPoolNode> rowModels = <MFragmentsAboutPendingPoolNode>[];
+    for (final Map<String, Object?> row in rows) {
         final MFragmentsAboutPendingPoolNode newRowModel = MFragmentsAboutPendingPoolNode();
         newRowModel._rowJson.addAll(row);
-        allRowModels.add(newRowModel);
+        rowModels.add(newRowModel);
     }
-    return allRowModels;
+    return rowModels;
   }
 
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
   @override
-  Map<String, String?> get getForeignKeyTables => _foreignKeyTables;
+  Map<String, String?> get getForeignKeyTableNames => _foreignKeyTableNames;
 
   @override
   List<String> get getDeleteChildFollowFathers => _deleteChildFollowFathers;
@@ -67,7 +73,7 @@ class MFragmentsAboutPendingPoolNode implements MBase{
 
   final Map<String, Object?> _rowJson = <String, Object?>{};
 
-  final Map<String, String?> _foreignKeyTables = <String, String?>{
+  final Map<String, String?> _foreignKeyTableNames = <String, String?>{
   'raw_fragment_atid': null,
   'raw_fragment_uuid': null,
   'pn_pending_pool_node_atid': 'pn_pending_pool_nodes',

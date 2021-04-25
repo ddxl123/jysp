@@ -27,16 +27,16 @@ class RPoolNode {
               return await fragmentPoolController.poolTypeSwitchFuture<List<MBase>>(
                 toPoolType: toPoolType,
                 pendingPoolCB: () async {
-                  return await MPnPendingPoolNode.getAllRowsAsModel();
+                  return await MPnPendingPoolNode.queryRowsAsModels();
                 },
                 memoryPoolCB: () async {
-                  return await MPnMemoryPoolNode.getAllRowsAsModel();
+                  return await MPnMemoryPoolNode.queryRowsAsModels();
                 },
                 completePoolCB: () async {
-                  return await MPnCompletePoolNode.getAllRowsAsModel();
+                  return await MPnCompletePoolNode.queryRowsAsModels();
                 },
                 rulePoolCB: () async {
-                  return await MPnRulePoolNode.getAllRowsAsModel();
+                  return await MPnRulePoolNode.queryRowsAsModels();
                 },
               );
             }(),

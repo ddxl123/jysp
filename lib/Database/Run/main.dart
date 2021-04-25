@@ -44,24 +44,24 @@ List<String> dartType = <String>['String', 'int'];
 /// 全局枚举。eg. ["enum ABC {a,b,c}"]
 List<String> globalEnum = <String>[];
 
-/// 模型名称、字段。eg. {"user_table":{"field1":[SqliteType.TEXT,"int"]}}
+/// 模型名称、字段。eg. {"table_name":{"field1":[SqliteType.TEXT,"int"]}}
 Map<String, Map<String, List<Object>>> modelFields = <String, Map<String, List<Object>>>{};
 
-/// 模型外键对应的表。{"model_name":{"foreign_key":"table_name"}}
+/// 模型外键对应的表。{"table_name":{"foreign_key":"table_name"}}
 Map<String, Map<String, String?>> foreignKeyTableNames = <String, Map<String, String?>>{};
 
 /// 当删除当前 row 时，需要同时删除对应 row 的外键名
-/// - eg.{"user_table":["foreign_key1","foreign_key2"]}
+/// - eg.{"table_name":["foreign_key1","foreign_key2"]}
 Map<String, List<String>> deleteChildFollowFathers = <String, List<String>>{};
 
 /// 当删除外键时，需要同时删除当前 row 的外键名
-/// - eg.{"user_table":["foreign_key1","foreign_key2"]}
+/// - eg.{"table_name":["foreign_key1","foreign_key2"]}
 Map<String, List<String>> deleteFatherFollowChilds = <String, List<String>>{};
 
-/// 模型对应的额外枚举内容。eg. {"user_table":"enum ABC {a,b,c}"}
+/// 模型对应的额外枚举内容。eg. {"table_name":"enum ABC {a,b,c}"}
 Map<String, String?> extraEnumContents = <String, String?>{};
 
-/// 模型是否需要全局枚举内容。eg. {"user_table":true}
+/// 模型是否需要全局枚举内容。eg. {"table_name":true}
 Map<String, bool> extraGlobalEnumContents = <String, bool>{};
 
 Future<void> main(List<String> args) async {
@@ -69,6 +69,7 @@ Future<void> main(List<String> args) async {
   await runWriteModels();
   await runParseIntoSqls();
   await runWriteGlobalEnum();
+  await runWriteMBase();
 }
 
 Future<void> runWriteModels() async {
@@ -112,4 +113,9 @@ Future<void> runWriteGlobalEnum() async {
   }
   await File('lib/Database/Models/GlobalEnum.dart').writeAsString(globalEnumString);
   print("'GlobalEnum' file is created successfully!");
+}
+
+Future<void> runWriteMBase() async {
+  await File('lib/Database/Base/MBase.dart').writeAsString(baseModelContent());
+  print("'MBase' file is created successfully!");
 }

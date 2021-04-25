@@ -3,8 +3,6 @@
 import 'package:jysp/Database/Run/Create.dart';
 import 'package:jysp/Database/Run/main.dart';
 
-bool isCoverFile = true;
-
 // ignore: avoid_classes_with_only_static_members
 class TableNames {
   static String version_infos = 'version_infos';
@@ -265,7 +263,7 @@ void f_fragments_about_memory_pool_nodes() {
         x_id_integer('using_raw_rule_atid', TableNames.rules, isDeleteChildFollowFather: false, isDeleteFatherFollowChild: false),
         x_id_text('using_raw_rule_uuid', TableNames.rules, isDeleteChildFollowFather: false, isDeleteFatherFollowChild: false),
         x_id_integer('pn_memory_pool_node_atid', TableNames.pn_memory_pool_nodes, isDeleteChildFollowFather: false, isDeleteFatherFollowChild: true),
-        x_id_integer('pn_memory_pool_node_uuid', TableNames.pn_memory_pool_nodes, isDeleteChildFollowFather: false, isDeleteFatherFollowChild: true),
+        x_id_text('pn_memory_pool_node_uuid', TableNames.pn_memory_pool_nodes, isDeleteChildFollowFather: false, isDeleteFatherFollowChild: true),
       ];
     },
   );
