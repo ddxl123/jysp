@@ -90,7 +90,7 @@ class InitDownloadController extends ChangeNotifier {
         batch.insert(
           MDownloadModule.getTableName,
           MDownloadModule.asJsonNoId(
-            atid_v: null,
+            aiid_v: null,
             uuid_v: null,
             module_name_v: baseDownloadModule.moduleName,
             download_status_v: baseDownloadModule.sqliteDownloadStatus,
@@ -133,7 +133,7 @@ class InitDownloadController extends ChangeNotifier {
         batch.insert(
           MDownloadModule.getTableName,
           MDownloadModule.asJsonNoId(
-            atid_v: null,
+            aiid_v: null,
             uuid_v: null,
             module_name_v: baseDownloadModule.moduleName,
             download_status_v: baseDownloadModule.sqliteDownloadStatus,

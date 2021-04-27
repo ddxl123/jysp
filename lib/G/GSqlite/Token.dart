@@ -57,7 +57,7 @@ class Token {
           await txn.insert(
             MToken.getTableName,
             MToken.asJsonNoId(
-              atid_v: null,
+              aiid_v: null,
               uuid_v: null,
               access_token_v: tokens[MToken.access_token],
               refresh_token_v: tokens[MToken.refresh_token],

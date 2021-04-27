@@ -1,5 +1,5 @@
-import 'package:jysp/Database/Base/MBase.dart';
-import 'package:jysp/Database/Models/GlobalEnum.dart';
+import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/Database/Models/MGlobalEnum.dart';
 import 'package:jysp/Database/Models/MUpload.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -99,11 +99,11 @@ class RSqliteCurd<T> {
             batch.insert(
               MUpload.getTableName,
               MUpload.asJsonNoId(
-                atid_v: null,
+                aiid_v: null,
                 uuid_v: null,
                 table_name_v: model.getCurrentTableName,
                 row_id_v: model.get_id,
-                row_atid_v: model.get_atid,
+                row_aiid_v: model.get_aiid,
                 row_uuid_v: model.get_uuid,
                 updated_columns_v: allUpdatedColumns,
                 curd_status_v: CurdStatus.U,
@@ -161,7 +161,7 @@ class RSqliteCurd<T> {
 
   /// 对 [model] 的 [insert] 操作。
   Future<bool> insert() async {
-    // TODO: 检查模型是否已存在，根据 atid 和 uuid 来检查
+    // TODO: 检查模型是否已存在，根据 aiid 和 uuid 来检查
 
     try {
       final Batch batch = db.batch();
@@ -169,11 +169,11 @@ class RSqliteCurd<T> {
       batch.insert(
         MUpload.getTableName,
         MUpload.asJsonNoId(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: null,
           table_name_v: model.getCurrentTableName,
           row_id_v: model.get_id,
-          row_atid_v: model.get_atid,
+          row_aiid_v: model.get_aiid,
           row_uuid_v: model.get_uuid,
           updated_columns_v: null,
           curd_status_v: CurdStatus.C,
@@ -195,7 +195,7 @@ class RSqliteCurd<T> {
   Future<bool> delete() async {
     // TODO: 检查该 model 是否存在
 
-    await findFromUploadModel();
+    await findRowFromUpload();
 
     // final Future<void> Function() toDelete = () async {};
 
@@ -207,9 +207,22 @@ class RSqliteCurd<T> {
       // 删除本体对应的 MUpload
       batch.delete(MUpload.getTableName, where: '${MUpload.row_id} = ?', whereArgs: <Object?>[model.get_id]);
 
-      // 删除需要删除外键为本体的 row
+      // 删除需要删除【外键为本体】的表的 row
 
-      // 删除需要删除本体的外键的 row
+      // 删除需要删除【本体的外键】的 row
+      for (int i = 0; i < model.getDeleteChildFollowFatherKeysForSingle.length; i++) {
+        final String foreignKeyName = model.getDeleteChildFollowFatherKeysForSingle.elementAt(i);
+        final int foreignKeyValue = model.getRowJson[foreignKeyName] as int;
+        final String? foreignKeyTableName = model.getForeignKeyTableNames(foreignKeyName: foreignKeyName);
+        if (foreignKeyTableName == null) {
+          throw 'foreignKeyTableName is null';
+        }
+        MBase.queryByTableNameAsModels(
+          tableName: foreignKeyTableName,
+          where: 'id = ?',
+          whereArgs: <int>[],
+        );
+      }
     }
   }
 

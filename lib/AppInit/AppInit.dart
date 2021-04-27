@@ -1,6 +1,6 @@
 import 'package:jysp/AppInit/AppVersionManager.dart';
 import 'package:jysp/Database/Models/MVersionInfo.dart';
-import 'package:jysp/Database/Models/ParseIntoSqls.dart';
+import 'package:jysp/Database/Models/MParseIntoSqls.dart';
 import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
@@ -37,7 +37,7 @@ class AppInit {
 
   Future<Object> _sqliteInit() async {
     // 解析全部需要的表的 Sql 语句
-    final Map<String, String> sqls = ParseIntoSqls().parseIntoSqls;
+    final Map<String, String> sqls = MParseIntoSqls().parseIntoSqls;
 
     // 打开数据库
     await openDb();
@@ -63,7 +63,7 @@ class AppInit {
     await db.insert(
       MVersionInfo.getTableName,
       MVersionInfo.asJsonNoId(
-        atid_v: null,
+        aiid_v: null,
         uuid_v: null,
         saved_version_v: await AppVersionManager().getCurrentAppVersion(),
         created_at_v: DateTime.now().millisecondsSinceEpoch,

@@ -40,7 +40,7 @@ class RInitDownload {
             await db.insert(
               MUser.getTableName,
               MUser.asJsonNoId(
-                atid_v: data['id'] as int?,
+                aiid_v: data['id'] as int?,
                 uuid_v: null,
                 username_v: data[MUser.username] as String?,
                 email_v: data[MUser.email] as String?,
@@ -83,9 +83,9 @@ class RInitDownload {
                 await db.insert(
                   MPnPendingPoolNode.getTableName,
                   MPnPendingPoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    recommend_raw_rule_atid_v: element[MPnPendingPoolNode.recommend_raw_rule_atid] as int?,
+                    recommend_raw_rule_aiid_v: element[MPnPendingPoolNode.recommend_raw_rule_aiid] as int?,
                     recommend_raw_rule_uuid_v: null,
                     type_v: element[MPnPendingPoolNode.type] == null ? null : PendingPoolNodeType.values[element[MPnPendingPoolNode.type] as int],
                     name_v: element[MPnPendingPoolNode.name] as String?,
@@ -132,9 +132,9 @@ class RInitDownload {
                 await db.insert(
                   MPnMemoryPoolNode.getTableName,
                   MPnMemoryPoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    using_raw_rule_atid_v: element[MPnMemoryPoolNode.using_raw_rule_atid] as int?,
+                    using_raw_rule_aiid_v: element[MPnMemoryPoolNode.using_raw_rule_aiid] as int?,
                     using_raw_rule_uuid_v: null,
                     type_v: element[MPnMemoryPoolNode.type] == null ? null : MemoryPoolNodeType.values[element[MPnMemoryPoolNode.type] as int],
                     name_v: element[MPnMemoryPoolNode.name] as String?,
@@ -181,9 +181,9 @@ class RInitDownload {
                 await db.insert(
                   MPnCompletePoolNode.getTableName,
                   MPnCompletePoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    used_raw_rule_atid_v: element[MPnCompletePoolNode.used_raw_rule_atid] as int?,
+                    used_raw_rule_aiid_v: element[MPnCompletePoolNode.used_raw_rule_aiid] as int?,
                     used_raw_rule_uuid_v: null,
                     type_v: element[MPnCompletePoolNode.type] == null ? null : CompletePoolNodeType.values[element[MPnCompletePoolNode.type] as int],
                     name_v: element[MPnCompletePoolNode.name] as String?,
@@ -230,7 +230,7 @@ class RInitDownload {
                 await db.insert(
                   MPnRulePoolNode.getTableName,
                   MPnRulePoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
                     type_v: element[MPnRulePoolNode.type] == null ? null : RulePoolNodeType.values[element[MPnRulePoolNode.type] as int],
                     name_v: element[MPnRulePoolNode.name] as String?,
@@ -277,13 +277,13 @@ class RInitDownload {
                 await db.insert(
                   MFragmentsAboutPendingPoolNode.getTableName,
                   MFragmentsAboutPendingPoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    raw_fragment_atid_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['id'] as int?,
+                    raw_fragment_aiid_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['id'] as int?,
                     raw_fragment_uuid_v: null,
-                    pn_pending_pool_node_atid_v: element[MFragmentsAboutPendingPoolNode.pn_pending_pool_node_atid] as int?,
+                    pn_pending_pool_node_aiid_v: element[MFragmentsAboutPendingPoolNode.pn_pending_pool_node_aiid] as int?,
                     pn_pending_pool_node_uuid_v: null,
-                    recommend_raw_rule_atid_v: element[MFragmentsAboutPendingPoolNode.recommend_raw_rule_atid] as int?,
+                    recommend_raw_rule_aiid_v: element[MFragmentsAboutPendingPoolNode.recommend_raw_rule_aiid] as int?,
                     recommend_raw_rule_uuid_v: null,
                     title_v: element['belongs_to_raw_fragment'] == null ? null : element['belongs_to_raw_fragment']['title'] as String?,
                     created_at_v: element[MFragmentsAboutPendingPoolNode.created_at] as int?,
@@ -327,13 +327,13 @@ class RInitDownload {
                 await db.insert(
                   MFragmentsAboutMemoryPoolNode.getTableName,
                   MFragmentsAboutMemoryPoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    fragments_about_pending_pool_node_atid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
+                    fragments_about_pending_pool_node_aiid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
                     fragments_about_pending_pool_node_uuid_v: null,
-                    using_raw_rule_atid_v: element[MFragmentsAboutMemoryPoolNode.using_raw_rule_atid] as int?,
+                    using_raw_rule_aiid_v: element[MFragmentsAboutMemoryPoolNode.using_raw_rule_aiid] as int?,
                     using_raw_rule_uuid_v: null,
-                    pn_memory_pool_node_atid_v: element[MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_atid] as int?,
+                    pn_memory_pool_node_aiid_v: element[MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_aiid] as int?,
                     pn_memory_pool_node_uuid_v: null,
                     created_at_v: element[MFragmentsAboutMemoryPoolNode.created_at] as int?,
                     updated_at_v: element[MFragmentsAboutMemoryPoolNode.updated_at] as int?,
@@ -377,13 +377,13 @@ class RInitDownload {
                 await db.insert(
                   MFragmentsAboutCompletePoolNode.getTableName,
                   MFragmentsAboutCompletePoolNode.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    fragments_about_pending_pool_node_atid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
+                    fragments_about_pending_pool_node_aiid_v: element['fragment_owner_about_pending_pool_node_id'] as int?,
                     fragments_about_pending_pool_node_uuid_v: null,
-                    used_raw_rule_atid_v: element[MFragmentsAboutCompletePoolNode.used_raw_rule_atid] as int?,
+                    used_raw_rule_aiid_v: element[MFragmentsAboutCompletePoolNode.used_raw_rule_aiid] as int?,
                     used_raw_rule_uuid_v: null,
-                    pn_complete_pool_node_atid_v: element[MFragmentsAboutCompletePoolNode.pn_complete_pool_node_atid] as int?,
+                    pn_complete_pool_node_aiid_v: element[MFragmentsAboutCompletePoolNode.pn_complete_pool_node_aiid] as int?,
                     pn_complete_pool_node_uuid_v: null,
                     created_at_v: element[MPnCompletePoolNode.created_at] as int?,
                     updated_at_v: element[MPnCompletePoolNode.updated_at] as int?,
@@ -427,11 +427,11 @@ class RInitDownload {
                 await db.insert(
                   MRule.getTableName,
                   MRule.asJsonNoId(
-                    atid_v: element['id'] as int?,
+                    aiid_v: element['id'] as int?,
                     uuid_v: null,
-                    raw_rule_atid_v: element['belongs_to_raw_rule'] == null ? null : element['belongs_to_raw_rule']['id'] as int?,
+                    raw_rule_aiid_v: element['belongs_to_raw_rule'] == null ? null : element['belongs_to_raw_rule']['id'] as int?,
                     raw_rule_uuid_v: null,
-                    pn_rule_pool_node_atid_v: element[MRule.pn_rule_pool_node_atid] as int?,
+                    pn_rule_pool_node_aiid_v: element[MRule.pn_rule_pool_node_aiid] as int?,
                     pn_rule_pool_node_uuid_v: null,
                     created_at_v: element[MRule.created_at] as int?,
                     updated_at_v: element[MRule.updated_at] as int?,

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/Base/MBase.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
@@ -53,9 +53,9 @@ class RPoolNode {
     try {
       final MBase model = fragmentPoolController.poolTypeSwitch<MBase>(
         pendingPoolCB: () => MPnPendingPoolNode.createModel(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: const Uuid().v4(),
-          recommend_raw_rule_atid_v: null,
+          recommend_raw_rule_aiid_v: null,
           recommend_raw_rule_uuid_v: null,
           type_v: PendingPoolNodeType.ordinary,
           name_v: name,
@@ -64,9 +64,9 @@ class RPoolNode {
           updated_at_v: DateTime.now().millisecondsSinceEpoch,
         ),
         memoryPoolCB: () => MPnMemoryPoolNode.createModel(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: const Uuid().v4(),
-          using_raw_rule_atid_v: null,
+          using_raw_rule_aiid_v: null,
           using_raw_rule_uuid_v: null,
           type_v: MemoryPoolNodeType.ordinary,
           name_v: name,
@@ -75,9 +75,9 @@ class RPoolNode {
           updated_at_v: DateTime.now().millisecondsSinceEpoch,
         ),
         completePoolCB: () => MPnCompletePoolNode.createModel(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: const Uuid().v4(),
-          used_raw_rule_atid_v: null,
+          used_raw_rule_aiid_v: null,
           used_raw_rule_uuid_v: null,
           type_v: CompletePoolNodeType.ordinary,
           name_v: name,
@@ -86,7 +86,7 @@ class RPoolNode {
           updated_at_v: DateTime.now().millisecondsSinceEpoch,
         ),
         rulePoolCB: () => MPnRulePoolNode.createModel(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: const Uuid().v4(),
           type_v: RulePoolNodeType.ordinary,
           name_v: name,
@@ -103,10 +103,10 @@ class RPoolNode {
       batch.insert(
         MUpload.getTableName,
         MUpload.asJsonNoId(
-          atid_v: null,
+          aiid_v: null,
           uuid_v: null,
           table_name_v: model.getCurrentTableName,
-          row_atid_v: null,
+          row_aiid_v: null,
           row_uuid_v: const Uuid().v4(),
           upload_status_v: UploadStatus.notUploaded,
           created_at_v: DateTime.now().millisecondsSinceEpoch,
@@ -131,7 +131,7 @@ class RPoolNode {
     try {
       // 如果是 create 的话，直接覆盖原来状态
       if (model.get_curd_status == Curd.C) {}
-      if (model.get_atid != null && model.get_uuid == null) {}
+      if (model.get_aiid != null && model.get_uuid == null) {}
       await db.delete(model.getCurrentTableName, where: 'id=?', whereArgs: [model.get_id]);
     } catch (e) {
       dLog(() => 'deleteNode err: ', () => e);
