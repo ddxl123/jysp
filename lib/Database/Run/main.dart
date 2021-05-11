@@ -2,8 +2,8 @@
 
 import 'dart:io';
 
-import 'package:jysp/Database/run/Content.dart';
-import 'package:jysp/Database/run/ModelConfig.dart';
+import 'package:jysp/Database/Run/Content.dart';
+import 'package:jysp/Database/Run/ModelConfig.dart';
 
 enum SqliteType {
   // Sqlite 类型
@@ -66,27 +66,6 @@ List<String> globalEnum = <String>[];
 /// 模型名称、字段。eg. {"table_name":{"field1":[SqliteType.TEXT,"int"]}}
 Map<String, Map<String, List<Object>>> modelFields = <String, Map<String, List<Object>>>{};
 
-/// 模型外键对应的表。{"table_name":{"foreign_key":"table_name.row_name"}}
-Map<String, Map<String, String?>> foreignKeyBelongsTo = <String, Map<String, String?>>{};
-
-/// 当删除当前 row 时，需要同时删除对应外键的 row 的外键名
-///
-/// xx_aiid 和 xx_uuid 会合并成 xx
-///
-/// eg.{"table_name":{"foreign_key1","foreign_key2"}}
-Map<String, Set<String>> deleteChildFollowFatherKeysForTwo = <String, Set<String>>{};
-
-/// 当删除当前 row 时，需要同时删除对应外键的 row 的外键名
-///
-/// 只有 xx_id 而没有 xx_aiid 和 xx_uuid
-///
-/// eg.{"table_name":{"foreign_key1","foreign_key2"}}
-Map<String, Set<String>> deleteChildFollowFatherKeysForSingle = <String, Set<String>>{};
-
-/// 当删除外键时，需要同时删除当前 row 的外键名
-/// - eg.{"table_name":["foreign_key1","foreign_key2"]}
-Map<String, List<String>> deleteFatherFollowChildKeys = <String, List<String>>{};
-
 /// 模型对应的额外枚举内容。eg. {"table_name":"enum ABC {a,b,c}"}
 ///
 /// 值不能为 []，要么是 null 要么元素至少一个
@@ -97,13 +76,100 @@ Map<String, bool> extraGlobalEnumContents = <String, bool>{};
 
 String modelsPath = 'lib/Database/Models';
 
+// ===============================================================================
+// ===============================================================================
+
+/// 模型外键对应的 table_name 和 Column_name。{"table_name":{"foreign_key":"table_name.Column_name"}}
+Map<String, Map<String, String?>> foreignKeyBelongsTos = <String, Map<String, String?>>{};
+
+/// 当删除当前 row 时，需要同时删除对应外键的 row 的外键名
+///
+/// xx_aiid 和 xx_uuid 会合并成 xx
+///
+/// eg.{"table_name":{"foreign_key1","foreign_key2"}}
+Map<String, Set<String>> deleteForeignKeyFollowCurrentForTwo = <String, Set<String>>{};
+
+Map<String, Set<String>> deleteForeignKeyFollowCurrentForSingle = <String, Set<String>>{};
+
+// ===============================================================================
+
+/// 当删除当前 row 对应的外键的 row 时，需要同时删除当前 row 的键名
+///
+/// xx_aiid 和 xx_uuid 会合并成 xx
+///
+/// eg.{'table_name':{'foreign_key1','foreign_key2'}}
+Map<String, Set<String>> deleteCurrentFollowForeignKeyForTwo = <String, Set<String>>{};
+
+Map<String, Set<String>> deleteCurrentFollowForeignKeyForSingle = <String, Set<String>>{};
+
+/// [foreignKeyBelongsTos] 的反向 for Two
+///
+/// 含义：当前表被哪个表的哪个外键所关联
+///
+/// 中间的 xx_aiid 和 xx_uuid 会合并成 xx
+///
+/// 尾部的 aiid 和 uuid 会合并成 ''，xx_aiid 和 xx_uuid 会合并成 xx
+///
+/// eg. {'table_name':{'table_name1.Column_name1.'(尾缀是 aiid 和 uuid),'table_name2.Column_name2.yy'(尾缀是 xx_aiid 和 xx_uuid)}}
+Map<String, Set<String>> foreignKeyHaveManyForTwo = <String, Set<String>>{};
+
+/// eg. {'table_name':{'table_name1.Column_name1.the_key','table_name2.Column_name2.the_key'}}
+Map<String, Set<String>> foreignKeyHaveManyForSingle = <String, Set<String>>{};
+
+/// 仅保留【当前表被哪个表的哪个外键所关联】中的【当前表被删除时需同时删除其表】的 Column
+///
+/// eg. {'table_name':{'table_name1.Column_name1.'(尾缀是 aiid 和 uuid),'table_name2.Column_name2.yy'(尾缀是 xx_aiid 和 xx_uuid)}}
+Map<String, Set<String>> deleteManyForeignKeyForTwo = <String, Set<String>>{};
+
+/// eg. {'table_name':{'table_name1.Column_name1.the_key','table_name2.Column_name2.the_key'}}
+Map<String, Set<String>> deleteManyForeignKeyForSingle = <String, Set<String>>{};
+
+// ===============================================================================
+// ===============================================================================
+
 Future<void> main(List<String> args) async {
   await setPath();
   runCreateModels();
+  afterRunCreateModels();
   await runWriteModels();
   await runParseIntoSqls();
   await runWriteGlobalEnum();
   await runWriteMBase();
+}
+
+void afterRunCreateModels() {
+  for (int x = 0; x < foreignKeyHaveManyForTwo.values.length; x++) {
+    for (int y = 0; y < foreignKeyHaveManyForTwo.values.elementAt(x).length; y++) {
+      // 遍历 foreignKeyHaveManyForTwo 的 tableNameAndColumnName
+      final List<String> tableNameAndColumnName = foreignKeyHaveManyForTwo.values.elementAt(x).elementAt(y).split('.');
+      // 检查 deleteForeignKeyHaveManyForTwo 中是否存在
+      if (deleteCurrentFollowForeignKeyForTwo.containsKey(tableNameAndColumnName[0]) && deleteCurrentFollowForeignKeyForTwo[tableNameAndColumnName[0]]!.contains(tableNameAndColumnName[1])) {
+        // 存在的话 给 deleteCurrentFollowForeignKeyForTwo 添加
+        if (!deleteManyForeignKeyForTwo.containsKey(foreignKeyHaveManyForTwo.keys.elementAt(x))) {
+          deleteManyForeignKeyForTwo.addAll(<String, Set<String>>{foreignKeyHaveManyForTwo.keys.elementAt(x): <String>{}});
+        }
+        if (!deleteManyForeignKeyForTwo[foreignKeyHaveManyForTwo.keys.elementAt(x)]!.contains(foreignKeyHaveManyForTwo.values.elementAt(x).elementAt(y))) {
+          deleteManyForeignKeyForTwo[foreignKeyHaveManyForTwo.keys.elementAt(x)]!.add(foreignKeyHaveManyForTwo.values.elementAt(x).elementAt(y));
+        }
+      }
+    }
+  }
+  for (int x = 0; x < foreignKeyHaveManyForSingle.values.length; x++) {
+    for (int y = 0; y < foreignKeyHaveManyForSingle.values.elementAt(x).length; y++) {
+      // 遍历 foreignKeyHaveManyForTwo 的 tableNameAndColumnName
+      final List<String> tableNameAndColumnName = foreignKeyHaveManyForSingle.values.elementAt(x).elementAt(y).split('.');
+      // 检查 deleteForeignKeyHaveManyForTwo 中是否存在
+      if (deleteCurrentFollowForeignKeyForSingle.containsKey(tableNameAndColumnName[0]) && deleteCurrentFollowForeignKeyForSingle[tableNameAndColumnName[0]]!.contains(tableNameAndColumnName[1])) {
+        // 存在的话 给 deleteCurrentFollowForeignKeyForTwo 添加
+        if (!deleteManyForeignKeyForSingle.containsKey(foreignKeyHaveManyForSingle.keys.elementAt(x))) {
+          deleteManyForeignKeyForSingle.addAll(<String, Set<String>>{foreignKeyHaveManyForSingle.keys.elementAt(x): <String>{}});
+        }
+        if (!deleteManyForeignKeyForSingle[foreignKeyHaveManyForSingle.keys.elementAt(x)]!.contains(foreignKeyHaveManyForSingle.values.elementAt(x).elementAt(y))) {
+          deleteManyForeignKeyForSingle[foreignKeyHaveManyForSingle.keys.elementAt(x)]!.add(foreignKeyHaveManyForSingle.values.elementAt(x).elementAt(y));
+        }
+      }
+    }
+  }
 }
 
 Future<void> setPath() async {
@@ -113,7 +179,6 @@ Future<void> setPath() async {
       if (element.uri.pathSegments.last[0] != 'M') {
         throw 'Unknown file in Models folder: ${element.uri.pathSegments.last}';
       }
-      print(element.uri.pathSegments);
     });
   } else {
     await Directory(modelsPath).create();

@@ -55,37 +55,33 @@ class MFragmentsAboutCompletePoolNode implements MBase{
     return rowModels;
   }
 
+  // ====================================================================
+  // ====================================================================
+
+  @override
+  String? getForeignKeyBelongsTos({required String foreignKeyName}) => <String,String?>{fragments_about_pending_pool_node_aiid: 'fragments_about_pending_pool_nodes.aiid',fragments_about_pending_pool_node_uuid: 'fragments_about_pending_pool_nodes.uuid',used_raw_rule_aiid: 'rules.aiid',used_raw_rule_uuid: 'rules.uuid',pn_complete_pool_node_aiid: 'pn_complete_pool_nodes.aiid',pn_complete_pool_node_uuid: 'pn_complete_pool_nodes.uuid',}[foreignKeyName];
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo => <String>{};
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle => <String>{};
+
+  // ====================================================================
+
+  @override
+  List<String> get getDeleteManyForeignKeyForTwo => <String>[];
+
+  @override
+  List<String> get getDeleteManyForeignKeyForSingle => <String>[];
+
+  // ====================================================================
+  // ====================================================================
+
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
-  @override
-  String? getForeignKeyTableNames({required String foreignKeyName}) => _foreignKeyTableNames[foreignKeyName];
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForTwo => _deleteChildFollowFatherKeysForTwo;
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForSingle => _deleteChildFollowFatherKeysForSingle;
-
-  @override
-  List<String> get getDeleteFatherFollowChildKeys => _deleteFatherFollowChildKeys;
-
   final Map<String, Object?> _rowJson = <String, Object?>{};
-
-  final Map<String, String?> _foreignKeyTableNames = <String, String?>{
-  'fragments_about_pending_pool_node_aiid': 'fragments_about_pending_pool_nodes',
-  'fragments_about_pending_pool_node_uuid': 'fragments_about_pending_pool_nodes',
-  'used_raw_rule_aiid': 'rules',
-  'used_raw_rule_uuid': 'rules',
-  'pn_complete_pool_node_aiid': 'pn_complete_pool_nodes',
-  'pn_complete_pool_node_uuid': 'pn_complete_pool_nodes'
-};
-
-  final Set<String> _deleteChildFollowFatherKeysForTwo = <String>{};
-
-  final Set<String> _deleteChildFollowFatherKeysForSingle = <String>{};
-
-  final List<String> _deleteFatherFollowChildKeys =<String>[fragments_about_pending_pool_node_aiid,fragments_about_pending_pool_node_uuid,pn_complete_pool_node_aiid,pn_complete_pool_node_uuid,];
 
   @override
   String get getCurrentTableName => getTableName;

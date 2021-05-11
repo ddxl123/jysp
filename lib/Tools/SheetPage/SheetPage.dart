@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 class SheetPage extends OverlayRoute<void> {
   ///
@@ -42,7 +43,7 @@ class SheetPage extends OverlayRoute<void> {
       child: Listener(
         behavior: HitTestBehavior.deferToChild,
         onPointerMove: (PointerMoveEvent event) {
-          print(event);
+          dLog(() => event);
         },
         child: Container(
           color: null,

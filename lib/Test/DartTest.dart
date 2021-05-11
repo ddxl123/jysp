@@ -10,8 +10,6 @@
 ///
 ///
 
-void main(List<String> args) {}
-
-class Name {
-  void aaa<aaa>() {}
+void main(List<String> args) {
+  print('abc..'.split('.')[1].runtimeType);
 }

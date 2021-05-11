@@ -8,61 +8,60 @@ import 'package:sqflite/sqflite.dart';
 /// Sqlite 专属表（没有对应可匹配的 mysql 表）不可用当前类
 ///
 /// T MBase 类型
-class RSqliteCurd<T> {
+class RSqliteCurd {
   ///
 
-  /// [model]：被 CURD 的 [model]。
   RSqliteCurd.byModel(this.model);
 
-  /// 需要 CURD 的 [model]。
+  /// 需要被 CURD 的 [model]。
   MBase model;
 
-  /// 为 R 时代表 [MUpload] 表中不存在当前 [model]。
-  late CurdStatus currentCurdStatus;
+  /// 需要被 CURD 的 [model] 对应的 [uploadModel]。
+  late MUpload uploadModel;
 
-  /// 为 [ ] 或 存在一个及以上元素。
-  late List<String> currentUpdatedColumns;
-
-  /// 当前 [model] 的上传状态。
-  late UploadStatus currentUploadStatus;
-
-  /// 从 [MUpload] 中查询当前 [row]。
-  Future<void> findRowFromUpload() async {
+  /// 对 [model] 的 [insert] 操作。
+  Future<bool> insertSingleRow() async {
     try {
-      // 通过 MUpload 的 row_id 进行 find
-      final List<Map<String, Object?>> uploadResult = await db.query(
-        MUpload.getTableName,
-        where: '${MUpload.row_id} = ?',
-        whereArgs: <Object?>[model.get_id],
+      // 插入时只存在 uuid
+      if (model.get_uuid == null || model.get_aiid != null) {
+        throw '${model.get_uuid}.${model.get_aiid}';
+      }
+
+      // 检查模型是否已存在
+      final List<Map<String, Object?>> queryResult = await MBase.queryByTableNameAsJsons(
+        tableName: model.getCurrentTableName,
+        where: 'uuid = ?',
+        whereArgs: <Object>[model.get_uuid!],
       );
 
-      // 若不存在时，代表只进行过 R
-      if (uploadResult.isEmpty) {
-        currentCurdStatus = CurdStatus.R;
-        currentUpdatedColumns = <String>[];
-        currentUploadStatus = UploadStatus.uploaded;
-      } else {
-        if (uploadResult.first[MUpload.curd_status] == null) {
-          throw 'curd_status is null';
-        } else {
-          currentCurdStatus = uploadResult.first[MUpload.curd_status]! as CurdStatus;
-        }
-
-        if (uploadResult.first[MUpload.updated_columns] == null) {
-          currentUpdatedColumns = <String>[];
-        } else {
-          currentUpdatedColumns = (uploadResult.first[MUpload.updated_columns]! as String).split(',');
-        }
-
-        if (uploadResult.first[MUpload.upload_status] == null) {
-          throw 'upload_status is null';
-        } else {
-          currentUploadStatus = uploadResult.first[MUpload.upload_status]! as UploadStatus;
-        }
+      if (queryResult.isNotEmpty) {
+        throw 'The model already exsits.';
       }
+
+      final Batch batch = db.batch();
+      batch.insert(model.getCurrentTableName, model.getRowJson);
+      batch.insert(
+        MUpload.getTableName,
+        MUpload.asJsonNoId(
+          aiid_v: null,
+          uuid_v: null,
+          table_name_v: model.getCurrentTableName,
+          row_id_v: model.get_id,
+          row_aiid_v: model.get_aiid,
+          row_uuid_v: model.get_uuid,
+          updated_columns_v: null,
+          curd_status_v: CurdStatus.C,
+          upload_status_v: UploadStatus.notUploaded,
+          created_at_v: DateTime.now().millisecondsSinceEpoch,
+          updated_at_v: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+      await batch.commit();
+
+      return true;
     } catch (e) {
-      dLog(() => 'findFromUploadModel err: ', () => e);
-      throw 'findFromUploadModel err';
+      dLog(() => 'insert err: ', () => e);
+      return false;
     }
   }
 
@@ -71,18 +70,13 @@ class RSqliteCurd<T> {
   /// - [updateContent]：更新的内容。
   ///
   /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
-  Future<bool> update(Map<String, Object?> updateContent) async {
+  Future<bool> updateSingleRow(Map<String, Object?> updateContent) async {
     try {
-      // TODO: 检查该 model 是否仍然存在
-
       await findRowFromUpload();
 
-      if (currentUploadStatus == UploadStatus.uploading) {
-        // TODO: 需要先重新进行上传后才能继续
-      }
-
       // 新增的 UpdatedColumns 和原来的 UpdatedColumns 合并
-      final String allUpdatedColumns = <String>{...updateContent.keys, ...currentUpdatedColumns}.toList().join(',');
+      final List<String> updatedColumns = uploadModel.get_updated_columns == null ? <String>[] : uploadModel.get_updated_columns!.split(',');
+      final String allUpdatedColumns = <String>{...updateContent.keys, ...updatedColumns}.toList().join(',');
 
       // 必然要 update model
       final Future<void> Function(Function(Batch)) toUpdate = (Function(Batch batch) uploadCallback) async {
@@ -93,7 +87,7 @@ class RSqliteCurd<T> {
       };
 
       // R
-      if (currentCurdStatus == CurdStatus.R) {
+      if (uploadModel.get_curd_status == CurdStatus.R) {
         await toUpdate(
           (Batch batch) {
             batch.insert(
@@ -118,7 +112,7 @@ class RSqliteCurd<T> {
       }
 
       // C
-      if (currentCurdStatus == CurdStatus.C) {
+      if (uploadModel.get_curd_status == CurdStatus.C) {
         await toUpdate(
           (Batch batch) {
             batch.update(
@@ -135,7 +129,7 @@ class RSqliteCurd<T> {
       }
 
       // U
-      else if (currentCurdStatus == CurdStatus.U) {
+      else if (uploadModel.get_curd_status == CurdStatus.U) {
         await toUpdate(
           (Batch batch) {
             batch.update(
@@ -150,25 +144,254 @@ class RSqliteCurd<T> {
           },
         );
         return true;
+      } else {
+        throw 'unkown currentCurdStatus: ${uploadModel.get_curd_status}';
       }
-
-      throw 'unkown currentCurdStatus: $currentCurdStatus';
     } catch (e) {
       dLog(() => 'update err: ', () => e);
       return false;
     }
   }
 
-  /// 对 [model] 的 [insert] 操作。
-  Future<bool> insert() async {
-    // TODO: 检查模型是否已存在，根据 aiid 和 uuid 来检查
-
+  /// 对 [model] 的 [delete] 操作。
+  /// - [model]：将被删除的 [model]
+  Future<bool> deleteSingleRow(Batch batch) async {
     try {
-      final Batch batch = db.batch();
-      batch.insert(model.getCurrentTableName, model.getRowJson);
-      batch.insert(
-        MUpload.getTableName,
-        MUpload.asJsonNoId(
+      await findRowFromUpload();
+
+      // 无论 CURD 都需要删除本体
+      batch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+
+      // C
+      if (uploadModel.get_curd_status == CurdStatus.C) {
+        // 直接删除本体对应的 MUpload
+        batch.delete(
+          MUpload.getTableName,
+          where: '${MUpload.row_id} = ?',
+          whereArgs: <Object?>[model.get_id],
+        );
+      }
+
+      // U
+      else if (uploadModel.get_curd_status == CurdStatus.U) {
+        // 将本体对应的 MUpload 的 curd_status 置为 D
+        batch.update(
+          MUpload.getTableName,
+          <String, Object?>{MUpload.curd_status: CurdStatus.D},
+          where: '${MUpload.row_id} = ?',
+          whereArgs: <Object?>[model.get_id],
+        );
+      }
+
+      // R
+      else if (uploadModel.get_curd_status == CurdStatus.R) {
+        // 生成本体对应的 MUpload ，并设 curd_status 为 D
+        batch.insert(
+          MUpload.getTableName,
+          MUpload.asJsonNoId(
+            aiid_v: null,
+            uuid_v: null,
+            table_name_v: model.getCurrentTableName,
+            row_id_v: model.get_id,
+            row_aiid_v: model.get_aiid,
+            row_uuid_v: model.get_uuid,
+            updated_columns_v: null,
+            curd_status_v: CurdStatus.D,
+            upload_status_v: UploadStatus.notUploaded,
+            created_at_v: DateTime.now().millisecondsSinceEpoch,
+            updated_at_v: DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      }
+
+      // D or null or unknown
+      else {
+        throw 'uploadModel.get_curd_status == ${uploadModel.get_curd_status.toString()}';
+      }
+
+      // 同时删除外键约束
+      await _toDeleteForeignKeyBelongsTo(batch: batch);
+      await _toDeleteForeignKeyHaveMany(batch: batch);
+
+      // 若全部递归完成（全部递归都处在同一条异步中），则提交事务
+      await batch.commit();
+
+      return true;
+    } catch (e) {
+      dLog(() => 'deleteSingleRow: ', () => e);
+      return false;
+    }
+  }
+
+  /// 筛选出需要同时删除的外键 row
+  ///
+  /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
+  Future<void> _toDeleteForeignKeyBelongsTo({required Batch batch}) async {
+    // for single
+    for (int i = 0; i < model.getDeleteForeignKeyFollowCurrentForSingle.length; i++) {
+      final String foreignKeyName = model.getDeleteForeignKeyFollowCurrentForSingle.elementAt(i);
+      final Object? foreignKeyValue = model.getRowJson[foreignKeyName];
+      final String? foreignKeyColumnNameWithTableName = model.getForeignKeyBelongsTos(foreignKeyName: foreignKeyName);
+      final List<String>? foreignKeyTableNameAndColumnName = foreignKeyColumnNameWithTableName == null ? null : foreignKeyColumnNameWithTableName.split('.');
+      late String foreignKeyTableName;
+      late String foreignKeyColumnName;
+
+      // 若该外键有对应的值，且，
+      // 若该外键有对应的表（本地 sqlite 中没有对应的表）。
+      if (foreignKeyValue != null && foreignKeyTableNameAndColumnName != null) {
+        foreignKeyTableName = foreignKeyTableNameAndColumnName[0];
+        foreignKeyColumnName = foreignKeyTableNameAndColumnName[1];
+        await _recursionDelete(
+          batch: batch,
+          tableName: foreignKeyTableName,
+          columnName: foreignKeyColumnName,
+          columnNameValue: foreignKeyValue,
+        );
+      }
+    }
+
+    // for two
+    for (int i = 0; i < model.getDeleteForeignKeyFollowCurrentForTwo.length; i++) {
+      final String foreignKeyNameForAiid = model.getDeleteForeignKeyFollowCurrentForTwo.elementAt(i) + '_aiid';
+      final String foreignKeyNameForUuid = model.getDeleteForeignKeyFollowCurrentForTwo.elementAt(i) + '_uuid';
+      final int? foreignKeyValueForAiid = model.getRowJson[foreignKeyNameForAiid] as int?;
+      final String? foreignKeyValueForUuid = model.getRowJson[foreignKeyNameForUuid] as String?;
+
+      final String? foreignKeyColumnNameWithTableNameAiid = model.getForeignKeyBelongsTos(foreignKeyName: foreignKeyNameForAiid);
+      final String? foreignKeyColumnNameWithTableNameUuid = model.getForeignKeyBelongsTos(foreignKeyName: foreignKeyNameForUuid);
+      final List<String>? foreignKeyTableNameAndColumnNameAiid = foreignKeyColumnNameWithTableNameAiid == null ? null : foreignKeyColumnNameWithTableNameAiid.split('.');
+      final List<String>? foreignKeyTableNameAndColumnNameUuid = foreignKeyColumnNameWithTableNameUuid == null ? null : foreignKeyColumnNameWithTableNameUuid.split('.');
+      late String foreignKeyTableNameAiid;
+      late String foreignKeyTableNameUuid;
+      late String foreignKeyColumnNameAiid;
+      late String foreignKeyColumnNameUuid;
+
+      // 若该外键有对应的值
+      if (foreignKeyValueForAiid != null && foreignKeyValueForUuid != null) {
+        throw '$foreignKeyValueForAiid.$foreignKeyValueForUuid';
+      } else if (foreignKeyValueForAiid != null) {
+        // 若该外键有对应的表（本地 sqlite 中没有对应的表）。
+        if (foreignKeyTableNameAndColumnNameAiid != null) {
+          foreignKeyTableNameAiid = foreignKeyTableNameAndColumnNameAiid[0];
+          foreignKeyColumnNameAiid = foreignKeyTableNameAndColumnNameAiid[1];
+          await _recursionDelete(
+            batch: batch,
+            tableName: foreignKeyTableNameAiid,
+            columnName: foreignKeyColumnNameAiid,
+            columnNameValue: foreignKeyValueForAiid,
+          );
+        }
+      } else if (foreignKeyValueForUuid != null) {
+        // 若该外键有对应的表（本地 sqlite 中没有对应的表）。
+        if (foreignKeyTableNameAndColumnNameUuid != null) {
+          foreignKeyTableNameUuid = foreignKeyTableNameAndColumnNameUuid[0];
+          foreignKeyColumnNameUuid = foreignKeyTableNameAndColumnNameUuid[1];
+          await _recursionDelete(
+            batch: batch,
+            tableName: foreignKeyTableNameUuid,
+            columnName: foreignKeyColumnNameUuid,
+            columnNameValue: foreignKeyValueForUuid,
+          );
+        }
+      }
+    }
+  }
+
+  /// 筛选出需要同时删除其他关联该表中的外键的 row
+  ///
+  /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
+  Future<void> _toDeleteForeignKeyHaveMany({required Batch batch}) async {
+    // for single
+    for (int i = 0; i < model.getDeleteManyForeignKeyForSingle.length; i++) {
+      final List<String> manyTableNameAndColumnNameAndCurrentColumnName = model.getDeleteManyForeignKeyForSingle[i].split('.');
+      final String manyTableName = manyTableNameAndColumnNameAndCurrentColumnName[0];
+      final String manyColumnName = manyTableNameAndColumnNameAndCurrentColumnName[1];
+      final String currentColumnName = manyTableNameAndColumnNameAndCurrentColumnName[2];
+      final Object? currentValue = model.getRowJson[currentColumnName];
+
+      // 若 value 为 null，则说明其外表关联的键为 null，意味着没有值没有被关联(row 名被关联)
+      if (currentValue != null) {
+        await _recursionDelete(
+          batch: batch,
+          tableName: manyTableName,
+          columnName: manyColumnName,
+          columnNameValue: currentValue,
+        );
+      }
+    }
+
+    // for two
+    for (int i = 0; i < model.getDeleteManyForeignKeyForTwo.length; i++) {
+      final List<String> manyTableNameAndColumnNameAndCurrentColumnName = model.getDeleteManyForeignKeyForTwo[i].split('.');
+      final String manyTableName = manyTableNameAndColumnNameAndCurrentColumnName[0];
+      final String manyColumnName = manyTableNameAndColumnNameAndCurrentColumnName[1];
+      final String currentColumnName = manyTableNameAndColumnNameAndCurrentColumnName[2];
+
+      // 转换为 aiid/uuid/_aiid/uuid 后缀
+      final String manyColumnNameAiid = manyColumnName + '_aiid';
+      final String manyColumnNameUuid = manyColumnName + '_uuid';
+      late String currentColumnNameAiid;
+      late String currentColumnNameUuid;
+      if (currentColumnName == '') {
+        currentColumnNameAiid = 'aiid';
+        currentColumnNameUuid = 'uuid';
+      } else {
+        currentColumnNameAiid = currentColumnName + '_aiid';
+        currentColumnNameUuid = currentColumnName + '_uuid';
+      }
+
+      final int? currentColumnNameValueAiid = model.getRowJson[currentColumnNameAiid] as int?;
+      final String? currentColumnNameValueUuid = model.getRowJson[currentColumnNameUuid] as String?;
+
+      // 若当前被引用的键有对应的值
+      if (currentColumnNameValueAiid != null && currentColumnNameValueUuid != null) {
+        throw '$currentColumnNameValueAiid.$currentColumnNameValueUuid';
+      } else if (currentColumnNameValueAiid != null) {
+        await _recursionDelete(
+          batch: batch,
+          tableName: manyTableName,
+          columnName: manyColumnNameAiid,
+          columnNameValue: currentColumnNameValueAiid,
+        );
+      } else if (currentColumnNameValueUuid != null) {
+        await _recursionDelete(
+          batch: batch,
+          tableName: manyTableName,
+          columnName: manyColumnNameUuid,
+          columnNameValue: currentColumnNameValueUuid,
+        );
+      }
+    }
+  }
+
+  /// 对每个被筛选出来的外键所对应的 row 进行递归 delete
+  Future<void> _recursionDelete({required Batch batch, required String tableName, required String columnName, required Object columnNameValue}) async {
+    // 查询外键对应的 row 模型
+    final List<MBase> query = await MBase.queryByTableNameAsModels(
+      tableName: tableName,
+      where: '$columnName = ?',
+      whereArgs: <Object>[columnNameValue],
+    );
+
+    // length 为 0 时，说明对应的 row 已被 delete
+    // 把查询到的进行递归 delete
+    if (query.isNotEmpty) {
+      await RSqliteCurd.byModel(query.first).deleteSingleRow(batch);
+    }
+  }
+
+  /// 从 [MUpload] 中查询当前 [row]。
+  Future<void> findRowFromUpload() async {
+    try {
+      // 通过 MUpload 的 row_id 进行 find
+      final List<MUpload> uploadModels = await MUpload.queryRowsAsModels(
+        where: '${MUpload.row_id} = ?',
+        whereArgs: <Object?>[model.get_id],
+      );
+
+      // 若不存在时，代表只进行过 R
+      if (uploadModels.isEmpty) {
+        uploadModel = MUpload.createModel(
           aiid_v: null,
           uuid_v: null,
           table_name_v: model.getCurrentTableName,
@@ -176,53 +399,23 @@ class RSqliteCurd<T> {
           row_aiid_v: model.get_aiid,
           row_uuid_v: model.get_uuid,
           updated_columns_v: null,
-          curd_status_v: CurdStatus.C,
-          upload_status_v: UploadStatus.notUploaded,
-          created_at_v: DateTime.now().millisecondsSinceEpoch,
-          updated_at_v: DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-      await batch.commit();
-      return true;
-    } catch (e) {
-      dLog(() => 'insert err: ', () => e);
-      return false;
-    }
-  }
-
-  /// 对 [model] 的 [delete] 操作。
-  /// - [model]：将被删除的 [model]
-  Future<bool> delete() async {
-    // TODO: 检查该 model 是否存在
-
-    await findRowFromUpload();
-
-    // final Future<void> Function() toDelete = () async {};
-
-    if (currentCurdStatus == CurdStatus.C) {
-      final Batch batch = db.batch();
-      // 删除本体
-      batch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
-
-      // 删除本体对应的 MUpload
-      batch.delete(MUpload.getTableName, where: '${MUpload.row_id} = ?', whereArgs: <Object?>[model.get_id]);
-
-      // 删除需要删除【外键为本体】的表的 row
-
-      // 删除需要删除【本体的外键】的 row
-      for (int i = 0; i < model.getDeleteChildFollowFatherKeysForSingle.length; i++) {
-        final String foreignKeyName = model.getDeleteChildFollowFatherKeysForSingle.elementAt(i);
-        final int foreignKeyValue = model.getRowJson[foreignKeyName] as int;
-        final String? foreignKeyTableName = model.getForeignKeyTableNames(foreignKeyName: foreignKeyName);
-        if (foreignKeyTableName == null) {
-          throw 'foreignKeyTableName is null';
-        }
-        MBase.queryByTableNameAsModels(
-          tableName: foreignKeyTableName,
-          where: 'id = ?',
-          whereArgs: <int>[],
+          curd_status_v: CurdStatus.R, // 主要是要配置这个选项
+          upload_status_v: UploadStatus.uploaded,
+          created_at_v: null,
+          updated_at_v: null,
         );
+      } else {
+        uploadModel = uploadModels.first;
       }
+
+      // 若为 uploading 状态，则需要先判断是否已经 upload 成功，成功则修改成 uploaded 后才能继续。
+      if (uploadModel.get_upload_status == null) {
+        throw 'uploadModel.get_upload_status == null';
+      } else if (uploadModel.get_upload_status == UploadStatus.uploading) {
+        //TODO: 从 mysql 中对照是否 upload 成功过，若成功过则设为 uploaded，若未成功过则进行 upload 后再设为 uploaded
+      }
+    } catch (e) {
+      throw 'findFromUploadModel err';
     }
   }
 

@@ -54,33 +54,33 @@ class MPnMemoryPoolNode implements MBase{
     return rowModels;
   }
 
+  // ====================================================================
+  // ====================================================================
+
+  @override
+  String? getForeignKeyBelongsTos({required String foreignKeyName}) => <String,String?>{using_raw_rule_aiid: 'rules.aiid',using_raw_rule_uuid: 'rules.uuid',}[foreignKeyName];
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo => <String>{};
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle => <String>{};
+
+  // ====================================================================
+
+  @override
+  List<String> get getDeleteManyForeignKeyForTwo => <String>['fragments_about_memory_pool_nodes.pn_memory_pool_node.',];
+
+  @override
+  List<String> get getDeleteManyForeignKeyForSingle => <String>[];
+
+  // ====================================================================
+  // ====================================================================
+
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
-  @override
-  String? getForeignKeyTableNames({required String foreignKeyName}) => _foreignKeyTableNames[foreignKeyName];
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForTwo => _deleteChildFollowFatherKeysForTwo;
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForSingle => _deleteChildFollowFatherKeysForSingle;
-
-  @override
-  List<String> get getDeleteFatherFollowChildKeys => _deleteFatherFollowChildKeys;
-
   final Map<String, Object?> _rowJson = <String, Object?>{};
-
-  final Map<String, String?> _foreignKeyTableNames = <String, String?>{
-  'using_raw_rule_aiid': 'rules',
-  'using_raw_rule_uuid': 'rules'
-};
-
-  final Set<String> _deleteChildFollowFatherKeysForTwo = <String>{};
-
-  final Set<String> _deleteChildFollowFatherKeysForSingle = <String>{};
-
-  final List<String> _deleteFatherFollowChildKeys =<String>[];
 
   @override
   String get getCurrentTableName => getTableName;

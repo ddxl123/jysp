@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:jysp/Database/run/main.dart';
+import 'package:jysp/Database/Run/main.dart';
 
 /// 将 demo_texts 形式转化成 DemoText 形式;
 String toCamelCaseWillRemoveS(String demo_texts) {
@@ -145,30 +145,51 @@ ${fieldNameQuickCall(fields)}
     return rowModels;
   }
 
+  // ====================================================================
+  // ====================================================================
+
+  @override
+  String? getForeignKeyBelongsTos({required String foreignKeyName}) => ${foreignKeyBelongsTos[tableNameWithS] == null ? '<String,String?>{}' : () {
+          String result = '';
+          foreignKeyBelongsTos[tableNameWithS]!.forEach((String key, String? value) {
+            result += "$key: ${value == null ? 'null' : "'$value'"},";
+          });
+          return '<String,String?>{$result}';
+        }()}[foreignKeyName];
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo => <String>${deleteForeignKeyFollowCurrentForTwo[tableNameWithS] == null ? '{}' : '{' + deleteForeignKeyFollowCurrentForTwo[tableNameWithS]!.join(',') + ',}'};
+
+  @override
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle => <String>${deleteForeignKeyFollowCurrentForSingle[tableNameWithS] == null ? '{}' : '{' + deleteForeignKeyFollowCurrentForSingle[tableNameWithS]!.join(',') + ',}'};
+
+  // ====================================================================
+
+  @override
+  List<String> get getDeleteManyForeignKeyForTwo => ${deleteManyForeignKeyForTwo[tableNameWithS] == null ? '<String>[]' : () {
+          String result = '';
+          for (int i = 0; i < deleteManyForeignKeyForTwo[tableNameWithS]!.length; i++) {
+            result += "'${deleteManyForeignKeyForTwo[tableNameWithS]!.elementAt(i)}',";
+          }
+          return '<String>[$result]';
+        }()};
+
+  @override
+  List<String> get getDeleteManyForeignKeyForSingle => ${deleteManyForeignKeyForSingle[tableNameWithS] == null ? '<String>[]' : () {
+          String result = '';
+          for (int i = 0; i < deleteManyForeignKeyForSingle[tableNameWithS]!.length; i++) {
+            result += "'${deleteManyForeignKeyForSingle[tableNameWithS]!.elementAt(i)}',";
+          }
+          return '<String>[$result]';
+        }()};
+
+  // ====================================================================
+  // ====================================================================
+
   @override
   Map<String, Object?> get getRowJson => _rowJson;
 
-  @override
-  String? getForeignKeyTableNames({required String foreignKeyName}) => _foreignKeyTableNames[foreignKeyName];
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForTwo => _deleteChildFollowFatherKeysForTwo;
-
-  @override
-  Set<String> get getDeleteChildFollowFatherKeysForSingle => _deleteChildFollowFatherKeysForSingle;
-
-  @override
-  List<String> get getDeleteFatherFollowChildKeys => _deleteFatherFollowChildKeys;
-
   final Map<String, Object?> _rowJson = <String, Object?>{};
-
-  final Map<String, String?> _foreignKeyTableNames = <String, String?>${foreignKeyBelongsTo[tableNameWithS] == null ? '{}' : const JsonEncoder.withIndent('  ').convert(foreignKeyBelongsTo[tableNameWithS]).replaceAll(RegExp(r'"'), '\'')};
-
-  final Set<String> _deleteChildFollowFatherKeysForTwo = <String>${deleteChildFollowFatherKeysForTwo[tableNameWithS] == null ? '{}' : '{' + deleteChildFollowFatherKeysForTwo[tableNameWithS]!.join(',') + ',}'};
-
-  final Set<String> _deleteChildFollowFatherKeysForSingle = <String>${deleteChildFollowFatherKeysForSingle[tableNameWithS] == null ? '{}' : '{' + deleteChildFollowFatherKeysForSingle[tableNameWithS]!.join(',') + ',}'};
-
-  final List<String> _deleteFatherFollowChildKeys =<String>${deleteFatherFollowChildKeys[tableNameWithS] == null ? '[]' : '[' + deleteFatherFollowChildKeys[tableNameWithS]!.join(',') + ',]'};
 
   @override
   String get getCurrentTableName => getTableName;
@@ -212,21 +233,50 @@ abstract class MBase {
   /// 值只有 int String bool null 类型，没有枚举类型（而是枚举的 int 值）
   Map<String, Object?> get getRowJson;
 
-  /// 外键对应的表。key: 外键名；value: 对应的表名
-  String? getForeignKeyTableNames({required String foreignKeyName});
+  // ====================================================================
+  // ====================================================================
+
+  /// 外键对应的 table 名称和 column 名称
+  ///
+  /// 不能被分成 _uuid 或 _aiid，因为有 虚主键 uuid 和 aiid
+  ///
+  /// [return]：null 或者 'table_name.column_name'
+  String? getForeignKeyBelongsTos({required String foreignKeyName});
 
   /// 当删除当前 row 时，需要同时删除对应 row 的外键名
   ///
-  /// 总是 xx_aiid 和 xx_uuid 合并成 xx
-  Set<String> get getDeleteChildFollowFatherKeysForTwo;
+  /// xx_aiid 和 xx_uuid 合并成 xx
+  ///
+  /// 其外键的值需要自行再分解成 String 和 int
+  ///
+  /// eg. {'foreign_key_name1','foreign_key_name2',}
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo;
 
   /// 当删除当前 row 时，需要同时删除对应 row 的外键名
   ///
-  /// 总是 xx_id
-  Set<String> get getDeleteChildFollowFatherKeysForSingle;
+  /// 其外键的值可能是 String 也可能是 int
+  ///
+  /// eg. {'foreign_key_name1','foreign_key_name2',}
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle;
 
-  /// 当删除外键时，需要同时删除当前 row 的外键名
-  List<String> get getDeleteFatherFollowChildKeys;
+  // ====================================================================
+
+  /// 被其他表的外键关联的 key（需要被约束删除的）
+  ///
+  /// 中间的 xx_aiid 和 xx_uuid 会合并成 xx
+  ///
+  /// 尾部的 aiid 和 uuid 会合并成 ''，xx_aiid 和 xx_uuid 会合并成 xx
+  ///
+  /// [return]：关联的 ['table_name1.column_name1.'(尾缀是 aiid 和 uuid),'table_name2.column_name2.yy'(尾缀是 xx_aiid 和 xx_uuid)]
+  List<String> get getDeleteManyForeignKeyForTwo;
+
+  /// 被其他表的外键关联的 key（需要被约束删除的）
+  ///
+  /// [return]：关联的 ['table_name.foreign_key_name.the_key']
+  List<String> get getDeleteManyForeignKeyForSingle;
+
+  // ====================================================================
+  // ====================================================================
 
   String get getCurrentTableName;
   int? get get_id;

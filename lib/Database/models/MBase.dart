@@ -7,21 +7,50 @@ abstract class MBase {
   /// 值只有 int String bool null 类型，没有枚举类型（而是枚举的 int 值）
   Map<String, Object?> get getRowJson;
 
-  /// 外键对应的表。key: 外键名；value: 对应的表名
-  String? getForeignKeyTableNames({required String foreignKeyName});
+  // ====================================================================
+  // ====================================================================
+
+  /// 外键对应的 table 名称和 row 名称
+  ///
+  /// 不能被分成 _uuid 或 _aiid，因为有 虚主键 uuid 和 aiid
+  ///
+  /// [return]：null 或者 'table_name.row_name'
+  String? getForeignKeyBelongsTos({required String foreignKeyName});
 
   /// 当删除当前 row 时，需要同时删除对应 row 的外键名
   ///
-  /// 总是 xx_aiid 和 xx_uuid 合并成 xx
-  Set<String> get getDeleteChildFollowFatherKeysForTwo;
+  /// xx_aiid 和 xx_uuid 合并成 xx
+  ///
+  /// 其外键的值需要自行再分解成 String 和 int
+  ///
+  /// eg. {'foreign_key_name1','foreign_key_name2',}
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo;
 
   /// 当删除当前 row 时，需要同时删除对应 row 的外键名
   ///
-  /// 总是 xx_id
-  Set<String> get getDeleteChildFollowFatherKeysForSingle;
+  /// 其外键的值可能是 String 也可能是 int
+  ///
+  /// eg. {'foreign_key_name1','foreign_key_name2',}
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle;
 
-  /// 当删除外键时，需要同时删除当前 row 的外键名
-  List<String> get getDeleteFatherFollowChildKeys;
+  // ====================================================================
+
+  /// 被其他表的外键关联的 key（需要被约束删除的）
+  ///
+  /// 中间的 xx_aiid 和 xx_uuid 会合并成 xx
+  ///
+  /// 尾部的 aiid 和 uuid 会合并成 ''，xx_aiid 和 xx_uuid 会合并成 xx
+  ///
+  /// [return]：关联的 ['table_name1.row_name1.'(尾缀是 aiid 和 uuid),'table_name2.row_name2.yy'(尾缀是 xx_aiid 和 xx_uuid)]
+  List<String> get getDeleteManyForeignKeyForTwo;
+
+  /// 被其他表的外键关联的 key（需要被约束删除的）
+  ///
+  /// [return]：关联的 ['table_name.foreign_key_name.the_key']
+  List<String> get getDeleteManyForeignKeyForSingle;
+
+  // ====================================================================
+  // ====================================================================
 
   String get getCurrentTableName;
   int? get get_id;

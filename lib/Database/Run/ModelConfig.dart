@@ -4,25 +4,9 @@
 // ignore_for_file: unused_element
 // ignore_for_file: unused_field
 
-import 'package:jysp/Database/run/Create.dart';
-import 'package:jysp/Database/run/FieldNameBase.dart';
-import 'package:jysp/Database/run/main.dart';
-
-class TableNames {
-  static String version_infos = 'version_infos';
-  static String tokens = 'tokens';
-  static String users = 'users';
-  static String uploads = 'uploads';
-  static String download_modules = 'download_modules';
-  static String pn_pending_pool_nodes = 'pn_pending_pool_nodes';
-  static String pn_memory_pool_nodes = 'pn_memory_pool_nodes';
-  static String pn_complete_pool_nodes = 'pn_complete_pool_nodes';
-  static String pn_rule_pool_nodes = 'pn_rule_pool_nodes';
-  static String fragments_about_pending_pool_nodes = 'fragments_about_pending_pool_nodes';
-  static String fragments_about_memory_pool_nodes = 'fragments_about_memory_pool_nodes';
-  static String fragments_about_complete_pool_nodes = 'fragments_about_complete_pool_nodes';
-  static String rules = 'rules';
-}
+import 'package:jysp/Database/Run/Create.dart';
+import 'package:jysp/Database/Run/FieldNameBase.dart';
+import 'package:jysp/Database/Run/main.dart';
 
 void runCreateModels() {
   _version_infos().createModel();
@@ -43,9 +27,9 @@ void runCreateModels() {
   ]);
 }
 
-class _version_infos extends FieldNameBase {
+class _version_infos extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.version_infos;
+  String get tableNameWithS => 'version_infos';
 
   String saved_version = 'saved_version';
 
@@ -55,9 +39,9 @@ class _version_infos extends FieldNameBase {
       ];
 }
 
-class _tokens extends FieldNameBase {
+class _tokens extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.tokens;
+  String get tableNameWithS => 'tokens';
 
   String access_token = 'access_token';
   String refresh_token = 'refresh_token';
@@ -69,9 +53,9 @@ class _tokens extends FieldNameBase {
       ];
 }
 
-class _users extends FieldNameBase {
+class _users extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.users;
+  String get tableNameWithS => 'users';
 
   String username = 'username';
   String email = 'email';
@@ -83,9 +67,9 @@ class _users extends FieldNameBase {
       ];
 }
 
-class _uploads extends FieldNameBase {
+class _uploads extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.uploads;
+  String get tableNameWithS => 'uploads';
 
   String table_name = 'table_name';
   String row_id = 'row_id';
@@ -106,18 +90,18 @@ class _uploads extends FieldNameBase {
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_normal(fieldName: table_name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
-        setField_x_any_integer(fieldName: row_id, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: row_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: row_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_any_integer(fieldName: row_id, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
+        setField_x_aiid_integer(fieldName: row_aiid, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
+        setField_x_uuid_text(fieldName: row_uuid, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
         setField_normal(fieldName: updated_columns, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: curd_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'CurdStatus'),
         setField_normal(fieldName: upload_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'UploadStatus'),
       ];
 }
 
-class _download_modules extends FieldNameBase {
+class _download_modules extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.download_modules;
+  String get tableNameWithS => 'download_modules';
 
   String module_name = 'module_name';
   String download_status = 'download_status';
@@ -134,9 +118,9 @@ class _download_modules extends FieldNameBase {
       ];
 }
 
-class _pn_pending_pool_nodes extends FieldNameBase {
+class _pn_pending_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.pn_pending_pool_nodes;
+  String get tableNameWithS => 'pn_pending_pool_nodes';
 
   String recommend_raw_rule_aiid = 'recommend_raw_rule_aiid';
   String recommend_raw_rule_uuid = 'recommend_raw_rule_uuid';
@@ -151,23 +135,27 @@ class _pn_pending_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        /// TODO: 到这里了，外键 和 isDeleteChildFollowFatherIfIsId
         setField_x_aiid_integer(
           fieldName: recommend_raw_rule_aiid,
-          foreignKeyTableName: TableNames.rules,
-          foreignKeyRowName: _rules().aiid,
-          isDeleteChildFollowFatherIfIsId: false,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
         ),
-        setField_x_uuid_text(fieldName: recommend_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_uuid_text(
+          fieldName: recommend_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'PendingPoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
-class _pn_memory_pool_nodes extends FieldNameBase {
+class _pn_memory_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.pn_memory_pool_nodes;
+  String get tableNameWithS => 'pn_memory_pool_nodes';
 
   String using_raw_rule_aiid = 'using_raw_rule_aiid';
   String using_raw_rule_uuid = 'using_raw_rule_uuid';
@@ -182,17 +170,27 @@ class _pn_memory_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: using_raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: using_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: using_raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: using_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'MemoryPoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
-class _pn_complete_pool_nodes extends FieldNameBase {
+class _pn_complete_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.pn_complete_pool_nodes;
+  String get tableNameWithS => 'pn_complete_pool_nodes';
 
   String used_raw_rule_aiid = 'used_raw_rule_aiid';
   String used_raw_rule_uuid = 'used_raw_rule_uuid';
@@ -207,17 +205,27 @@ class _pn_complete_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: used_raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: used_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: used_raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: used_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'CompletePoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
-class _pn_rule_pool_nodes extends FieldNameBase {
+class _pn_rule_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.pn_rule_pool_nodes;
+  String get tableNameWithS => 'pn_rule_pool_nodes';
 
   String type = 'type';
   String name = 'name';
@@ -236,9 +244,9 @@ class _pn_rule_pool_nodes extends FieldNameBase {
       ];
 }
 
-class _fragments_about_pending_pool_nodes extends FieldNameBase {
+class _fragments_about_pending_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.fragments_about_pending_pool_nodes;
+  String get tableNameWithS => 'fragments_about_pending_pool_nodes';
 
   String raw_fragment_aiid = 'raw_fragment_aiid';
   String raw_fragment_uuid = 'raw_fragment_uuid';
@@ -250,19 +258,49 @@ class _fragments_about_pending_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: raw_fragment_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: raw_fragment_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: pn_pending_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: pn_pending_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: recommend_raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: recommend_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: raw_fragment_aiid,
+          foreignKeyColumnNameWithTableName: null,
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: raw_fragment_uuid,
+          foreignKeyColumnNameWithTableName: null,
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_aiid_integer(
+          fieldName: pn_pending_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_pending_pool_nodes().tableNameWithS, _pn_pending_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: pn_pending_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_pending_pool_nodes().tableNameWithS, _pn_pending_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_aiid_integer(
+          fieldName: recommend_raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: recommend_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
         setField_normal(fieldName: title, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
-class _fragments_about_memory_pool_nodes extends FieldNameBase {
+class _fragments_about_memory_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.fragments_about_memory_pool_nodes;
+  String get tableNameWithS => 'fragments_about_memory_pool_nodes';
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
   String fragments_about_pending_pool_node_uuid = 'fragments_about_pending_pool_node_uuid';
@@ -273,18 +311,48 @@ class _fragments_about_memory_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: fragments_about_pending_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: fragments_about_pending_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: using_raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: using_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: pn_memory_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: pn_memory_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: fragments_about_pending_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_pending_pool_nodes().tableNameWithS, _fragments_about_pending_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: fragments_about_pending_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_pending_pool_nodes().tableNameWithS, _fragments_about_pending_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_aiid_integer(
+          fieldName: using_raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: using_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_aiid_integer(
+          fieldName: pn_memory_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_memory_pool_nodes().tableNameWithS, _pn_memory_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: pn_memory_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_memory_pool_nodes().tableNameWithS, _pn_memory_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
       ];
 }
 
-class _fragments_about_complete_pool_nodes extends FieldNameBase {
+class _fragments_about_complete_pool_nodes extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.fragments_about_complete_pool_nodes;
+  String get tableNameWithS => 'fragments_about_complete_pool_nodes';
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
   String fragments_about_pending_pool_node_uuid = 'fragments_about_pending_pool_node_uuid';
@@ -295,18 +363,48 @@ class _fragments_about_complete_pool_nodes extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: fragments_about_pending_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: fragments_about_pending_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: used_raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: used_raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: pn_complete_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: pn_complete_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: fragments_about_pending_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_pending_pool_nodes().tableNameWithS, _fragments_about_pending_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: fragments_about_pending_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_pending_pool_nodes().tableNameWithS, _fragments_about_pending_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_aiid_integer(
+          fieldName: used_raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: used_raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_aiid_integer(
+          fieldName: pn_complete_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_complete_pool_nodes().tableNameWithS, _pn_complete_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: pn_complete_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_complete_pool_nodes().tableNameWithS, _pn_complete_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
       ];
 }
 
-class _rules extends FieldNameBase {
+class _rules extends FieldBase {
   @override
-  String get tableNameWithS => TableNames.rules;
+  String get tableNameWithS => 'rules';
 
   String raw_rule_aiid = 'raw_rule_aiid';
   String raw_rule_uuid = 'raw_rule_uuid';
@@ -315,9 +413,29 @@ class _rules extends FieldNameBase {
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
-        setField_x_aiid_integer(fieldName: raw_rule_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: raw_rule_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_aiid_integer(fieldName: pn_rule_pool_node_aiid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
-        setField_x_uuid_text(fieldName: pn_rule_pool_node_uuid, foreignKeyTableName: null, foreignKeyRowName: null, isDeleteChildFollowFatherIfIsId: false),
+        setField_x_aiid_integer(
+          fieldName: raw_rule_aiid,
+          foreignKeyColumnNameWithTableName: null,
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_uuid_text(
+          fieldName: raw_rule_uuid,
+          foreignKeyColumnNameWithTableName: null,
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: false,
+        ),
+        setField_x_aiid_integer(
+          fieldName: pn_rule_pool_node_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_rule_pool_nodes().tableNameWithS, _pn_rule_pool_nodes().aiid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
+        setField_x_uuid_text(
+          fieldName: pn_rule_pool_node_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_pn_rule_pool_nodes().tableNameWithS, _pn_rule_pool_nodes().uuid),
+          isDeleteForeignKeyFollowCurrent: false,
+          isDeleteCurrentFollowForeignKey: true,
+        ),
       ];
 }
