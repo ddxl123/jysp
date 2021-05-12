@@ -15,11 +15,15 @@ class CreateModel {
   ///     ```
   /// - [extraGlobalEnum]：是否需要全局枚举。
   CreateModel({
+    required this.modelCategory,
     required this.tableNameWithS,
     required this.createFields,
     this.createExtraEnums,
     this.extraGlobalEnum = false,
   }) {
+    modelCategorys.addAll(
+      <String, ModelCategory>{tableNameWithS: modelCategory},
+    );
     modelFields.addAll(
       <String, Map<String, List<Object>>>{
         tableNameWithS: <String, List<Object>>{
@@ -55,6 +59,8 @@ class CreateModel {
     );
     extraGlobalEnumContents.addAll(<String, bool>{tableNameWithS: extraGlobalEnum});
   }
+
+  final ModelCategory modelCategory;
 
   final String tableNameWithS;
 

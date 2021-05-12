@@ -1,3 +1,4 @@
+import 'package:jysp/AppInit/AppInitEnum.dart';
 import 'package:jysp/AppInit/AppVersionManager.dart';
 import 'package:jysp/Database/Models/MVersionInfo.dart';
 import 'package:jysp/Database/Models/MParseIntoSqls.dart';
@@ -5,12 +6,6 @@ import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
-
-enum AppInitStatus {
-  ok,
-  tableLost,
-  initialized,
-}
 
 class AppInit {
   ///

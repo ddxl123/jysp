@@ -29,6 +29,9 @@ void runCreateModels() {
 
 class _version_infos extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.onlySqlite;
+
+  @override
   String get tableNameWithS => 'version_infos';
 
   String saved_version = 'saved_version';
@@ -40,6 +43,9 @@ class _version_infos extends FieldBase {
 }
 
 class _tokens extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.onlySqlite;
+
   @override
   String get tableNameWithS => 'tokens';
 
@@ -55,6 +61,9 @@ class _tokens extends FieldBase {
 
 class _users extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
+  @override
   String get tableNameWithS => 'users';
 
   String username = 'username';
@@ -68,6 +77,9 @@ class _users extends FieldBase {
 }
 
 class _uploads extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.onlySqlite;
+
   @override
   String get tableNameWithS => 'uploads';
 
@@ -101,6 +113,9 @@ class _uploads extends FieldBase {
 
 class _download_modules extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.onlySqlite;
+
+  @override
   String get tableNameWithS => 'download_modules';
 
   String module_name = 'module_name';
@@ -119,6 +134,9 @@ class _download_modules extends FieldBase {
 }
 
 class _pn_pending_pool_nodes extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
   @override
   String get tableNameWithS => 'pn_pending_pool_nodes';
 
@@ -155,6 +173,9 @@ class _pn_pending_pool_nodes extends FieldBase {
 
 class _pn_memory_pool_nodes extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
+  @override
   String get tableNameWithS => 'pn_memory_pool_nodes';
 
   String using_raw_rule_aiid = 'using_raw_rule_aiid';
@@ -189,6 +210,9 @@ class _pn_memory_pool_nodes extends FieldBase {
 }
 
 class _pn_complete_pool_nodes extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
   @override
   String get tableNameWithS => 'pn_complete_pool_nodes';
 
@@ -225,6 +249,9 @@ class _pn_complete_pool_nodes extends FieldBase {
 
 class _pn_rule_pool_nodes extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
+  @override
   String get tableNameWithS => 'pn_rule_pool_nodes';
 
   String type = 'type';
@@ -245,6 +272,9 @@ class _pn_rule_pool_nodes extends FieldBase {
 }
 
 class _fragments_about_pending_pool_nodes extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
   @override
   String get tableNameWithS => 'fragments_about_pending_pool_nodes';
 
@@ -300,6 +330,9 @@ class _fragments_about_pending_pool_nodes extends FieldBase {
 
 class _fragments_about_memory_pool_nodes extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
+  @override
   String get tableNameWithS => 'fragments_about_memory_pool_nodes';
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
@@ -352,6 +385,9 @@ class _fragments_about_memory_pool_nodes extends FieldBase {
 
 class _fragments_about_complete_pool_nodes extends FieldBase {
   @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
+  @override
   String get tableNameWithS => 'fragments_about_complete_pool_nodes';
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
@@ -403,6 +439,9 @@ class _fragments_about_complete_pool_nodes extends FieldBase {
 }
 
 class _rules extends FieldBase {
+  @override
+  ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
+
   @override
   String get tableNameWithS => 'rules';
 

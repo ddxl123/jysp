@@ -6,12 +6,11 @@ import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
-import 'package:jysp/Database/Models/MUpload.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/TDebug.dart';
-import 'package:sqflite/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 class RPoolNode {
@@ -51,7 +50,7 @@ class RPoolNode {
   /// 在当前池内插入新节点
   Future<bool> insertNewNode({required FragmentPoolController fragmentPoolController, required String name, required Offset position}) async {
     try {
-      final MBase model = fragmentPoolController.poolTypeSwitch<MBase>(
+      final MBase newNodeModel = fragmentPoolController.poolTypeSwitch<MBase>(
         pendingPoolCB: () => MPnPendingPoolNode.createModel(
           aiid_v: null,
           uuid_v: const Uuid().v4(),
@@ -96,45 +95,15 @@ class RPoolNode {
         ),
       );
 
-      final Batch batch = db.batch();
       // 插入 new node
-      batch.insert(model.getCurrentTableName, model.getRowJson);
-      // 插入 upload
-      batch.insert(
-        MUpload.getTableName,
-        MUpload.asJsonNoId(
-          aiid_v: null,
-          uuid_v: null,
-          table_name_v: model.getCurrentTableName,
-          row_aiid_v: null,
-          row_uuid_v: const Uuid().v4(),
-          upload_status_v: UploadStatus.notUploaded,
-          created_at_v: DateTime.now().millisecondsSinceEpoch,
-          updated_at_v: DateTime.now().millisecondsSinceEpoch,
-          curd_status_v: null,
-          row_id_v: null,
-          updated_columns_v: '',
-        ),
-      );
-      await batch.commit();
+      RSqliteCurd.byModel(newNodeModel).insertRow(connectBatch: db.batch(), isConnectBatchCommitInternal: true);
+
       // 让 state 变化
-      fragmentPoolController.getPoolTypeNodesList().add(model);
+      fragmentPoolController.getPoolTypeNodesList().add(newNodeModel);
+
       return true;
     } catch (e) {
       dLog(() => 'createNewNode err:', () => e);
-      return false;
-    }
-  }
-
-  /// 删除当前池内的指定节点
-  Future<bool> deleteNode({required FragmentPoolController fragmentPoolController, required MBase model}) async {
-    try {
-      // 如果是 create 的话，直接覆盖原来状态
-      if (model.get_curd_status == Curd.C) {}
-      if (model.get_aiid != null && model.get_uuid == null) {}
-      await db.delete(model.getCurrentTableName, where: 'id=?', whereArgs: [model.get_id]);
-    } catch (e) {
-      dLog(() => 'deleteNode err: ', () => e);
       return false;
     }
   }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/AppInit/AppInit.dart';
-import 'package:jysp/AppInit/AppVersionManager.dart';
+import 'package:jysp/AppInit/AppInitEnum.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
-import 'package:jysp/Tools/TDebug.dart';
 
 class WillToHomePage extends StatefulWidget {
   @override
@@ -17,18 +16,15 @@ class _WillToHomePageState extends State<WillToHomePage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Object>(
+      initialData: 1,
       future: _future(),
       builder: _builder,
     );
   }
 
   Future<Object> _future() async {
-    return await AppInit().appInit().onError(
-          (Object? error, StackTrace stackTrace) => dLog(
-            () => stackTrace,
-            () => error.toString(),
-          ),
-        );
+    print(await AppInit().appInit());
+    return 2;
   }
 
   Widget _builder(BuildContext context, AsyncSnapshot<Object> snapshot) {

@@ -223,9 +223,27 @@ String baseModelContent() {
         return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsJsons(where: where, whereArgs: whereArgs);""";
   }
 
+  String modelCategoryEnumContentBase = '';
+  String modelCategoryEnumContent = '';
+  for (int i = 0; i < ModelCategory.values.length; i++) {
+    modelCategoryEnumContentBase += '${ModelCategory.values[i].toString().replaceFirst('ModelCategory.', '')},';
+  }
+  modelCategoryEnumContent = 'enum ModelCategory {$modelCategoryEnumContentBase}';
+
+  String modelCategorysContentBase = '';
+  String modelCategorysContent = '';
+  for (int i = 0; i < modelCategorys.keys.length; i++) {
+    final String tableName = modelCategorys.keys.elementAt(i);
+    final ModelCategory modelCategory = modelCategorys[tableName]!;
+    modelCategorysContentBase += '\'${modelCategorys.keys.elementAt(i)}\':${modelCategory.toString()},';
+  }
+  modelCategorysContent = '<String,ModelCategory>{$modelCategorysContentBase}';
+
   return """
 // ignore_for_file: non_constant_identifier_names
 $importContent
+
+$modelCategoryEnumContent
 
 abstract class MBase {
   ///
@@ -303,8 +321,11 @@ abstract class MBase {
     }
   }
 
-  ///
+  /// 当前 Model 的类型
+  static ModelCategory? modelCategory({required String tableName}){
+    return $modelCategorysContent[tableName];
+  }
 }
 
-  """;
+""";
 }

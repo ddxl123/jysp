@@ -1,7 +1,8 @@
 import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/Database/Models/MDownloadModule.dart';
 import 'package:jysp/Database/Models/MGlobalEnum.dart';
 import 'package:jysp/Database/Models/MUpload.dart';
-import 'package:jysp/G/GSqlite/GSqlite.dart';
+import 'package:jysp/Database/Models/MVersionInfo.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -11,7 +12,11 @@ import 'package:sqflite/sqflite.dart';
 class RSqliteCurd {
   ///
 
-  RSqliteCurd.byModel(this.model);
+  RSqliteCurd.byModel(this.model) {
+    if (MBase.modelCategory(tableName: model.getCurrentTableName) == ModelCategory.onlySqlite) {
+      throw 'ModelCategory can not be onlySqlite';
+    }
+  }
 
   /// 需要被 CURD 的 [model]。
   MBase model;
@@ -20,7 +25,9 @@ class RSqliteCurd {
   late MUpload uploadModel;
 
   /// 对 [model] 的 [insert] 操作。
-  Future<bool> insertSingleRow() async {
+  ///
+  /// 若已存在，则抛异常
+  Future<bool> insertRow({required Batch connectBatch, required bool isConnectBatchCommitInternal}) async {
     try {
       // 插入时只存在 uuid
       if (model.get_uuid == null || model.get_aiid != null) {
@@ -38,9 +45,8 @@ class RSqliteCurd {
         throw 'The model already exsits.';
       }
 
-      final Batch batch = db.batch();
-      batch.insert(model.getCurrentTableName, model.getRowJson);
-      batch.insert(
+      connectBatch.insert(model.getCurrentTableName, model.getRowJson);
+      connectBatch.insert(
         MUpload.getTableName,
         MUpload.asJsonNoId(
           aiid_v: null,
@@ -56,7 +62,10 @@ class RSqliteCurd {
           updated_at_v: DateTime.now().millisecondsSinceEpoch,
         ),
       );
-      await batch.commit();
+
+      if (isConnectBatchCommitInternal) {
+        await connectBatch.commit();
+      }
 
       return true;
     } catch (e) {
@@ -70,7 +79,7 @@ class RSqliteCurd {
   /// - [updateContent]：更新的内容。
   ///
   /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
-  Future<bool> updateSingleRow(Map<String, Object?> updateContent) async {
+  Future<bool> updateRow({required Map<String, Object?> updateContent, required Batch connectBatch, required bool isConnectBatchCommitInternal}) async {
     try {
       await findRowFromUpload();
 
@@ -79,74 +88,60 @@ class RSqliteCurd {
       final String allUpdatedColumns = <String>{...updateContent.keys, ...updatedColumns}.toList().join(',');
 
       // 必然要 update model
-      final Future<void> Function(Function(Batch)) toUpdate = (Function(Batch batch) uploadCallback) async {
-        final Batch batch = db.batch();
-        batch.update(model.getCurrentTableName, updateContent, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
-        uploadCallback(batch);
-        await batch.commit();
-      };
+      connectBatch.update(model.getCurrentTableName, updateContent, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
 
       // R
       if (uploadModel.get_curd_status == CurdStatus.R) {
-        await toUpdate(
-          (Batch batch) {
-            batch.insert(
-              MUpload.getTableName,
-              MUpload.asJsonNoId(
-                aiid_v: null,
-                uuid_v: null,
-                table_name_v: model.getCurrentTableName,
-                row_id_v: model.get_id,
-                row_aiid_v: model.get_aiid,
-                row_uuid_v: model.get_uuid,
-                updated_columns_v: allUpdatedColumns,
-                curd_status_v: CurdStatus.U,
-                upload_status_v: UploadStatus.notUploaded,
-                created_at_v: DateTime.now().millisecondsSinceEpoch,
-                updated_at_v: DateTime.now().millisecondsSinceEpoch,
-              ),
-            );
-          },
+        connectBatch.insert(
+          MUpload.getTableName,
+          MUpload.asJsonNoId(
+            aiid_v: null,
+            uuid_v: null,
+            table_name_v: model.getCurrentTableName,
+            row_id_v: model.get_id,
+            row_aiid_v: model.get_aiid,
+            row_uuid_v: model.get_uuid,
+            updated_columns_v: allUpdatedColumns,
+            curd_status_v: CurdStatus.U,
+            upload_status_v: UploadStatus.notUploaded,
+            created_at_v: DateTime.now().millisecondsSinceEpoch,
+            updated_at_v: DateTime.now().millisecondsSinceEpoch,
+          ),
         );
-        return true;
       }
 
       // C
       if (uploadModel.get_curd_status == CurdStatus.C) {
-        await toUpdate(
-          (Batch batch) {
-            batch.update(
-              MUpload.getTableName,
-              <String, Object?>{
-                MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
-              },
-              where: '${MUpload.row_id} = ?',
-              whereArgs: <Object?>[model.get_id],
-            );
+        connectBatch.update(
+          MUpload.getTableName,
+          <String, Object?>{
+            MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
           },
+          where: '${MUpload.row_id} = ?',
+          whereArgs: <Object?>[model.get_id],
         );
-        return true;
       }
 
       // U
       else if (uploadModel.get_curd_status == CurdStatus.U) {
-        await toUpdate(
-          (Batch batch) {
-            batch.update(
-              MUpload.getTableName,
-              <String, Object?>{
-                MUpload.updated_columns: allUpdatedColumns,
-                MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
-              },
-              where: '${MUpload.row_id} = ?',
-              whereArgs: <Object?>[model.get_id],
-            );
+        connectBatch.update(
+          MUpload.getTableName,
+          <String, Object?>{
+            MUpload.updated_columns: allUpdatedColumns,
+            MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
           },
+          where: '${MUpload.row_id} = ?',
+          whereArgs: <Object?>[model.get_id],
         );
-        return true;
       } else {
         throw 'unkown currentCurdStatus: ${uploadModel.get_curd_status}';
       }
+
+      if (isConnectBatchCommitInternal) {
+        await connectBatch.commit();
+      }
+
+      return true;
     } catch (e) {
       dLog(() => 'update err: ', () => e);
       return false;
@@ -154,18 +149,19 @@ class RSqliteCurd {
   }
 
   /// 对 [model] 的 [delete] 操作。
-  /// - [model]：将被删除的 [model]
-  Future<bool> deleteSingleRow(Batch batch) async {
+  ///
+  /// 当将被 delete 的 row 不存在时，并不会抛异常，这是 delete 本身的特性。
+  Future<bool> deleteRow({required Batch connectBatch, required bool isConnectBatchCommitInternal}) async {
     try {
       await findRowFromUpload();
 
       // 无论 CURD 都需要删除本体
-      batch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+      connectBatch.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
 
       // C
       if (uploadModel.get_curd_status == CurdStatus.C) {
         // 直接删除本体对应的 MUpload
-        batch.delete(
+        connectBatch.delete(
           MUpload.getTableName,
           where: '${MUpload.row_id} = ?',
           whereArgs: <Object?>[model.get_id],
@@ -175,9 +171,12 @@ class RSqliteCurd {
       // U
       else if (uploadModel.get_curd_status == CurdStatus.U) {
         // 将本体对应的 MUpload 的 curd_status 置为 D
-        batch.update(
+        connectBatch.update(
           MUpload.getTableName,
-          <String, Object?>{MUpload.curd_status: CurdStatus.D},
+          <String, Object?>{
+            MUpload.curd_status: CurdStatus.D,
+            MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
+          },
           where: '${MUpload.row_id} = ?',
           whereArgs: <Object?>[model.get_id],
         );
@@ -186,7 +185,7 @@ class RSqliteCurd {
       // R
       else if (uploadModel.get_curd_status == CurdStatus.R) {
         // 生成本体对应的 MUpload ，并设 curd_status 为 D
-        batch.insert(
+        connectBatch.insert(
           MUpload.getTableName,
           MUpload.asJsonNoId(
             aiid_v: null,
@@ -210,15 +209,17 @@ class RSqliteCurd {
       }
 
       // 同时删除外键约束
-      await _toDeleteForeignKeyBelongsTo(batch: batch);
-      await _toDeleteForeignKeyHaveMany(batch: batch);
+      await _toDeleteForeignKeyBelongsTo(connectBatch: connectBatch);
+      await _toDeleteForeignKeyHaveMany(connectBatch: connectBatch);
 
       // 若全部递归完成（全部递归都处在同一条异步中），则提交事务
-      await batch.commit();
+      if (isConnectBatchCommitInternal) {
+        await connectBatch.commit();
+      }
 
       return true;
     } catch (e) {
-      dLog(() => 'deleteSingleRow: ', () => e);
+      dLog(() => 'delete err: ', () => e);
       return false;
     }
   }
@@ -226,7 +227,7 @@ class RSqliteCurd {
   /// 筛选出需要同时删除的外键 row
   ///
   /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
-  Future<void> _toDeleteForeignKeyBelongsTo({required Batch batch}) async {
+  Future<void> _toDeleteForeignKeyBelongsTo({required Batch connectBatch}) async {
     // for single
     for (int i = 0; i < model.getDeleteForeignKeyFollowCurrentForSingle.length; i++) {
       final String foreignKeyName = model.getDeleteForeignKeyFollowCurrentForSingle.elementAt(i);
@@ -242,7 +243,7 @@ class RSqliteCurd {
         foreignKeyTableName = foreignKeyTableNameAndColumnName[0];
         foreignKeyColumnName = foreignKeyTableNameAndColumnName[1];
         await _recursionDelete(
-          batch: batch,
+          connectBatch: connectBatch,
           tableName: foreignKeyTableName,
           columnName: foreignKeyColumnName,
           columnNameValue: foreignKeyValue,
@@ -275,7 +276,7 @@ class RSqliteCurd {
           foreignKeyTableNameAiid = foreignKeyTableNameAndColumnNameAiid[0];
           foreignKeyColumnNameAiid = foreignKeyTableNameAndColumnNameAiid[1];
           await _recursionDelete(
-            batch: batch,
+            connectBatch: connectBatch,
             tableName: foreignKeyTableNameAiid,
             columnName: foreignKeyColumnNameAiid,
             columnNameValue: foreignKeyValueForAiid,
@@ -287,7 +288,7 @@ class RSqliteCurd {
           foreignKeyTableNameUuid = foreignKeyTableNameAndColumnNameUuid[0];
           foreignKeyColumnNameUuid = foreignKeyTableNameAndColumnNameUuid[1];
           await _recursionDelete(
-            batch: batch,
+            connectBatch: connectBatch,
             tableName: foreignKeyTableNameUuid,
             columnName: foreignKeyColumnNameUuid,
             columnNameValue: foreignKeyValueForUuid,
@@ -300,7 +301,7 @@ class RSqliteCurd {
   /// 筛选出需要同时删除其他关联该表中的外键的 row
   ///
   /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
-  Future<void> _toDeleteForeignKeyHaveMany({required Batch batch}) async {
+  Future<void> _toDeleteForeignKeyHaveMany({required Batch connectBatch}) async {
     // for single
     for (int i = 0; i < model.getDeleteManyForeignKeyForSingle.length; i++) {
       final List<String> manyTableNameAndColumnNameAndCurrentColumnName = model.getDeleteManyForeignKeyForSingle[i].split('.');
@@ -312,7 +313,7 @@ class RSqliteCurd {
       // 若 value 为 null，则说明其外表关联的键为 null，意味着没有值没有被关联(row 名被关联)
       if (currentValue != null) {
         await _recursionDelete(
-          batch: batch,
+          connectBatch: connectBatch,
           tableName: manyTableName,
           columnName: manyColumnName,
           columnNameValue: currentValue,
@@ -348,14 +349,14 @@ class RSqliteCurd {
         throw '$currentColumnNameValueAiid.$currentColumnNameValueUuid';
       } else if (currentColumnNameValueAiid != null) {
         await _recursionDelete(
-          batch: batch,
+          connectBatch: connectBatch,
           tableName: manyTableName,
           columnName: manyColumnNameAiid,
           columnNameValue: currentColumnNameValueAiid,
         );
       } else if (currentColumnNameValueUuid != null) {
         await _recursionDelete(
-          batch: batch,
+          connectBatch: connectBatch,
           tableName: manyTableName,
           columnName: manyColumnNameUuid,
           columnNameValue: currentColumnNameValueUuid,
@@ -365,7 +366,7 @@ class RSqliteCurd {
   }
 
   /// 对每个被筛选出来的外键所对应的 row 进行递归 delete
-  Future<void> _recursionDelete({required Batch batch, required String tableName, required String columnName, required Object columnNameValue}) async {
+  Future<void> _recursionDelete({required Batch connectBatch, required String tableName, required String columnName, required Object columnNameValue}) async {
     // 查询外键对应的 row 模型
     final List<MBase> query = await MBase.queryByTableNameAsModels(
       tableName: tableName,
@@ -376,7 +377,7 @@ class RSqliteCurd {
     // length 为 0 时，说明对应的 row 已被 delete
     // 把查询到的进行递归 delete
     if (query.isNotEmpty) {
-      await RSqliteCurd.byModel(query.first).deleteSingleRow(batch);
+      await RSqliteCurd.byModel(query.first).deleteRow(connectBatch: connectBatch, isConnectBatchCommitInternal: false);
     }
   }
 
@@ -408,14 +409,17 @@ class RSqliteCurd {
         uploadModel = uploadModels.first;
       }
 
+      // curd_status_v 不为 CurdStatus 时，在 curd 操作中进行判断，不在这里判断
+
       // 若为 uploading 状态，则需要先判断是否已经 upload 成功，成功则修改成 uploaded 后才能继续。
       if (uploadModel.get_upload_status == null) {
-        throw 'uploadModel.get_upload_status == null';
+        throw '${uploadModel.get_upload_status}';
       } else if (uploadModel.get_upload_status == UploadStatus.uploading) {
         //TODO: 从 mysql 中对照是否 upload 成功过，若成功过则设为 uploaded，若未成功过则进行 upload 后再设为 uploaded
       }
     } catch (e) {
-      throw 'findFromUploadModel err';
+      dLog(() => e);
+      throw 'findFromUploadModel err: $e';
     }
   }
 

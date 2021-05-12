@@ -5,6 +5,11 @@ import 'dart:io';
 import 'package:jysp/Database/Run/Content.dart';
 import 'package:jysp/Database/Run/ModelConfig.dart';
 
+enum ModelCategory {
+  onlySqlite,
+  SqliteAndMysql,
+}
+
 enum SqliteType {
   // Sqlite 类型
   TEXT,
@@ -62,6 +67,9 @@ List<String> dartType = <String>['String', 'int'];
 
 /// 全局枚举。eg. ["enum ABC {a,b,c}"]
 List<String> globalEnum = <String>[];
+
+/// 模型对应的类型。eg. {'table_name':ModelCategory.onlySqlite}
+Map<String, ModelCategory> modelCategorys = <String, ModelCategory>{};
 
 /// 模型名称、字段。eg. {"table_name":{"field1":[SqliteType.TEXT,"int"]}}
 Map<String, Map<String, List<Object>>> modelFields = <String, Map<String, List<Object>>>{};

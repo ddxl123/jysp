@@ -6,6 +6,7 @@ import 'package:jysp/Database/Run/main.dart';
 abstract class FieldBase {
   void createModel() {
     CreateModel(
+      modelCategory: modelCategory,
       tableNameWithS: tableNameWithS,
       createFields: (Map<String, List<Object>> Function({
         required String fieldName,
@@ -143,6 +144,9 @@ abstract class FieldBase {
 
   /// 第一个参数：枚举名称。第二个参数：枚举成员。
   late String Function(String, List<String>) setExtraEnumMembers;
+
+  /// 当前模型类型
+  ModelCategory get modelCategory;
 
   String get tableNameWithS;
   List<Map<String, List<Object>>> get createFields;
