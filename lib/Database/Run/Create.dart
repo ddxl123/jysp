@@ -27,7 +27,7 @@ class CreateModel {
     modelFields.addAll(
       <String, Map<String, List<Object>>>{
         tableNameWithS: <String, List<Object>>{
-          'id': <Object>[SqliteType.INTEGER, SqliteType.UNSIGNED, SqliteType.PRIMARY_KEY, SqliteType.AUTOINCREMENT, 'int'],
+          'id': <Object>[SqliteType.INTEGER, SqliteType.PRIMARY_KEY, SqliteType.AUTOINCREMENT, 'int'],
           'aiid': <Object>[SqliteType.INTEGER, 'int'],
           'uuid': <Object>[SqliteType.TEXT, 'String'],
           ...() {
@@ -38,8 +38,8 @@ class CreateModel {
             }
             return fieldsMap;
           }(),
-          'created_at': <Object>[SqliteType.INTEGER, SqliteType.UNSIGNED, 'int'],
-          'updated_at': <Object>[SqliteType.INTEGER, SqliteType.UNSIGNED, 'int'],
+          'created_at': <Object>[SqliteType.INTEGER, 'int'],
+          'updated_at': <Object>[SqliteType.INTEGER, 'int'],
         },
       },
     );
@@ -118,7 +118,7 @@ class CreateModel {
     if (setFieldType == SetFieldType.foreign_key_x_aiid_integer) {
       toSetManyForTwo(fieldName: fieldName, foreignKeyColumnNameWithTableName: foreignKeyColumnNameWithTableName);
       toSetDeleteForTwo(fieldName: fieldName, isDeleteForeignKeyFollowCurrent: isDeleteForeignKeyFollowCurrent, isDeleteCurrentFollowForeignKey: isDeleteCurrentFollowForeignKey);
-      return toSetFieldType(fieldName: fieldName, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER, SqliteType.UNSIGNED], dartFieldType: 'int');
+      return toSetFieldType(fieldName: fieldName, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'int');
     }
     // 有对应的 aaid 时使用
     else if (setFieldType == SetFieldType.foreign_key_x_uuid_text) {
@@ -130,7 +130,7 @@ class CreateModel {
     else if (setFieldType == SetFieldType.foreign_key_any_integer) {
       toSetManyForSingle(fieldName: fieldName, foreignKeyColumnNameWithTableName: foreignKeyColumnNameWithTableName);
       toSetDeleteForSingle(fieldName: fieldName, isDeleteForeignKeyFollowCurrent: isDeleteForeignKeyFollowCurrent, isDeleteCurrentFollowForeignKey: isDeleteCurrentFollowForeignKey);
-      return toSetFieldType(fieldName: fieldName, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER, SqliteType.UNSIGNED], dartFieldType: 'int');
+      return toSetFieldType(fieldName: fieldName, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'int');
     }
     //
     else if (setFieldType == SetFieldType.foreign_key_any_text) {

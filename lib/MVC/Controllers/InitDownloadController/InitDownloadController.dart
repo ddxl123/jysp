@@ -73,7 +73,7 @@ class InitDownloadController extends ChangeNotifier {
     await Future<void>.delayed(const Duration(seconds: 2));
     downloadModuleModels.clear();
     downloadModuleModelModuleNames.clear();
-    downloadModuleModels = await MDownloadModule.queryRowsAsModels();
+    downloadModuleModels = await MDownloadModule.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
     for (final MDownloadModule model in downloadModuleModels) {
       downloadModuleModelModuleNames.add(model.get_module_name!);
     }

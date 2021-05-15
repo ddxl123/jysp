@@ -16,6 +16,8 @@ import 'package:jysp/Tools/TDebug.dart';
 class FragmentPoolController extends ChangeNotifier {
   ///
 
+  final FreeBoxController freeBoxController = FreeBoxController();
+
   /// 需要显示在池内的节点
   final List<MPnPendingPoolNode> pendingPoolNodes = <MPnPendingPoolNode>[];
   final List<MPnMemoryPoolNode> memoryPoolNodes = <MPnMemoryPoolNode>[];
@@ -99,6 +101,8 @@ class FragmentPoolController extends ChangeNotifier {
   }
 
   /// 对指定 nodes 统一操作：
+  ///
+  /// [toPoolType] 为 null 时为当前池类型
   List<MBase> getPoolTypeNodesList([PoolType? toPoolType]) {
     final PoolType poolType = toPoolType ?? getCurrentPoolType;
     return poolTypeSwitch<List<MBase>>(

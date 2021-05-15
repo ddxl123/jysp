@@ -7,7 +7,6 @@ import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
-import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +23,7 @@ class HomePageState extends State<HomePage> {
       child: Stack(
         children: <Widget>[
           FreeBox(
+            freeBoxController: context.read<FragmentPoolController>().freeBoxController,
             backgroundColor: Colors.green,
             viewableWidth: double.maxFinite,
             viewableHeight: double.maxFinite,
@@ -55,7 +55,7 @@ class HomePageState extends State<HomePage> {
                   final bool result = await RPoolNode().insertNewNode(
                     fragmentPoolController: context.read<FragmentPoolController>(),
                     name: text,
-                    position: context.read<FreeBoxController>().screenToBoxTransform(details.focalPoint),
+                    position: context.read<FragmentPoolController>().freeBoxController.screenToBoxTransform(details.focalPoint),
                   );
 
                   // 插入成功，插入失败不进行任何操作
@@ -78,7 +78,7 @@ class HomePageState extends State<HomePage> {
       left: 0,
       child: TextButton(
         onPressed: () {
-          context.read<FreeBoxController>().targetSlide(
+          context.read<FragmentPoolController>().freeBoxController.targetSlide(
                 targetOffset: Offset.zero,
                 targetScale: 1.0,
               );
@@ -107,7 +107,12 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Expanded(child: TextButton(onPressed: () {}, child: const Text('发现'))),
-            Expanded(child: FragmentPoolChoice(fragmentPoolController: context.read<FragmentPoolController>(), freeBoxController: context.read<FreeBoxController>())),
+            Expanded(
+              child: FragmentPoolChoice(
+                fragmentPoolController: context.read<FragmentPoolController>(),
+                freeBoxController: context.read<FragmentPoolController>().freeBoxController,
+              ),
+            ),
             Expanded(child: TextButton(onPressed: () {}, child: const Text('我'))),
           ],
         ),

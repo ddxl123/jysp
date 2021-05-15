@@ -9,8 +9,9 @@
 ///
 ///
 ///
-class A {
-  Type a = A;
-}
 
 void main(List<String> args) {}
+
+Type a<T>() {
+  return int;
+}

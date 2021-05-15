@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/MVC/Views/HomePage/SmallPage/SmallRoute.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 class NodeLongPressMenu extends SmallRoute<void> {
+  NodeLongPressMenu({required this.baseModel});
+  final MBase baseModel;
+
   @override
   Color get backgroundColor => Colors.transparent;
 
@@ -32,7 +38,8 @@ class NodeLongPressMenu extends SmallRoute<void> {
             children: <Widget>[
               TextButton(
                 child: const Text('删除节点'),
-                onPressed: () {
+                onPressed: () async {
+                  await RSqliteCurd.byModel(baseModel).toDeleteRow(connectTransaction: null);
                   Navigator.pop(context!);
                 },
               ),

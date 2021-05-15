@@ -103,7 +103,10 @@ String modelContent(String tableNameWithS, Map<String, List<Object>> fields) {
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 ${extraGlobalEnumContents[tableNameWithS] == true ? "import 'package:jysp/Database/Models/MGlobalEnum.dart';" : ""}
+import 'package:sqflite/sqflite.dart';
+
 ${extraEnumContents[tableNameWithS] ?? ""}
+
 class M${toCamelCaseWillRemoveS(tableNameWithS)} implements MBase{
 
   M${toCamelCaseWillRemoveS(tableNameWithS)}();
@@ -129,13 +132,17 @@ ${fieldNameQuickCall(fields)}
 
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryRowsAsJsons({String? where, List<Object?>? whereArgs}) async {
-    return await db.query(getTableName, where: 'id = ?', whereArgs: whereArgs);
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons({required String? where,required List<Object?>? whereArgs,required Transaction? connectTransaction}) async {
+    if(connectTransaction != null)
+    {
+      return await connectTransaction.query(getTableName, where: where, whereArgs: whereArgs);
+    }
+    return await db.query(getTableName, where: where, whereArgs: whereArgs);
   }
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> queryRowsAsModels({String? where, List<Object?>? whereArgs}) async {
-    final List<Map<String, Object?>> rows = await queryRowsAsJsons(where: where, whereArgs: whereArgs);
+  static Future<List<M${toCamelCaseWillRemoveS(tableNameWithS)}>> queryRowsAsModels({required String? where,required List<Object?>? whereArgs,required Transaction? connectTransaction}) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(where: where, whereArgs: whereArgs,connectTransaction: connectTransaction);
     final List<M${toCamelCaseWillRemoveS(tableNameWithS)}> rowModels = <M${toCamelCaseWillRemoveS(tableNameWithS)}>[];
     for (final Map<String, Object?> row in rows) {
         final M${toCamelCaseWillRemoveS(tableNameWithS)} newRowModel = M${toCamelCaseWillRemoveS(tableNameWithS)}();
@@ -217,10 +224,10 @@ String baseModelContent() {
     importContent += """import 'package:jysp/Database/Models/M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.dart';""";
     queryByTableNameAsModelsContent += """
         case '${modelFields.keys.elementAt(i)}':
-        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsModels(where: where, whereArgs: whereArgs);""";
+        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);""";
     queryByTableNameAsJsonsContent += """
         case '${modelFields.keys.elementAt(i)}':
-        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsJsons(where: where, whereArgs: whereArgs);""";
+        return await M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);""";
   }
 
   String modelCategoryEnumContentBase = '';
@@ -242,6 +249,7 @@ String baseModelContent() {
   return """
 // ignore_for_file: non_constant_identifier_names
 $importContent
+import 'package:sqflite/sqflite.dart';
 
 $modelCategoryEnumContent
 
@@ -304,7 +312,7 @@ abstract class MBase {
   int? get get_created_at;
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<MBase>> queryByTableNameAsModels({required String tableName, String? where, List<Object?>? whereArgs}) async {
+  static Future<List<MBase>> queryByTableNameAsModels({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
     switch (tableName) {
       $queryByTableNameAsModelsContent
       default:
@@ -313,7 +321,7 @@ abstract class MBase {
   }
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryByTableNameAsJsons({required String tableName, String? where, List<Object?>? whereArgs}) async {
+  static Future<List<Map<String, Object?>>> queryByTableNameAsJsons({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
     switch (tableName) {
       $queryByTableNameAsJsonsContent
       default:

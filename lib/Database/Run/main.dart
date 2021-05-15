@@ -17,7 +17,7 @@ enum SqliteType {
   UNIQUE,
   PRIMARY_KEY,
   NOT_NULL,
-  UNSIGNED,
+  // UNSIGNED, // sqlite 没有该类型
   AUTOINCREMENT,
 }
 
@@ -31,13 +31,11 @@ extension SqliteTypeValue on SqliteType {
       case 2:
         return 'UNIQUE';
       case 3:
-        return 'PRIMARY_KEY';
+        return 'PRIMARY KEY';
       case 4:
-        return 'NOT_NULL';
+        return 'NOT NULL';
       case 5:
-        return 'UNSIGNED';
-      case 6:
-        return 'AUTO_INCREMENT';
+        return 'AUTOINCREMENT';
       default:
         throw Exception('Unknown value!');
     }

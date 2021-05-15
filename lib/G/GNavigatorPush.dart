@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
@@ -7,7 +8,6 @@ import 'package:jysp/MVC/Views/HomePage/SmallPage/NodeJustCreated.dart';
 import 'package:jysp/MVC/Views/HomePage/SmallPage/NodeLongPressMenu.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/InitDownloadPage.dart';
 import 'package:jysp/MVC/Views/LoginPage.dart';
-import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/SheetPage/SheetPage.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +47,6 @@ class GNavigatorPush {
         builder: (_) => MultiProvider(
           providers: <SingleChildWidget>[
             ChangeNotifierProvider<FragmentPoolController>(create: (_) => FragmentPoolController()),
-            ChangeNotifierProvider<FreeBoxController>(create: (_) => FreeBoxController()),
           ],
           child: HomePage(),
         ),
@@ -139,8 +138,8 @@ class GNavigatorPush {
     );
   }
 
-  GNavigatorPush.pushNodeLongPressMenu({required BuildContext context}) {
-    Navigator.push(context, NodeLongPressMenu());
+  GNavigatorPush.pushNodeLongPressMenu({required BuildContext context, required MBase baseModel}) {
+    Navigator.push(context, NodeLongPressMenu(baseModel: baseModel));
   }
 
   ///

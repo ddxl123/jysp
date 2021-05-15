@@ -9,10 +9,11 @@
 ///
 ///
 ///
-class A {
-  Type a = A;
-}
 
 void main(List<String> args) {
-  print(A().a.runtimeType);
+  print(a<int>().runtimeType);
+}
+
+Type a<T>() {
+  return int;
 }

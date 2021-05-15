@@ -2,7 +2,10 @@
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 
+import 'package:sqflite/sqflite.dart';
+
 enum CompletePoolNodeType {ordinary,}
+
 class MPnCompletePoolNode implements MBase{
 
   MPnCompletePoolNode();
@@ -38,13 +41,17 @@ class MPnCompletePoolNode implements MBase{
 
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryRowsAsJsons({String? where, List<Object?>? whereArgs}) async {
-    return await db.query(getTableName, where: 'id = ?', whereArgs: whereArgs);
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons({required String? where,required List<Object?>? whereArgs,required Transaction? connectTransaction}) async {
+    if(connectTransaction != null)
+    {
+      return await connectTransaction.query(getTableName, where: where, whereArgs: whereArgs);
+    }
+    return await db.query(getTableName, where: where, whereArgs: whereArgs);
   }
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<MPnCompletePoolNode>> queryRowsAsModels({String? where, List<Object?>? whereArgs}) async {
-    final List<Map<String, Object?>> rows = await queryRowsAsJsons(where: where, whereArgs: whereArgs);
+  static Future<List<MPnCompletePoolNode>> queryRowsAsModels({required String? where,required List<Object?>? whereArgs,required Transaction? connectTransaction}) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(where: where, whereArgs: whereArgs,connectTransaction: connectTransaction);
     final List<MPnCompletePoolNode> rowModels = <MPnCompletePoolNode>[];
     for (final Map<String, Object?> row in rows) {
         final MPnCompletePoolNode newRowModel = MPnCompletePoolNode();

@@ -1,7 +1,18 @@
 enum AppInitStatus {
+  ///准备初始化
+  readyInit,
+
+  /// 初始化完成
   ok,
+
+  /// 表损坏
   tableLost,
+
+  /// 已被初始化过
   initialized,
+
+  /// 异常
+  err,
 }
 
 enum VersionStatus {

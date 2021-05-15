@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
-import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
 class SingleNode extends StatefulWidget {
-  const SingleNode({required this.name, required this.position});
+  /// [baseModel] 当前 model，供调用 base 方法。其他参数 base 可能没有对应方法
+  const SingleNode({required this.name, required this.position, required this.baseModel});
   final String name;
   final String position;
+  final MBase baseModel;
 
   @override
   SingleNodeState createState() => SingleNodeState();
@@ -43,8 +46,8 @@ class SingleNodeState extends State<SingleNode> {
 
   Widget _buildWidget() {
     return Positioned(
-      left: context.read<FreeBoxController>().leftTopOffsetFilling.dx + _left + _onLongPressMoveUpdateOffset.dx,
-      top: context.read<FreeBoxController>().leftTopOffsetFilling.dy + _top + _onLongPressMoveUpdateOffset.dy,
+      left: _left + _onLongPressMoveUpdateOffset.dx,
+      top: _top + _onLongPressMoveUpdateOffset.dy,
       child: Listener(
         onPointerDown: (_) {
           if (_.device > 0) {
@@ -78,7 +81,7 @@ class SingleNodeState extends State<SingleNode> {
             _isLongPress = false;
             _longPressUp();
           }
-          context.read<FreeBoxController>().disableTouch(false);
+          context.read<FragmentPoolController>().freeBoxController.disableTouch(false);
         },
         onPointerCancel: (_) {
           dLog(() => 'cancel');
@@ -92,7 +95,7 @@ class SingleNodeState extends State<SingleNode> {
             _isLongPress = false;
             _longPressCancel();
           }
-          context.read<FreeBoxController>().disableTouch(false);
+          context.read<FragmentPoolController>().freeBoxController.disableTouch(false);
         },
         child: _body(),
       ),
@@ -101,8 +104,8 @@ class SingleNodeState extends State<SingleNode> {
 
   void _longPressStart() {
     dLog(() => '_longPressStart');
-    context.read<FreeBoxController>().disableTouch(true);
-    GNavigatorPush.pushNodeLongPressMenu(context: context);
+    context.read<FragmentPoolController>().freeBoxController.disableTouch(true);
+    GNavigatorPush.pushNodeLongPressMenu(context: context, baseModel: widget.baseModel);
   }
 
   void _longPressMove() {
@@ -119,8 +122,8 @@ class SingleNodeState extends State<SingleNode> {
 
   // Widget _buildWidget() {
   //   return Positioned(
-  //     left: context.read<FreeBoxController>().leftTopOffsetFilling.dx + left + _onLongPressMoveUpdateOffset.dx,
-  //     top: context.read<FreeBoxController>().leftTopOffsetFilling.dy + top + _onLongPressMoveUpdateOffset.dy,
+  //     left:  context.read<FragmentPoolController>().freeBoxController.leftTopOffsetFilling.dx + left + _onLongPressMoveUpdateOffset.dx,
+  //     top:  context.read<FragmentPoolController>().freeBoxController.leftTopOffsetFilling.dy + top + _onLongPressMoveUpdateOffset.dy,
   //     child: GestureDetector(
   //       onLongPressStart: (details) {
   //         dLog(() => "onLongPressStart");

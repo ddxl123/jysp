@@ -14,9 +14,6 @@ mixin _Root on _Init {
   /// 偏移值,默认必须(0,0)
   Offset offset = const Offset(0, 0) - const Offset(100, 100);
 
-  /// 左上角偏移填充
-  Offset leftTopOffsetFilling = const Offset(100, 100);
-
   bool doRebuild = false;
 
   ///
@@ -147,7 +144,7 @@ mixin _CommonTool on _TouchEvent {
 
   /// 屏幕坐标转盒子坐标
   Offset screenToBoxTransform(Offset screenPosition) {
-    return (screenPosition - offset) / scale - const Offset(100, 100);
+    return (screenPosition - offset) / scale;
   }
 
   /// 滑动至目标位置

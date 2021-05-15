@@ -17,11 +17,7 @@ enum RequestInterruptedType {
   refreshTokenRefreshTokenExpired, // 刷新 tokens 失败，代表 refresh 过期
 
   /// 响应数据
-  codeAndDataNotMap,
-  codeAndDataServerErr,
-  codeAndDataCodeNotInt,
-  codeAndDataDataNotT,
-  codeAndDataUnknownError,
+  codeAndDataError,
 
   /// catch local error
   localDioError,

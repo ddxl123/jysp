@@ -6,6 +6,7 @@ import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/G/GSqlite/SqliteDiag.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 class AppInit {
   ///
@@ -15,36 +16,46 @@ class AppInit {
   /// 注意先后顺序
   /// - [return]: [AppInitStatus] or [VersionStatus]
   Future<Object> appInit() async {
-    if (_isAppInited) {
-      return AppInitStatus.initialized;
-    }
-    _isAppInited = true;
+    try {
+      if (_isAppInited) {
+        return AppInitStatus.initialized;
+      }
+      _isAppInited = true;
 
-    // 关于 sqlite 的初始化
-    final Object initResult = await _sqliteInit();
-    if (!(initResult == AppInitStatus.ok)) {
-      return initResult;
-    }
+      // 关于 sqlite 的初始化
+      final Object initResult = await _sqliteInit();
+      if (!(initResult == AppInitStatus.ok)) {
+        return initResult;
+      }
 
-    // 关于其他初始化
-    return await _otherInit();
+      // 关于其他初始化
+      return await _otherInit();
+    } catch (e) {
+      dLog(() => 'appInit err: $e');
+      return AppInitStatus.err;
+    }
   }
 
   Future<Object> _sqliteInit() async {
-    // 解析全部需要的表的 Sql 语句
-    final Map<String, String> sqls = MParseIntoSqls().parseIntoSqls;
+    try {
+      // 解析全部需要的表的 Sql 语句
+      final Map<String, String> sqls = MParseIntoSqls().parseIntoSqls;
 
-    // 打开数据库
-    await openDb();
+      // 打开数据库
+      await openDb();
 
-    // TODO: 先清空，发布版本需要去除
-    await SqliteTools().clearSqlite();
+      // TODO: 先清空，发布版本需要去除
+      await SqliteTools().clearSqlite();
 
-    // 检查应用是否第一次被打开: 根据 [version_info] 表是否存在进行检查
-    if (await SqliteDiag().isTableExist(MVersionInfo.getTableName)) {
-      return _notFirstInit(sqls);
-    } else {
-      return _firstInit(sqls);
+      // 检查应用是否第一次被打开: 根据 [version_info] 表是否存在进行检查
+      if (await SqliteDiag().isTableExist(MVersionInfo.getTableName)) {
+        return _notFirstInit(sqls);
+      } else {
+        return _firstInit(sqls);
+      }
+    } catch (e) {
+      dLog(() => 'sqliteInit err: $e');
+      return AppInitStatus.err;
     }
   }
 

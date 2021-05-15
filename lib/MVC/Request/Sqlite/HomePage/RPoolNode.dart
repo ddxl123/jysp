@@ -11,6 +11,7 @@ import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/TDebug.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 class RPoolNode {
@@ -26,16 +27,16 @@ class RPoolNode {
               return await fragmentPoolController.poolTypeSwitchFuture<List<MBase>>(
                 toPoolType: toPoolType,
                 pendingPoolCB: () async {
-                  return await MPnPendingPoolNode.queryRowsAsModels();
+                  return await MPnPendingPoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
                 },
                 memoryPoolCB: () async {
-                  return await MPnMemoryPoolNode.queryRowsAsModels();
+                  return await MPnMemoryPoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
                 },
                 completePoolCB: () async {
-                  return await MPnCompletePoolNode.queryRowsAsModels();
+                  return await MPnCompletePoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
                 },
                 rulePoolCB: () async {
-                  return await MPnRulePoolNode.queryRowsAsModels();
+                  return await MPnRulePoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
                 },
               );
             }(),
@@ -96,12 +97,16 @@ class RPoolNode {
       );
 
       // 插入 new node
-      RSqliteCurd.byModel(newNodeModel).insertRow(connectBatch: db.batch(), isConnectBatchCommitInternal: true);
+      final MBase? insertReuslt = await RSqliteCurd.byModel(newNodeModel).toInsertRow(connectTransaction: null);
 
       // 让 state 变化
-      fragmentPoolController.getPoolTypeNodesList().add(newNodeModel);
+      if (insertReuslt != null) {
+        // 不能把 newNodeModel 插入，而是把 insertReuslt 插入，因为前者没有 id
+        fragmentPoolController.getPoolTypeNodesList().add(insertReuslt);
+        return true;
+      }
 
-      return true;
+      return false;
     } catch (e) {
       dLog(() => 'createNewNode err:', () => e);
       return false;

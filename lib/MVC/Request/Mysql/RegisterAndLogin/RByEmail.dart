@@ -81,13 +81,13 @@ mixin RByEmail {
       //
       // 服务器验证
       // TODO: POST api/register_and_login/by_email/verify_email
-      await GHttp.sendCreateTokenRequest<Map<String, dynamic>>(
+      await GHttp.sendCreateTokenRequest(
         route: 'api/register_and_login/by_email/verify_email',
         willVerifyData: <String, String>{
           'email': qqEmailTextEditingController.text,
           'code': codeTextEditingController.text,
         },
-        resultCallback: (int code, Map<String, dynamic> data) async {
+        resultCallback: (int code, Map<String, String> data) async {
           switch (code) {
             case 200:
               dLog(() => '邮箱验证码错误!');
@@ -110,7 +110,7 @@ mixin RByEmail {
             case 206:
               dLog(() => '用户 注册 成功并只响应 token!');
               await Token().setSqliteToken(
-                tokens: data as Map<String, String>?,
+                tokens: data,
                 success: () {
                   GNavigatorPush.pushInitDownloadPage(globalKey.currentContext!);
                 },
@@ -123,7 +123,7 @@ mixin RByEmail {
             case 208:
               dLog(() => '用户 登陆 成功并只响应 token!');
               await Token().setSqliteToken(
-                tokens: data as Map<String, String>?,
+                tokens: data,
                 success: () {
                   GNavigatorPush.pushInitDownloadPage(globalKey.currentContext!);
                 },
