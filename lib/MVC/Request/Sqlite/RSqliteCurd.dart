@@ -128,8 +128,8 @@ class RSqliteCurd {
   Future<void> _getMUploadAndcheck({required Transaction connectTransaction}) async {
     // 通过 MUpload 的 row_id 进行 find
     final List<MUpload> uploadModels = await MUpload.queryRowsAsModels(
-      where: '${MUpload.row_id} = ?',
-      whereArgs: <Object?>[model.get_id],
+      where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+      whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
       connectTransaction: connectTransaction,
     );
 
@@ -154,6 +154,10 @@ class RSqliteCurd {
       // 当前 model 的 aiid/uuid 与对应 MUpload 的不匹配
       if (uploadModel.get_row_aiid != model.get_aiid || uploadModel.get_row_uuid != model.get_uuid) {
         throw 'aiid/uuid err: ${uploadModel.get_row_aiid}-${model.get_aiid}-${uploadModel.get_row_uuid}-${model.get_uuid}';
+      }
+      // 当前 model 的 table_name 与对应的 MUpload 的不匹配
+      if (uploadModel.get_table_name != model.getCurrentTableName) {
+        throw 'table_name err: ${uploadModel.get_table_name}-${model.getCurrentTableName}';
       }
     }
 
@@ -269,8 +273,8 @@ class RSqliteCurd {
         <String, Object?>{
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ?',
-        whereArgs: <Object?>[model.get_id],
+        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
       );
     }
 
@@ -282,8 +286,8 @@ class RSqliteCurd {
           MUpload.updated_columns: allUpdatedColumns,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ?',
-        whereArgs: <Object?>[model.get_id],
+        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
       );
     } else {
       throw 'unkown currentCurdStatus: ${uploadModel.get_curd_status}';
@@ -304,8 +308,8 @@ class RSqliteCurd {
       // 直接删除
       await connectTransaction.delete(
         MUpload.getTableName,
-        where: '${MUpload.row_id} = ?',
-        whereArgs: <Object?>[model.get_id],
+        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
       );
     }
 
@@ -318,20 +322,21 @@ class RSqliteCurd {
           MUpload.curd_status: CurdStatus.D,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ?',
-        whereArgs: <Object?>[model.get_id],
+        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
       );
     }
 
     // R
     else if (uploadModel.get_curd_status == CurdStatus.R) {
+      dLog(() => uploadModel.getCurrentTableName);
       // 生成本体对应的 MUpload ，并设 curd_status 为 D
       await connectTransaction.insert(
         MUpload.getTableName,
         MUpload.asJsonNoId(
           aiid_v: uploadModel.get_aiid,
           uuid_v: uploadModel.get_uuid,
-          table_name_v: uploadModel.getCurrentTableName,
+          table_name_v: uploadModel.get_table_name, // 注意这里不是 getCurrentTableName, 而是 get_table_name
           row_id_v: uploadModel.get_row_id,
           row_aiid_v: uploadModel.get_row_aiid,
           row_uuid_v: uploadModel.get_row_uuid,

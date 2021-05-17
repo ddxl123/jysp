@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeLongPressMenuRoute.dart';
 import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:provider/provider.dart';
 
 class SingleNode extends StatefulWidget {
@@ -105,7 +107,7 @@ class SingleNodeState extends State<SingleNode> {
   void _longPressStart() {
     dLog(() => '_longPressStart');
     context.read<FragmentPoolController>().freeBoxController.disableTouch(true);
-    GNavigatorPush.pushNodeLongPressMenu(context: context, baseModel: widget.baseModel);
+    showToastRoute(context, NodeLongPressMenuRoute(baseModel: widget.baseModel));
   }
 
   void _longPressMove() {

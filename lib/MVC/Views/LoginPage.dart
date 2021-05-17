@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
+import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
@@ -15,41 +16,33 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
-      body: Center(
-        child: Container(
-          width: 300,
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
-          decoration: BoxDecoration(
-            color: Colors.yellow,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(offset: Offset(10, 10), blurRadius: 10, spreadRadius: -10),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Flexible(
-                child: Text(
-                  '登陆/注册',
-                  style: TextStyle(fontSize: 18),
-                ),
+      body: Container(
+        alignment: Alignment.center,
+        color: Colors.green,
+        child: RoundedBox(
+          width: MediaQuery.of(context).size.width * 4 / 5,
+          height: null,
+          pidding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
+          children: <Widget>[
+            const Flexible(
+              child: Text(
+                '登陆/注册',
+                style: TextStyle(fontSize: 18),
               ),
-              _emailInputField(),
-              const Flexible(child: SizedBox(height: 10)),
-              Flexible(
-                child: Row(
-                  children: <Widget>[
-                    _codeInputField(),
-                    _sendEmailButton(),
-                  ],
-                ),
+            ),
+            _emailInputField(),
+            const Flexible(child: SizedBox(height: 10)),
+            Flexible(
+              child: Row(
+                children: <Widget>[
+                  _codeInputField(),
+                  _sendEmailButton(),
+                ],
               ),
-              const Flexible(child: SizedBox(height: 10)),
-              _verifyEmailButton(),
-            ],
-          ),
+            ),
+            const Flexible(child: SizedBox(height: 10)),
+            _verifyEmailButton(),
+          ],
         ),
       ),
     );
