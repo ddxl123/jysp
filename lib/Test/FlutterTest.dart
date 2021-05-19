@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/G/GSqlite/GSqlite.dart';
-import 'package:jysp/G/GSqlite/SqliteTools.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 
 class FlutterTest extends StatefulWidget {
   @override

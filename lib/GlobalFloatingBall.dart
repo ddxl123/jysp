@@ -266,7 +266,7 @@ class _TableForTableDataState extends State<TableForTableData> {
         for (int i = 0; i < tableInfo.length; i++) {
           columnNames.add(tableInfo[i]['name']! as String);
         }
-        MBase.queryByTableNameAsModels(tableName: widget.tableName, where: null, whereArgs: null, connectTransaction: null).then(
+        MBase.queryRowsAsModels(tableName: widget.tableName, where: null, whereArgs: null, connectTransaction: null).then(
           (List<MBase> value) {
             data.addAll(value);
             setState(() {});

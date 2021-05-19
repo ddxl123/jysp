@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeLongPressMenuRoute.dart';
@@ -11,10 +13,8 @@ import 'package:provider/provider.dart';
 
 class SingleNode extends StatefulWidget {
   /// [baseModel] 当前 model，供调用 base 方法。其他参数 base 可能没有对应方法
-  const SingleNode({required this.name, required this.position, required this.baseModel});
-  final String name;
-  final String position;
-  final MBase baseModel;
+  const SingleNode({required this.mmodel});
+  final MMFragmentPoolNode<MBase> mmodel;
 
   @override
   SingleNodeState createState() => SingleNodeState();
@@ -38,7 +38,7 @@ class SingleNodeState extends State<SingleNode> {
 
   void _parsePosition() {
     try {
-      final List<String> sp = widget.position.split(',');
+      final List<String> sp = widget.mmodel.get_position!.split(',');
       _left = double.parse(sp[0]);
       _top = double.parse(sp[1]);
     } catch (e) {
@@ -107,7 +107,7 @@ class SingleNodeState extends State<SingleNode> {
   void _longPressStart() {
     dLog(() => '_longPressStart');
     context.read<FragmentPoolController>().freeBoxController.disableTouch(true);
-    showToastRoute(context, NodeLongPressMenuRoute(baseModel: widget.baseModel));
+    showToastRoute(context, NodeLongPressMenuRoute(mmodel: widget.mmodel));
   }
 
   void _longPressMove() {
@@ -147,7 +147,7 @@ class SingleNodeState extends State<SingleNode> {
 
   Widget _body() {
     return TextButton(
-      child: Text(widget.name),
+      child: Text(widget.mmodel.get_name ?? unknown),
       onPressed: () {
         GNavigatorPush.pushSheetPage(context);
       },

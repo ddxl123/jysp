@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MToken.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -26,8 +27,7 @@ class Token {
         throw 'tokenType is null';
       }
       String token = '';
-      final List<MToken> results = await MToken.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
-      dLog(() => results);
+      final List<MToken> results = await MBase.queryRowsAsModels(tableName: MToken.tableName, where: null, whereArgs: null, connectTransaction: null);
       if (results.isNotEmpty) {
         token = results.first.getRowJson[tokenType].toString(); // 当值为 null 时结果为 ''
       }
@@ -60,9 +60,9 @@ class Token {
         // 先清空表，再插入
         await db.transaction(
           (Transaction txn) async {
-            await txn.delete(MToken.getTableName);
+            await txn.delete(MToken.tableName);
             await txn.insert(
-              MToken.getTableName,
+              MToken.tableName,
               MToken.asJsonNoId(
                 aiid_v: null,
                 uuid_v: null,
@@ -76,7 +76,7 @@ class Token {
         ).then(
           (FutureOr<void> onValue) async {
             await success();
-            dLog(() => '生成的 tokens ：', () => null, () async => await db.query(MToken.getTableName));
+            dLog(() => '生成的 tokens ：', () => null, () async => await db.query(MToken.tableName));
           },
         );
       }

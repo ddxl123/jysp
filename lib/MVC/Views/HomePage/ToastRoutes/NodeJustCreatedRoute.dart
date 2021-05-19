@@ -58,7 +58,7 @@ class NodeJustCreatedRoute extends ToastRoute {
           focusNode: _focusNode,
           controller: _txtEditingController,
           onEditingComplete: () {
-            // 点击提交时也 pop
+            // 不仅返回时执行 future ，点击键盘的提交按钮时也 pop->future
             Navigator.pop(context);
           },
         ),

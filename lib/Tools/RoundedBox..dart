@@ -3,11 +3,18 @@ import 'package:flutter/material.dart';
 /// 圆角框
 class RoundedBox extends StatelessWidget {
   /// [width]\[height] 最大值为屏幕宽\高度值，为 null 时按照子 widget 的宽\高值。
-  const RoundedBox({required this.width, required this.height, required this.pidding, required this.children});
+  const RoundedBox({
+    required this.width,
+    required this.height,
+    required this.pidding,
+    required this.children,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+  });
 
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? pidding;
+  final CrossAxisAlignment crossAxisAlignment;
   final List<Widget> children;
 
   @override
@@ -25,8 +32,10 @@ class RoundedBox extends StatelessWidget {
         ],
       ),
       child: SingleChildScrollView(
+        padding: EdgeInsets.zero,
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         child: Column(
+          crossAxisAlignment: crossAxisAlignment,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[...children],
         ),

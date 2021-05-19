@@ -8,17 +8,17 @@ import 'package:sqflite/sqflite.dart';
 /// Sqlite 专属表（没有对应可匹配的 mysql 表）不可用当前类
 ///
 /// T MBase 类型
-class RSqliteCurd {
+class RSqliteCurd<T extends MBase> {
   ///
 
   RSqliteCurd.byModel(this.model) {
-    if (MBase.modelCategory(tableName: model.getCurrentTableName) == ModelCategory.onlySqlite) {
+    if (MBase.modelCategory(tableName: model.getTableName) == ModelCategory.onlySqlite) {
       throw 'ModelCategory can not be onlySqlite';
     }
   }
 
   /// 需要被 CURD 的 [model]。
-  MBase model;
+  T model;
 
   /// 需要被 CURD 的 [model] 对应的 [uploadModel]。
   late MUpload uploadModel;
@@ -34,10 +34,10 @@ class RSqliteCurd {
   ///
   /// 事务中每条 sql 语句都必须 await
 
-  Future<MBase?> toInsertRow({required Transaction? connectTransaction}) async {
+  Future<T?> toInsertRow({required Transaction? connectTransaction}) async {
     if (connectTransaction == null) {
       try {
-        return await db.transaction<MBase>(
+        return await db.transaction<T>(
           (Transaction txn) async {
             return await _insertRow(connectTransaction: txn);
           },
@@ -52,23 +52,21 @@ class RSqliteCurd {
     }
   }
 
-  Future<bool> toUpdateRow({required Map<String, Object?> updateContent, required Transaction? connectTransaction}) async {
+  Future<T?> toUpdateRow({required Map<String, Object?> updateContent, required bool isReturnNewModel, required Transaction? connectTransaction}) async {
     if (connectTransaction == null) {
       try {
-        await db.transaction<void>(
+        return await db.transaction<T?>(
           (Transaction txn) async {
-            await _updateRow(updateContent: updateContent, connectTransaction: txn);
+            return await _updateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, connectTransaction: txn);
           },
         );
-        return true;
       } catch (e) {
         dLog(() => 'update err: $e');
-        return false;
+        return null;
       }
     } else {
       // 这里不能捕获异常，而必须在事务的外部捕获异常
-      await _updateRow(updateContent: updateContent, connectTransaction: connectTransaction);
-      return true;
+      return await _updateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, connectTransaction: connectTransaction);
     }
   }
 
@@ -106,8 +104,8 @@ class RSqliteCurd {
     // 只检查 model 的 aiid/uuid ,而不用再检查 sqlite，因为 model get_xx 是只读的。
 
     // 判断当前 model 的 id 是否存在
-    final List<MBase> queryResult = await MBase.queryByTableNameAsModels(
-      tableName: model.getCurrentTableName,
+    final List<MBase> queryResult = await MBase.queryRowsAsModels(
+      tableName: model.getTableName,
       where: 'id = ?',
       whereArgs: <Object?>[model.get_id],
       connectTransaction: connectTransaction,
@@ -127,9 +125,10 @@ class RSqliteCurd {
   /// 获取并检验 MUpload
   Future<void> _getMUploadAndcheck({required Transaction connectTransaction}) async {
     // 通过 MUpload 的 row_id 进行 find
-    final List<MUpload> uploadModels = await MUpload.queryRowsAsModels(
+    final List<MUpload> uploadModels = await MBase.queryRowsAsModels(
+      tableName: MUpload.tableName,
       where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-      whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
+      whereArgs: <Object?>[model.get_id, model.getTableName],
       connectTransaction: connectTransaction,
     );
 
@@ -138,7 +137,7 @@ class RSqliteCurd {
       uploadModel = MUpload.createModel(
         aiid_v: null,
         uuid_v: null,
-        table_name_v: model.getCurrentTableName,
+        table_name_v: model.getTableName,
         row_id_v: model.get_id,
         row_aiid_v: model.get_aiid,
         row_uuid_v: model.get_uuid,
@@ -156,8 +155,8 @@ class RSqliteCurd {
         throw 'aiid/uuid err: ${uploadModel.get_row_aiid}-${model.get_aiid}-${uploadModel.get_row_uuid}-${model.get_uuid}';
       }
       // 当前 model 的 table_name 与对应的 MUpload 的不匹配
-      if (uploadModel.get_table_name != model.getCurrentTableName) {
-        throw 'table_name err: ${uploadModel.get_table_name}-${model.getCurrentTableName}';
+      if (uploadModel.get_table_name != model.getTableName) {
+        throw 'table_name err: ${uploadModel.get_table_name}-${model.getTableName}';
       }
     }
 
@@ -182,15 +181,18 @@ class RSqliteCurd {
 
   /// 对 [model] 的 [insert] 操作。
   ///
-  /// 若已存在，则抛异常
-  Future<MBase> _insertRow({required Transaction connectTransaction}) async {
+  /// [return]：插入的模型（带有插入后 sqlite 生成的 id），未插入前的 model 不带有 id。
+  ///
+  /// 若已存在，则抛异常.
+  Future<T> _insertRow({required Transaction connectTransaction}) async {
     // 插入时只存在 uuid
     if (model.get_uuid == null || model.get_aiid != null) {
       throw '${model.get_uuid}.${model.get_aiid}';
     }
     // 检查模型是否已存在
-    final List<Map<String, Object?>> queryResult = await MBase.queryByTableNameAsJsons(
-      tableName: model.getCurrentTableName,
+
+    final List<Map<String, Object?>> queryResult = await MBase.queryRowsAsModels(
+      tableName: model.getTableName,
       where: 'uuid = ?',
       whereArgs: <Object>[model.get_uuid!],
       connectTransaction: connectTransaction,
@@ -200,14 +202,14 @@ class RSqliteCurd {
       throw 'The model already exsits.';
     }
 
-    final int rowId = await connectTransaction.insert(model.getCurrentTableName, model.getRowJson);
+    final int rowId = await connectTransaction.insert(model.getTableName, model.getRowJson);
     model.getRowJson['id'] = rowId;
     await connectTransaction.insert(
-      MUpload.getTableName,
+      MUpload.tableName,
       MUpload.asJsonNoId(
         aiid_v: null,
         uuid_v: null,
-        table_name_v: model.getCurrentTableName,
+        table_name_v: model.getTableName,
         row_id_v: rowId,
         row_aiid_v: model.get_aiid,
         row_uuid_v: model.get_uuid,
@@ -230,13 +232,16 @@ class RSqliteCurd {
   /// 对 [model] 的 [update] 操作。
   ///
   /// - [updateContent]：更新的内容。
+  /// - [isReturnNewModel]：是否返回新模型，为 false 时返回 null。
   ///
   /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
   ///
   /// 但 [_haveModel] 函数已经让 [_updateRow] 函数的 row 必然存在。
   ///
   /// 当 {xx:null} 时，会将数据会覆盖成 null; 而 {不存在xx} 时，则并不进行覆盖。
-  Future<void> _updateRow({required Map<String, Object?> updateContent, required Transaction connectTransaction}) async {
+  ///
+  /// [return]：
+  Future<T?> _updateRow({required Map<String, Object?> updateContent, required Transaction connectTransaction, required bool isReturnNewModel}) async {
     await _haveModelAndMUpload(connectTransaction: connectTransaction);
 
     // 新增的 UpdatedColumns 和原来的 UpdatedColumns 合并
@@ -244,16 +249,33 @@ class RSqliteCurd {
     final String allUpdatedColumns = <String>{...updateContent.keys, ...updatedColumns}.toList().join(',');
 
     // 必然要 update model
-    await connectTransaction.update(model.getCurrentTableName, updateContent, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+    await connectTransaction.update(model.getTableName, updateContent, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+
+    T? newModel;
+    if (isReturnNewModel) {
+      final List<T> queryResults = await MBase.queryRowsAsModels<T>(
+        tableName: model.getTableName,
+        where: 'id = ?',
+        whereArgs: <Object?>[model.get_id],
+        connectTransaction: connectTransaction,
+      );
+      if (queryResults.isEmpty) {
+        throw 'query result is empty';
+      } else {
+        newModel = queryResults.first;
+      }
+    } else {
+      newModel = null;
+    }
 
     // R
     if (uploadModel.get_curd_status == CurdStatus.R) {
       await connectTransaction.insert(
-        MUpload.getTableName,
+        MUpload.tableName,
         MUpload.asJsonNoId(
           aiid_v: null,
           uuid_v: null,
-          table_name_v: model.getCurrentTableName,
+          table_name_v: model.getTableName,
           row_id_v: model.get_id,
           row_aiid_v: model.get_aiid,
           row_uuid_v: model.get_uuid,
@@ -269,29 +291,31 @@ class RSqliteCurd {
     // C
     if (uploadModel.get_curd_status == CurdStatus.C) {
       await connectTransaction.update(
-        MUpload.getTableName,
+        MUpload.tableName,
         <String, Object?>{
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
         where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
+        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     }
 
     // U
     else if (uploadModel.get_curd_status == CurdStatus.U) {
       await connectTransaction.update(
-        MUpload.getTableName,
+        MUpload.tableName,
         <String, Object?>{
           MUpload.updated_columns: allUpdatedColumns,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
         where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
+        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     } else {
       throw 'unkown currentCurdStatus: ${uploadModel.get_curd_status}';
     }
+
+    return newModel;
   }
 
   /// 对 [model] 的 [delete] 操作。
@@ -301,15 +325,15 @@ class RSqliteCurd {
     await _haveModelAndMUpload(connectTransaction: connectTransaction);
 
     // 无论 CURD 都需要删除本体
-    await connectTransaction.delete(model.getCurrentTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
+    await connectTransaction.delete(model.getTableName, where: 'id = ?', whereArgs: <Object?>[model.get_id]);
 
     // C
     if (uploadModel.get_curd_status == CurdStatus.C) {
       // 直接删除
       await connectTransaction.delete(
-        MUpload.getTableName,
+        MUpload.tableName,
         where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
+        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     }
 
@@ -317,26 +341,26 @@ class RSqliteCurd {
     else if (uploadModel.get_curd_status == CurdStatus.U) {
       // 将本体对应的 MUpload 的 curd_status 置为 D
       await connectTransaction.update(
-        MUpload.getTableName,
+        MUpload.tableName,
         <String, Object?>{
           MUpload.curd_status: CurdStatus.D,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
         where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getCurrentTableName],
+        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     }
 
     // R
     else if (uploadModel.get_curd_status == CurdStatus.R) {
-      dLog(() => uploadModel.getCurrentTableName);
+      dLog(() => uploadModel.getTableName);
       // 生成本体对应的 MUpload ，并设 curd_status 为 D
       await connectTransaction.insert(
-        MUpload.getTableName,
+        MUpload.tableName,
         MUpload.asJsonNoId(
           aiid_v: uploadModel.get_aiid,
           uuid_v: uploadModel.get_uuid,
-          table_name_v: uploadModel.get_table_name, // 注意这里不是 getCurrentTableName, 而是 get_table_name
+          table_name_v: uploadModel.get_table_name, // 注意这里不是 getTableName, 而是 get_table_name
           row_id_v: uploadModel.get_row_id,
           row_aiid_v: uploadModel.get_row_aiid,
           row_uuid_v: uploadModel.get_row_uuid,
@@ -503,7 +527,7 @@ class RSqliteCurd {
   /// 对每个被筛选出来的外键所对应的 row 进行递归 delete
   Future<void> _recursionDelete({required String tableName, required String columnName, required Object columnNameValue, required Transaction connectTransaction}) async {
     // 查询外键对应的 row 模型
-    final List<MBase> queryResult = await MBase.queryByTableNameAsModels(
+    final List<MBase> queryResult = await MBase.queryRowsAsModels(
       tableName: tableName,
       where: '$columnName = ?',
       whereArgs: <Object>[columnNameValue],
@@ -512,7 +536,7 @@ class RSqliteCurd {
 
     // 把查询到的进行递归 delete
     if (queryResult.isNotEmpty) {
-      await RSqliteCurd.byModel(queryResult.first)._deleteRow(connectTransaction: connectTransaction);
+      await RSqliteCurd<MBase>.byModel(queryResult.first)._deleteRow(connectTransaction: connectTransaction);
     }
   }
 

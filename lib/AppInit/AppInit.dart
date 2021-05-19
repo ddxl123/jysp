@@ -48,7 +48,7 @@ class AppInit {
       await SqliteTools().clearSqlite();
 
       // 检查应用是否第一次被打开: 根据 [version_info] 表是否存在进行检查
-      if (await SqliteDiag().isTableExist(MVersionInfo.getTableName)) {
+      if (await SqliteDiag().isTableExist(MVersionInfo.tableName)) {
         return _notFirstInit(sqls);
       } else {
         return _firstInit(sqls);
@@ -67,7 +67,7 @@ class AppInit {
 
     // 2. 创建 [version_infos] 信息
     await db.insert(
-      MVersionInfo.getTableName,
+      MVersionInfo.tableName,
       MVersionInfo.asJsonNoId(
         aiid_v: null,
         uuid_v: null,

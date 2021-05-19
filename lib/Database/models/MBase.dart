@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/Database/Models/MVersionInfo.dart';import 'package:jysp/Database/Models/MToken.dart';import 'package:jysp/Database/Models/MUser.dart';import 'package:jysp/Database/Models/MUpload.dart';import 'package:jysp/Database/Models/MDownloadModule.dart';import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';import 'package:jysp/Database/Models/MPnRulePoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';import 'package:jysp/Database/Models/MRule.dart';
+import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:sqflite/sqflite.dart';
 
 enum ModelCategory {onlySqlite,SqliteAndMysql,}
@@ -55,56 +56,41 @@ abstract class MBase {
   // ====================================================================
   // ====================================================================
 
-  String get getCurrentTableName;
+  String get getTableName;
   int? get get_id;
   int? get get_aiid;
   String? get get_uuid;
   int? get get_updated_at;
   int? get get_created_at;
 
-  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<MBase>> queryByTableNameAsModels({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
-    switch (tableName) {
-              case 'version_infos':
-        return await MVersionInfo.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'tokens':
-        return await MToken.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'users':
-        return await MUser.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'uploads':
-        return await MUpload.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'download_modules':
-        return await MDownloadModule.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_pending_pool_nodes':
-        return await MPnPendingPoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_memory_pool_nodes':
-        return await MPnMemoryPoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_complete_pool_nodes':
-        return await MPnCompletePoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_rule_pool_nodes':
-        return await MPnRulePoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_pending_pool_nodes':
-        return await MFragmentsAboutPendingPoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_memory_pool_nodes':
-        return await MFragmentsAboutMemoryPoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_complete_pool_nodes':
-        return await MFragmentsAboutCompletePoolNode.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'rules':
-        return await MRule.queryRowsAsModels(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);
-      default:
-        throw 'tableName is unknown';
+  /// 使用 tableName 创建模型
+  static T createEmptyModelByTableName<T extends MBase>(String tableName){
+    switch(tableName){
+      case 'version_infos': return MVersionInfo() as T;case 'tokens': return MToken() as T;case 'users': return MUser() as T;case 'uploads': return MUpload() as T;case 'download_modules': return MDownloadModule() as T;case 'pn_pending_pool_nodes': return MPnPendingPoolNode() as T;case 'pn_memory_pool_nodes': return MPnMemoryPoolNode() as T;case 'pn_complete_pool_nodes': return MPnCompletePoolNode() as T;case 'pn_rule_pool_nodes': return MPnRulePoolNode() as T;case 'fragments_about_pending_pool_nodes': return MFragmentsAboutPendingPoolNode() as T;case 'fragments_about_memory_pool_nodes': return MFragmentsAboutMemoryPoolNode() as T;case 'fragments_about_complete_pool_nodes': return MFragmentsAboutCompletePoolNode() as T;case 'rules': return MRule() as T;
+      default: throw 'unknown tableName: $tableName';
     }
   }
 
   /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryByTableNameAsJsons({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
-    switch (tableName) {
-              case 'version_infos':
-        return await MVersionInfo.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'tokens':
-        return await MToken.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'users':
-        return await MUser.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'uploads':
-        return await MUpload.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'download_modules':
-        return await MDownloadModule.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_pending_pool_nodes':
-        return await MPnPendingPoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_memory_pool_nodes':
-        return await MPnMemoryPoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_complete_pool_nodes':
-        return await MPnCompletePoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'pn_rule_pool_nodes':
-        return await MPnRulePoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_pending_pool_nodes':
-        return await MFragmentsAboutPendingPoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_memory_pool_nodes':
-        return await MFragmentsAboutMemoryPoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'fragments_about_complete_pool_nodes':
-        return await MFragmentsAboutCompletePoolNode.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);        case 'rules':
-        return await MRule.queryRowsAsJsons(where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);
-      default:
-        throw 'tableName is unknown';
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
+    if (connectTransaction != null) {
+      return await connectTransaction.query(tableName, where: where, whereArgs: whereArgs);
     }
+    return await db.query(tableName, where: where, whereArgs: whereArgs);
   }
+
+  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
+  static Future<List<T>> queryRowsAsModels<T extends MBase>({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(tableName: tableName, where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);
+    final List<T> rowModels = <T>[];
+    for (final Map<String, Object?> row in rows) {
+      final T newRowModel = createEmptyModelByTableName(tableName) as T;
+      newRowModel.getRowJson.addAll(row);
+      rowModels.add(newRowModel);
+    }
+    return rowModels;
+  }
+
 
   /// 当前 Model 的类型
   static ModelCategory? modelCategory({required String tableName}){

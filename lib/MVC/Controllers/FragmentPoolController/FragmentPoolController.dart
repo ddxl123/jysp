@@ -2,11 +2,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
+import 'package:jysp/Database/Models/MRule.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
@@ -19,10 +20,10 @@ class FragmentPoolController extends ChangeNotifier {
   final FreeBoxController freeBoxController = FreeBoxController();
 
   /// 需要显示在池内的节点
-  final List<MPnPendingPoolNode> pendingPoolNodes = <MPnPendingPoolNode>[];
-  final List<MPnMemoryPoolNode> memoryPoolNodes = <MPnMemoryPoolNode>[];
-  final List<MPnCompletePoolNode> completePoolNodes = <MPnCompletePoolNode>[];
-  final List<MPnRulePoolNode> rulePoolNodes = <MPnRulePoolNode>[];
+  final List<MMFragmentPoolNode<MPnPendingPoolNode>> pendingPoolNodes = <MMFragmentPoolNode<MPnPendingPoolNode>>[];
+  final List<MMFragmentPoolNode<MPnMemoryPoolNode>> memoryPoolNodes = <MMFragmentPoolNode<MPnMemoryPoolNode>>[];
+  final List<MMFragmentPoolNode<MPnCompletePoolNode>> completePoolNodes = <MMFragmentPoolNode<MPnCompletePoolNode>>[];
+  final List<MMFragmentPoolNode<MRule>> rulePoolNodes = <MMFragmentPoolNode<MRule>>[];
 
   /// 当前展现的碎片池类型
   /// 必须设置默认值：
@@ -103,14 +104,16 @@ class FragmentPoolController extends ChangeNotifier {
   /// 对指定 nodes 统一操作：
   ///
   /// [toPoolType] 为 null 时为当前池类型
-  List<MBase> getPoolTypeNodesList([PoolType? toPoolType]) {
+  ///
+  /// <T>：若已知类型，则传入其类型
+  List<MMFragmentPoolNode<T>> getPoolTypeNodesList<T extends MBase>([PoolType? toPoolType]) {
     final PoolType poolType = toPoolType ?? getCurrentPoolType;
-    return poolTypeSwitch<List<MBase>>(
+    return poolTypeSwitch<List<MMFragmentPoolNode<T>>>(
       toPoolType: poolType,
-      pendingPoolCB: () => pendingPoolNodes,
-      memoryPoolCB: () => memoryPoolNodes,
-      completePoolCB: () => completePoolNodes,
-      rulePoolCB: () => rulePoolNodes,
+      pendingPoolCB: () => pendingPoolNodes as List<MMFragmentPoolNode<T>>,
+      memoryPoolCB: () => memoryPoolNodes as List<MMFragmentPoolNode<T>>,
+      completePoolCB: () => completePoolNodes as List<MMFragmentPoolNode<T>>,
+      rulePoolCB: () => rulePoolNodes as List<MMFragmentPoolNode<T>>,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MDownloadModule.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/MVC/Request/Mysql/InitDownload/RInitDownload.dart';
@@ -73,7 +74,7 @@ class InitDownloadController extends ChangeNotifier {
     await Future<void>.delayed(const Duration(seconds: 2));
     downloadModuleModels.clear();
     downloadModuleModelModuleNames.clear();
-    downloadModuleModels = await MDownloadModule.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
+    downloadModuleModels = await MBase.queryRowsAsModels(tableName: MDownloadModule.tableName, where: null, whereArgs: null, connectTransaction: null);
     for (final MDownloadModule model in downloadModuleModels) {
       downloadModuleModelModuleNames.add(model.get_module_name!);
     }
@@ -88,7 +89,7 @@ class InitDownloadController extends ChangeNotifier {
       final Batch batch = db.batch();
       for (final DownloadModule baseDownloadModule in baseDownloadModuleGroup) {
         batch.insert(
-          MDownloadModule.getTableName,
+          MDownloadModule.tableName,
           MDownloadModule.asJsonNoId(
             aiid_v: null,
             uuid_v: null,
@@ -125,13 +126,13 @@ class InitDownloadController extends ChangeNotifier {
       }
 
       // 2. 清空 sqlite 的 MDownloadQueueModule 表
-      await db.delete(MDownloadModule.getTableName);
+      await db.delete(MDownloadModule.tableName);
 
       // 3. 重新写入
       final Batch batch = db.batch();
       for (final DownloadModule baseDownloadModule in baseDownloadModuleGroup) {
         batch.insert(
-          MDownloadModule.getTableName,
+          MDownloadModule.tableName,
           MDownloadModule.asJsonNoId(
             aiid_v: null,
             uuid_v: null,

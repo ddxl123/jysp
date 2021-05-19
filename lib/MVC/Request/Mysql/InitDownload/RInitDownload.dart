@@ -36,9 +36,9 @@ class RInitDownload {
       resultCallback: (int code, Map<String, dynamic> data) async {
         switch (code) {
           case 300:
-            await db.delete(MUser.getTableName);
+            await db.delete(MUser.tableName);
             await db.insert(
-              MUser.getTableName,
+              MUser.tableName,
               MUser.asJsonNoId(
                 aiid_v: data['id'] as int?,
                 uuid_v: null,
@@ -48,7 +48,7 @@ class RInitDownload {
                 updated_at_v: data[MUser.updated_at] as int?,
               ),
             );
-            dLog(() => 'getUserInfo:', null, () async => await db.query(MUser.getTableName));
+            dLog(() => 'getUserInfo:', null, () async => await db.query(MUser.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -75,13 +75,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 302:
-            await db.delete(MPnPendingPoolNode.getTableName);
+            await db.delete(MPnPendingPoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MPnPendingPoolNode.getTableName,
+                  MPnPendingPoolNode.tableName,
                   MPnPendingPoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -97,7 +97,7 @@ class RInitDownload {
               },
             );
 
-            dLog(() => 'getPendingPoolNodes:', null, () async => await db.query(MPnPendingPoolNode.getTableName));
+            dLog(() => 'getPendingPoolNodes:', null, () async => await db.query(MPnPendingPoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -124,13 +124,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 304:
-            await db.delete(MPnMemoryPoolNode.getTableName);
+            await db.delete(MPnMemoryPoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MPnMemoryPoolNode.getTableName,
+                  MPnMemoryPoolNode.tableName,
                   MPnMemoryPoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -146,7 +146,7 @@ class RInitDownload {
               },
             );
 
-            dLog(() => 'getMemoryPoolNodes:', null, () async => await db.query(MPnMemoryPoolNode.getTableName));
+            dLog(() => 'getMemoryPoolNodes:', null, () async => await db.query(MPnMemoryPoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -173,13 +173,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 306:
-            await db.delete(MPnCompletePoolNode.getTableName);
+            await db.delete(MPnCompletePoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MPnCompletePoolNode.getTableName,
+                  MPnCompletePoolNode.tableName,
                   MPnCompletePoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -195,7 +195,7 @@ class RInitDownload {
               },
             );
 
-            dLog(() => 'getCompletePoolNodes:', null, () async => await db.query(MPnCompletePoolNode.getTableName));
+            dLog(() => 'getCompletePoolNodes:', null, () async => await db.query(MPnCompletePoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -222,13 +222,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 308:
-            await db.delete(MPnRulePoolNode.getTableName);
+            await db.delete(MPnRulePoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MPnRulePoolNode.getTableName,
+                  MPnRulePoolNode.tableName,
                   MPnRulePoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -242,7 +242,7 @@ class RInitDownload {
               },
             );
 
-            dLog(() => 'getRulePoolNodes:', null, () async => await db.query(MPnRulePoolNode.getTableName));
+            dLog(() => 'getRulePoolNodes:', null, () async => await db.query(MPnRulePoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -269,13 +269,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 310:
-            await db.delete(MFragmentsAboutPendingPoolNode.getTableName);
+            await db.delete(MFragmentsAboutPendingPoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MFragmentsAboutPendingPoolNode.getTableName,
+                  MFragmentsAboutPendingPoolNode.tableName,
                   MFragmentsAboutPendingPoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -292,7 +292,7 @@ class RInitDownload {
                 );
               },
             );
-            dLog(() => 'getPendingPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutPendingPoolNode.getTableName));
+            dLog(() => 'getPendingPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutPendingPoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -319,13 +319,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 312:
-            await db.delete(MFragmentsAboutMemoryPoolNode.getTableName);
+            await db.delete(MFragmentsAboutMemoryPoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MFragmentsAboutMemoryPoolNode.getTableName,
+                  MFragmentsAboutMemoryPoolNode.tableName,
                   MFragmentsAboutMemoryPoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -341,7 +341,7 @@ class RInitDownload {
                 );
               },
             );
-            dLog(() => 'getMemoryPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutMemoryPoolNode.getTableName));
+            dLog(() => 'getMemoryPoolNodeFragments:', null, () async => await db.query(MFragmentsAboutMemoryPoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -369,13 +369,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 313:
-            await db.delete(MFragmentsAboutCompletePoolNode.getTableName);
+            await db.delete(MFragmentsAboutCompletePoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MFragmentsAboutCompletePoolNode.getTableName,
+                  MFragmentsAboutCompletePoolNode.tableName,
                   MFragmentsAboutCompletePoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -391,7 +391,7 @@ class RInitDownload {
                 );
               },
             );
-            dLog(() => 'getCompletePoolNodeFragments:', null, () async => await db.query(MFragmentsAboutCompletePoolNode.getTableName));
+            dLog(() => 'getCompletePoolNodeFragments:', null, () async => await db.query(MFragmentsAboutCompletePoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
@@ -419,13 +419,13 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 315:
-            await db.delete(MRule.getTableName);
+            await db.delete(MRule.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MRule.getTableName,
+                  MRule.tableName,
                   MRule.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
@@ -439,7 +439,7 @@ class RInitDownload {
                 );
               },
             );
-            dLog(() => 'getRulePoolNodeFragments:', null, () async => await db.query(MRule.getTableName));
+            dLog(() => 'getRulePoolNodeFragments:', null, () async => await db.query(MRule.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:

@@ -1,17 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
-import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/TDebug.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 class RPoolNode {
@@ -20,23 +19,46 @@ class RPoolNode {
   /// 读取当前池的全部节点
   Future<bool> retrievePoolNodes(FragmentPoolController fragmentPoolController, PoolType toPoolType) async {
     try {
-      // 虽然清除后再重新 addAll，但清除的是 MBase 数据，而 list widget 没有被重置，因此 clear data 后仍保持相同的 state
+      // 虽然清除后再重新 addAll，但清除的是 MBase 数据，而 list widget 的 index 没有被重置，因此 clear data 后仍保持相同的 state
       fragmentPoolController.getPoolTypeNodesList(toPoolType).clear();
       fragmentPoolController.getPoolTypeNodesList(toPoolType).addAll(
             await () async {
-              return await fragmentPoolController.poolTypeSwitchFuture<List<MBase>>(
+              return await fragmentPoolController.poolTypeSwitchFuture<List<MMFragmentPoolNode<MBase>>>(
                 toPoolType: toPoolType,
                 pendingPoolCB: () async {
-                  return await MPnPendingPoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
+                  final List<MPnPendingPoolNode> models =
+                      await MBase.queryRowsAsModels<MPnPendingPoolNode>(tableName: MPnPendingPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+                  final List<MMFragmentPoolNode<MPnPendingPoolNode>> mmodels = <MMFragmentPoolNode<MPnPendingPoolNode>>[];
+                  for (final MPnPendingPoolNode model in models) {
+                    mmodels.add(MMFragmentPoolNode<MPnPendingPoolNode>(model: model));
+                  }
+                  return mmodels;
                 },
                 memoryPoolCB: () async {
-                  return await MPnMemoryPoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
+                  final List<MPnMemoryPoolNode> models =
+                      await MBase.queryRowsAsModels<MPnMemoryPoolNode>(tableName: MPnMemoryPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+                  final List<MMFragmentPoolNode<MPnMemoryPoolNode>> mmodels = <MMFragmentPoolNode<MPnMemoryPoolNode>>[];
+                  for (final MPnMemoryPoolNode model in models) {
+                    mmodels.add(MMFragmentPoolNode<MPnMemoryPoolNode>(model: model));
+                  }
+                  return mmodels;
                 },
                 completePoolCB: () async {
-                  return await MPnCompletePoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
+                  final List<MPnCompletePoolNode> models =
+                      await MBase.queryRowsAsModels<MPnCompletePoolNode>(tableName: MPnCompletePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+                  final List<MMFragmentPoolNode<MPnCompletePoolNode>> mmodels = <MMFragmentPoolNode<MPnCompletePoolNode>>[];
+                  for (final MPnCompletePoolNode model in models) {
+                    mmodels.add(MMFragmentPoolNode<MPnCompletePoolNode>(model: model));
+                  }
+                  return mmodels;
                 },
                 rulePoolCB: () async {
-                  return await MPnRulePoolNode.queryRowsAsModels(where: null, whereArgs: null, connectTransaction: null);
+                  final List<MPnRulePoolNode> models = await MBase.queryRowsAsModels<MPnRulePoolNode>(tableName: MPnRulePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+                  final List<MMFragmentPoolNode<MPnRulePoolNode>> mmodels = <MMFragmentPoolNode<MPnRulePoolNode>>[];
+                  for (final MPnRulePoolNode model in models) {
+                    mmodels.add(MMFragmentPoolNode<MPnRulePoolNode>(model: model));
+                  }
+                  return mmodels;
                 },
               );
             }(),
@@ -97,12 +119,12 @@ class RPoolNode {
       );
 
       // 插入 new node
-      final MBase? insertReuslt = await RSqliteCurd.byModel(newNodeModel).toInsertRow(connectTransaction: null);
+      final MBase? insertReuslt = await RSqliteCurd<MBase>.byModel(newNodeModel).toInsertRow(connectTransaction: null);
 
       // 让 state 变化
       if (insertReuslt != null) {
         // 不能把 newNodeModel 插入，而是把 insertReuslt 插入，因为前者没有 id
-        fragmentPoolController.getPoolTypeNodesList().add(insertReuslt);
+        fragmentPoolController.getPoolTypeNodesList<MBase>().add(MMFragmentPoolNode<MBase>(model: insertReuslt));
         return true;
       }
 

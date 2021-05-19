@@ -9,7 +9,7 @@ class AppVersionManager {
 
   /// 获取被保存在本地应用版本
   Future<String?> _getSavedAppVersion() async {
-    final Object? savedVersion = (await db.query(MVersionInfo.getTableName, limit: 1)).first[MVersionInfo.saved_version];
+    final Object? savedVersion = (await db.query(MVersionInfo.tableName, limit: 1)).first[MVersionInfo.saved_version];
     if (savedVersion == null) {
       throw 'savedVersion is null';
     }

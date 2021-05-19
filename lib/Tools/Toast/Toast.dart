@@ -12,16 +12,21 @@ import 'package:jysp/Tools/Toast/ShowToast.dart';
 abstract class ToastRoute extends OverlayRoute<int> {
   ///
 
-  ///
-  ///
-  /// 需实现的部分
-  ///
-  ///
+  //
+  //
+  // 需实现的部分
+  //
+  //
 
-  /// - 若 [whenPop] 为 null，则代表点击背景不进行 pop；
-  /// - 若返回 true，则异步完后整个 route 被 pop, ；若返回 false，则异步完后 route 不进行 pop，只有等待页面被 pop。
+  /// [whenPop]：
+  /// - 若 [whenPop] 为 null，则代表点击背景会直接 pop；
+  /// - 若返回 true，则异步完后整个 route 被 pop,；
+  /// - 若返回 false，则异步完后 route 不进行 pop，只有等待页面被 pop。
+  ///
+  /// 参数值 [result]：
   /// - 若参数值为 null，则代表(或充当)'点击背景'、'物理返回'。
-  /// - 已经被设定成只会执行一次
+  ///
+  /// 已经被设定成只会执行一次
   Future<Toast<bool>> Function(int? result)? get whenPop;
 
   /// 默认定位

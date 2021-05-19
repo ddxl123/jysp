@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
-import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
-import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
-import 'package:jysp/MVC/Views/HomePage/SnCompletePoolNode.dart';
-import 'package:jysp/MVC/Views/HomePage/SnMemoryPoolNode.dart';
-import 'package:jysp/MVC/Views/HomePage/SnPendingPoolNode.dart';
-import 'package:jysp/MVC/Views/HomePage/SnRulePoolNode.dart';
+import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
 import 'package:provider/provider.dart';
 
 class FragmentPool extends StatefulWidget {
@@ -58,20 +52,7 @@ class _FragmentPoolState extends State<FragmentPool> {
       children: <Widget>[
         for (int i = 0; i < context.read<FragmentPoolController>().getPoolTypeNodesList().length; i++)
           () {
-            return context.read<FragmentPoolController>().poolTypeSwitch<Widget>(
-              pendingPoolCB: () {
-                return SnPendingPoolNode(model: context.read<FragmentPoolController>().getPoolTypeNodesList()[i] as MPnPendingPoolNode);
-              },
-              memoryPoolCB: () {
-                return SnMemoryPoolNode(model: context.read<FragmentPoolController>().getPoolTypeNodesList()[i] as MPnMemoryPoolNode);
-              },
-              completePoolCB: () {
-                return SnCompletePoolNode(model: context.read<FragmentPoolController>().getPoolTypeNodesList()[i] as MPnCompletePoolNode);
-              },
-              rulePoolCB: () {
-                return SnRulePoolNode(model: context.read<FragmentPoolController>().getPoolTypeNodesList()[i] as MPnRulePoolNode);
-              },
-            );
+            return SingleNode(mmodel: context.read<FragmentPoolController>().getPoolTypeNodesList<MBase>()[i]);
           }(),
       ],
     );

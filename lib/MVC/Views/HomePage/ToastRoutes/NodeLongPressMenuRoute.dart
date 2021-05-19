@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeReNameRoute.dart';
+import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:jysp/Tools/Toast/Toast.dart';
 
 class NodeLongPressMenuRoute extends ToastRoute {
-  NodeLongPressMenuRoute({required this.baseModel});
-  final MBase baseModel;
+  NodeLongPressMenuRoute({required this.mmodel});
+  final MMFragmentPoolNode<MBase> mmodel;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.center;
@@ -25,9 +27,10 @@ class NodeLongPressMenuRoute extends ToastRoute {
       Positioned(
         child: Container(
           alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+          child: RoundedBox(
+            width: null,
+            height: null,
+            pidding: null,
             children: <Widget>[
               TextButton(
                 child: const Text('删除节点'),
@@ -39,7 +42,8 @@ class NodeLongPressMenuRoute extends ToastRoute {
                 child: const Text('修改名称'),
                 onPressed: () {
                   Navigator.pop<int>(context, null);
-                  showToastRoute(context, NodeRenameRoute());
+                  // 不仅返回时执行 future ，点击键盘的提交按钮时也 pop->future
+                  showToastRoute(context, NodeRenameRoute(mmodel: mmodel));
                 },
               ),
               TextButton(
@@ -59,7 +63,7 @@ class NodeLongPressMenuRoute extends ToastRoute {
           if (result == null) {
             return showToast(text: '未选择', returnValue: true);
           } else if (result == 0) {
-            final bool isOk = await RSqliteCurd.byModel(baseModel).toDeleteRow(connectTransaction: null);
+            final bool isOk = await RSqliteCurd<MMFragmentPoolNode<MBase>>.byModel(mmodel).toDeleteRow(connectTransaction: null);
             if (isOk) {
               return showToast(text: '删除成功', returnValue: true);
             } else {

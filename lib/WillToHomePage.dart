@@ -5,7 +5,6 @@ import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/GlobalFloatingBall.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
-import 'package:jysp/Tools/TDebug.dart';
 
 class WillToHomePage extends StatefulWidget {
   @override
