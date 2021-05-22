@@ -7,9 +7,8 @@ import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MRule.dart';
+import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/Enums.dart';
-import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/RebuildHandler.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -20,10 +19,10 @@ class FragmentPoolController extends ChangeNotifier {
   final FreeBoxController freeBoxController = FreeBoxController();
 
   /// 需要显示在池内的节点
-  final List<MMFragmentPoolNode<MPnPendingPoolNode>> pendingPoolNodes = <MMFragmentPoolNode<MPnPendingPoolNode>>[];
-  final List<MMFragmentPoolNode<MPnMemoryPoolNode>> memoryPoolNodes = <MMFragmentPoolNode<MPnMemoryPoolNode>>[];
-  final List<MMFragmentPoolNode<MPnCompletePoolNode>> completePoolNodes = <MMFragmentPoolNode<MPnCompletePoolNode>>[];
-  final List<MMFragmentPoolNode<MRule>> rulePoolNodes = <MMFragmentPoolNode<MRule>>[];
+  final List<MMFragmentPoolNode> pendingPoolNodes = <MMFragmentPoolNode>[];
+  final List<MMFragmentPoolNode> memoryPoolNodes = <MMFragmentPoolNode>[];
+  final List<MMFragmentPoolNode> completePoolNodes = <MMFragmentPoolNode>[];
+  final List<MMFragmentPoolNode> rulePoolNodes = <MMFragmentPoolNode>[];
 
   /// 当前展现的碎片池类型
   /// 必须设置默认值：
@@ -106,14 +105,14 @@ class FragmentPoolController extends ChangeNotifier {
   /// [toPoolType] 为 null 时为当前池类型
   ///
   /// <T>：若已知类型，则传入其类型
-  List<MMFragmentPoolNode<T>> getPoolTypeNodesList<T extends MBase>([PoolType? toPoolType]) {
+  List<MMFragmentPoolNode> getPoolTypeNodesList([PoolType? toPoolType]) {
     final PoolType poolType = toPoolType ?? getCurrentPoolType;
-    return poolTypeSwitch<List<MMFragmentPoolNode<T>>>(
+    return poolTypeSwitch<List<MMFragmentPoolNode>>(
       toPoolType: poolType,
-      pendingPoolCB: () => pendingPoolNodes as List<MMFragmentPoolNode<T>>,
-      memoryPoolCB: () => memoryPoolNodes as List<MMFragmentPoolNode<T>>,
-      completePoolCB: () => completePoolNodes as List<MMFragmentPoolNode<T>>,
-      rulePoolCB: () => rulePoolNodes as List<MMFragmentPoolNode<T>>,
+      pendingPoolCB: () => pendingPoolNodes,
+      memoryPoolCB: () => memoryPoolNodes,
+      completePoolCB: () => completePoolNodes,
+      rulePoolCB: () => rulePoolNodes,
     );
   }
 
@@ -151,7 +150,7 @@ class FragmentPoolController extends ChangeNotifier {
       isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.enabled);
 
       // 获取数据：[toPoolType] 的数据
-      final bool result = await RPoolNode().retrievePoolNodes(this, toPoolType);
+      final bool result = await retrievePoolNodes(toPoolType);
 
       switch (result) {
         case true:
@@ -183,6 +182,54 @@ class FragmentPoolController extends ChangeNotifier {
     viewSelectedType[getCurrentPoolType]!['scale'] = freeBoxController.scale;
 
     setCurrentPoolType = toPoolType; // 必须放到设置 viewSelectedType 的后面
+  }
+
+  /// 读取当前池的全部节点
+  Future<bool> retrievePoolNodes(PoolType toPoolType) async {
+    try {
+      // 虽然清除后再重新 addAll，但清除的是 MBase 数据，而 list widget 的 index 没有被重置，因此 clear data 后仍保持相同的 state
+      getPoolTypeNodesList(toPoolType).clear();
+      final List<MMFragmentPoolNode> mmnodes = await poolTypeSwitchFuture<List<MMFragmentPoolNode>>(
+        toPoolType: toPoolType,
+        pendingPoolCB: () async {
+          final List<MPnPendingPoolNode> models = await MBase.queryRowsAsModels<MPnPendingPoolNode>(tableName: MPnPendingPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
+          for (final MPnPendingPoolNode model in models) {
+            mmodels.add(MMFragmentPoolNode(model: model));
+          }
+          return mmodels;
+        },
+        memoryPoolCB: () async {
+          final List<MPnMemoryPoolNode> models = await MBase.queryRowsAsModels<MPnMemoryPoolNode>(tableName: MPnMemoryPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
+          for (final MPnMemoryPoolNode model in models) {
+            mmodels.add(MMFragmentPoolNode(model: model));
+          }
+          return mmodels;
+        },
+        completePoolCB: () async {
+          final List<MPnCompletePoolNode> models = await MBase.queryRowsAsModels<MPnCompletePoolNode>(tableName: MPnCompletePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
+          for (final MPnCompletePoolNode model in models) {
+            mmodels.add(MMFragmentPoolNode(model: model));
+          }
+          return mmodels;
+        },
+        rulePoolCB: () async {
+          final List<MPnRulePoolNode> models = await MBase.queryRowsAsModels<MPnRulePoolNode>(tableName: MPnRulePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
+          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
+          for (final MPnRulePoolNode model in models) {
+            mmodels.add(MMFragmentPoolNode(model: model));
+          }
+          return mmodels;
+        },
+      );
+      getPoolTypeNodesList(toPoolType).addAll(mmnodes);
+      return true;
+    } catch (e) {
+      dLog(() => 'retrievePoolNodes err: ', () => e);
+      return false;
+    }
   }
 
   ///

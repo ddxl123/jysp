@@ -12,44 +12,12 @@ enum Direction { idle, up, down }
 /// 数据获取结果枚举
 enum BodyDataFutureResult { success, fail }
 
-/// [header]：header 位置的 widget
-///
-/// [body]：body 位置的 widget
-///
-/// [loadArea]：loadArea 位置的 widget
-typedef Slivers = List<Widget> Function({
-  required SheetPageController sheetPageController,
-  required Widget Function(Widget content) header,
-  required Widget Function(Widget content) body,
-  required Widget Function() loadArea,
-});
+class Mark<M> {
+  M? value;
+}
 
-typedef BodyDataFuture = Future<BodyDataFutureResult> Function(List<Map<String, String>> bodyData);
-
-/// 控制器
-class SheetPageController extends ChangeNotifier {
+class SheetPageController<T, M> extends ChangeNotifier {
   ///
-
-  /// 内部滑动的 Widget 数据回调
-  late final Slivers slivers;
-
-  /// 内部滑动的数据数组回调
-  late final BodyDataFuture bodyDataFuture;
-
-  /// 内部滑动的数据数组
-  final List<Map<String, String>> bodyData = <Map<String, String>>[
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-    <String, String>{},
-  ];
 
   /// 当前 [sheetRoute]。
   late final Route<void> sheetRoute;
@@ -57,7 +25,7 @@ class SheetPageController extends ChangeNotifier {
   /// [sheet] 中的 [context]。
   late final BuildContext sheetContext;
 
-  /// [sheet] 中的 [setState]。直接 sheetSetState() 即可。
+  /// 整个 [sheet] 中的 [setState]。
   late final Function(void Function() fn) sheetSetState;
 
   /// [header] 中的 [setState]。直接调用 headerSetState() 即可。
@@ -70,6 +38,7 @@ class SheetPageController extends ChangeNotifier {
   Function(void Function() fn) loadAreaSetState = (_) {};
 
   late final Animation<double> animation;
+
   late final AnimationController animationController;
 
   /// 内部滑动控制器
@@ -77,6 +46,15 @@ class SheetPageController extends ChangeNotifier {
 
   /// 加载区控制器
   final SheetLoadAreaController sheetLoadAreaController = SheetLoadAreaController();
+
+  /// 内部滑动的数据数组回调
+  late final Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture;
+
+  /// 内部滑动的数据数组
+  final List<T> bodyData = <T>[];
+
+  /// 异步标记
+  final Mark<M> mark = Mark<M>();
 
   /// 最大高度：屏幕高度-下拉栏高度。
   final double maxHeight = MediaQueryData.fromWindow(window).size.height - MediaQueryData.fromWindow(window).padding.top;
@@ -105,26 +83,32 @@ class SheetPageController extends ChangeNotifier {
   /// 是否正处于获取数据状态，防止 [dataLoad] 被同时触发多次
   bool _isDataLoading = false;
 
+  /// header
+  late Widget Function(SheetPageController<T, M> sheetPageController) header;
+
+  /// body
+  late Widget Function(SheetPageController<T, M> sheetPageController) body;
+
   /// [header] 位置的 widget
-  Widget header(Widget content) {
+  Widget headerStateful() {
     return StatefulBuilder(
       builder: (_, void Function(void Function()) rebuild) {
         if (headerSetState != rebuild) {
           headerSetState = rebuild;
         }
-        return content;
+        return header(this);
       },
     );
   }
 
   /// [body] 位置的 widget
-  Widget body(Widget content) {
+  Widget bodyStateful() {
     return StatefulBuilder(
       builder: (_, void Function(void Function()) rebuild) {
         if (bodySetState != rebuild) {
           bodySetState = rebuild;
         }
-        return content;
+        return body(this);
       },
     );
   }
@@ -136,7 +120,7 @@ class SheetPageController extends ChangeNotifier {
         if (loadAreaSetState != rebuild) {
           loadAreaSetState = rebuild;
         }
-        return SheetLoadArea(sheetPageController: this);
+        return SheetLoadArea<T, M>(sheetPageController: this);
       },
     );
   }
@@ -269,6 +253,8 @@ class SheetPageController extends ChangeNotifier {
   }
 
   /// 异步加载数据
+  ///
+  /// [T]：元素类型
   Future<void> dataLoad() async {
     if (_isDataLoading) {
       return;
@@ -281,12 +267,11 @@ class SheetPageController extends ChangeNotifier {
     loadAreaSetState(() {
       sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
     });
-
-    final BodyDataFutureResult bodyDataFutureResult = await bodyDataFuture(bodyData);
+    final BodyDataFutureResult bodyDataFutureResult = await bodyDataFuture(bodyData, mark);
 
     switch (bodyDataFutureResult) {
       case BodyDataFutureResult.success:
-        sheetSetState(() {});
+        bodySetState(() {});
         loadAreaSetState(() {
           sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
         });

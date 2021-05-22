@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Views/HomePage/SingleNode.dart';
 import 'package:provider/provider.dart';
@@ -52,7 +51,7 @@ class _FragmentPoolState extends State<FragmentPool> {
       children: <Widget>[
         for (int i = 0; i < context.read<FragmentPoolController>().getPoolTypeNodesList().length; i++)
           () {
-            return SingleNode(mmodel: context.read<FragmentPoolController>().getPoolTypeNodesList<MBase>()[i]);
+            return SingleNode(mmodel: context.read<FragmentPoolController>().getPoolTypeNodesList()[i]);
           }(),
       ],
     );

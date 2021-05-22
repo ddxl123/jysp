@@ -5,7 +5,7 @@
 // ignore_for_file: unused_field
 
 import 'package:jysp/Database/Run/Create.dart';
-import 'package:jysp/Database/Run/FieldNameBase.dart';
+import 'package:jysp/Database/Run/CreateModelBase.dart';
 import 'package:jysp/Database/Run/main.dart';
 
 void runCreateModels() {
@@ -21,13 +21,25 @@ void runCreateModels() {
   _fragments_about_pending_pool_nodes().createModel();
   _fragments_about_memory_pool_nodes().createModel();
   _fragments_about_complete_pool_nodes().createModel();
-  _rules().createModel();
+  _fragments_about_rule_pool_nodes().createModel();
   createGlobalEnums(<List<String>>[
     <String>['CurdStatus', 'C', 'U', 'R', 'D'] // C:增，U:改，R:查(默认，即无)，D:删
   ]);
+  createMModel('MMFragmentsAboutPoolNode', <CreateModelBase>[
+    _fragments_about_pending_pool_nodes(),
+    _fragments_about_memory_pool_nodes(),
+    _fragments_about_complete_pool_nodes(),
+    _fragments_about_rule_pool_nodes(),
+  ]);
+  createMModel('MMPoolNode', <CreateModelBase>[
+    _pn_pending_pool_nodes(),
+    _pn_memory_pool_nodes(),
+    _pn_complete_pool_nodes(),
+    _pn_rule_pool_nodes(),
+  ]);
 }
 
-class _version_infos extends FieldBase {
+class _version_infos extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.onlySqlite;
 
@@ -42,7 +54,7 @@ class _version_infos extends FieldBase {
       ];
 }
 
-class _tokens extends FieldBase {
+class _tokens extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.onlySqlite;
 
@@ -59,7 +71,7 @@ class _tokens extends FieldBase {
       ];
 }
 
-class _users extends FieldBase {
+class _users extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
@@ -76,7 +88,7 @@ class _users extends FieldBase {
       ];
 }
 
-class _uploads extends FieldBase {
+class _uploads extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.onlySqlite;
 
@@ -111,7 +123,7 @@ class _uploads extends FieldBase {
       ];
 }
 
-class _download_modules extends FieldBase {
+class _download_modules extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.onlySqlite;
 
@@ -133,15 +145,15 @@ class _download_modules extends FieldBase {
       ];
 }
 
-class _pn_pending_pool_nodes extends FieldBase {
+class _pn_pending_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
   @override
   String get tableNameWithS => 'pn_pending_pool_nodes';
 
-  String recommend_raw_rule_aiid = 'recommend_raw_rule_aiid';
-  String recommend_raw_rule_uuid = 'recommend_raw_rule_uuid';
+  String recommend_rule_aiid = 'recommend_rule_aiid';
+  String recommend_rule_uuid = 'recommend_rule_uuid';
   String type = 'type';
   String name = 'name';
   String position = 'position';
@@ -154,14 +166,14 @@ class _pn_pending_pool_nodes extends FieldBase {
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_x_aiid_integer(
-          fieldName: recommend_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: recommend_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: recommend_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: recommend_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -171,15 +183,15 @@ class _pn_pending_pool_nodes extends FieldBase {
       ];
 }
 
-class _pn_memory_pool_nodes extends FieldBase {
+class _pn_memory_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
   @override
   String get tableNameWithS => 'pn_memory_pool_nodes';
 
-  String using_raw_rule_aiid = 'using_raw_rule_aiid';
-  String using_raw_rule_uuid = 'using_raw_rule_uuid';
+  String using_rule_aiid = 'using_rule_aiid';
+  String using_rule_uuid = 'using_rule_uuid';
   String type = 'type';
   String name = 'name';
   String position = 'position';
@@ -192,14 +204,14 @@ class _pn_memory_pool_nodes extends FieldBase {
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_x_aiid_integer(
-          fieldName: using_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: using_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: using_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: using_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -209,15 +221,15 @@ class _pn_memory_pool_nodes extends FieldBase {
       ];
 }
 
-class _pn_complete_pool_nodes extends FieldBase {
+class _pn_complete_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
   @override
   String get tableNameWithS => 'pn_complete_pool_nodes';
 
-  String used_raw_rule_aiid = 'used_raw_rule_aiid';
-  String used_raw_rule_uuid = 'used_raw_rule_uuid';
+  String used_rule_aiid = 'used_rule_aiid';
+  String used_rule_uuid = 'used_rule_uuid';
   String type = 'type';
   String name = 'name';
   String position = 'position';
@@ -230,14 +242,14 @@ class _pn_complete_pool_nodes extends FieldBase {
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_x_aiid_integer(
-          fieldName: used_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: used_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: used_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: used_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -247,7 +259,7 @@ class _pn_complete_pool_nodes extends FieldBase {
       ];
 }
 
-class _pn_rule_pool_nodes extends FieldBase {
+class _pn_rule_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
@@ -271,7 +283,7 @@ class _pn_rule_pool_nodes extends FieldBase {
       ];
 }
 
-class _fragments_about_pending_pool_nodes extends FieldBase {
+class _fragments_about_pending_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
@@ -282,8 +294,8 @@ class _fragments_about_pending_pool_nodes extends FieldBase {
   String raw_fragment_uuid = 'raw_fragment_uuid';
   String pn_pending_pool_node_aiid = 'pn_pending_pool_node_aiid';
   String pn_pending_pool_node_uuid = 'pn_pending_pool_node_uuid';
-  String recommend_raw_rule_aiid = 'recommend_raw_rule_aiid';
-  String recommend_raw_rule_uuid = 'recommend_raw_rule_uuid';
+  String recommend_rule_aiid = 'recommend_rule_aiid';
+  String recommend_rule_uuid = 'recommend_rule_uuid';
   String title = 'title';
 
   @override
@@ -313,14 +325,14 @@ class _fragments_about_pending_pool_nodes extends FieldBase {
           isDeleteCurrentFollowForeignKey: true,
         ),
         setField_x_aiid_integer(
-          fieldName: recommend_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: recommend_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: recommend_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: recommend_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -328,7 +340,7 @@ class _fragments_about_pending_pool_nodes extends FieldBase {
       ];
 }
 
-class _fragments_about_memory_pool_nodes extends FieldBase {
+class _fragments_about_memory_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
@@ -337,8 +349,8 @@ class _fragments_about_memory_pool_nodes extends FieldBase {
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
   String fragments_about_pending_pool_node_uuid = 'fragments_about_pending_pool_node_uuid';
-  String using_raw_rule_aiid = 'using_raw_rule_aiid';
-  String using_raw_rule_uuid = 'using_raw_rule_uuid';
+  String using_rule_aiid = 'using_rule_aiid';
+  String using_rule_uuid = 'using_rule_uuid';
   String pn_memory_pool_node_aiid = 'pn_memory_pool_node_aiid';
   String pn_memory_pool_node_uuid = 'pn_memory_pool_node_uuid';
 
@@ -357,14 +369,14 @@ class _fragments_about_memory_pool_nodes extends FieldBase {
           isDeleteCurrentFollowForeignKey: true,
         ),
         setField_x_aiid_integer(
-          fieldName: using_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: using_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: using_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: using_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -383,7 +395,7 @@ class _fragments_about_memory_pool_nodes extends FieldBase {
       ];
 }
 
-class _fragments_about_complete_pool_nodes extends FieldBase {
+class _fragments_about_complete_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
@@ -392,8 +404,8 @@ class _fragments_about_complete_pool_nodes extends FieldBase {
 
   String fragments_about_pending_pool_node_aiid = 'fragments_about_pending_pool_node_aiid';
   String fragments_about_pending_pool_node_uuid = 'fragments_about_pending_pool_node_uuid';
-  String used_raw_rule_aiid = 'used_raw_rule_aiid';
-  String used_raw_rule_uuid = 'used_raw_rule_uuid';
+  String used_rule_aiid = 'used_rule_aiid';
+  String used_rule_uuid = 'used_rule_uuid';
   String pn_complete_pool_node_aiid = 'pn_complete_pool_node_aiid';
   String pn_complete_pool_node_uuid = 'pn_complete_pool_node_uuid';
 
@@ -412,14 +424,14 @@ class _fragments_about_complete_pool_nodes extends FieldBase {
           isDeleteCurrentFollowForeignKey: true,
         ),
         setField_x_aiid_integer(
-          fieldName: used_raw_rule_aiid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().aiid),
+          fieldName: used_rule_aiid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().aiid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
         setField_x_uuid_text(
-          fieldName: used_raw_rule_uuid,
-          foreignKeyColumnNameWithTableName: toCombine(_rules().tableNameWithS, _rules().uuid),
+          fieldName: used_rule_uuid,
+          foreignKeyColumnNameWithTableName: toCombine(_fragments_about_rule_pool_nodes().tableNameWithS, _fragments_about_rule_pool_nodes().uuid),
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: false,
         ),
@@ -438,12 +450,12 @@ class _fragments_about_complete_pool_nodes extends FieldBase {
       ];
 }
 
-class _rules extends FieldBase {
+class _fragments_about_rule_pool_nodes extends CreateModelBase {
   @override
   ModelCategory get modelCategory => ModelCategory.SqliteAndMysql;
 
   @override
-  String get tableNameWithS => 'rules';
+  String get tableNameWithS => 'fragments_about_rule_pool_nodes';
 
   String raw_rule_aiid = 'raw_rule_aiid';
   String raw_rule_uuid = 'raw_rule_uuid';

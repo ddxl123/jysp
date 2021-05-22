@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:jysp/Database/Run/CreateModelBase.dart';
 import 'package:jysp/Database/Run/main.dart';
 
 /// 创建模型
@@ -284,4 +285,16 @@ void createGlobalEnums(List<List<String>> enumNameAndMembers) {
     enumString += '}';
     globalEnum.add(enumString);
   }
+}
+
+/// 创建 mmodel
+void createMModel(String mmodelName, List<CreateModelBase> models) {
+  if (!mmodelName.startsWith('MM')) {
+    throw 'mmodel name must is \'MM\' at start';
+  }
+  final List<String> modelNames = <String>[];
+  for (int i = 0; i < models.length; i++) {
+    modelNames.add(models[i].tableNameWithS);
+  }
+  mmodels.addAll(<String, List<String>>{mmodelName: modelNames});
 }

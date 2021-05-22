@@ -12,6 +12,9 @@ import 'package:jysp/Tools/Toast/ShowToast.dart';
 abstract class ToastRoute extends OverlayRoute<int> {
   ///
 
+  ToastRoute(this.fatherContext);
+  final BuildContext fatherContext;
+
   //
   //
   // 需实现的部分

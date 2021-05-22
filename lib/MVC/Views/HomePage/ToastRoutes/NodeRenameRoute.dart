@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
-import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:jysp/Tools/Toast/Toast.dart';
+import 'package:provider/provider.dart';
 
 class NodeRenameRoute extends ToastRoute {
-  NodeRenameRoute({required this.mmodel});
-  final MMFragmentPoolNode<MBase> mmodel;
+  NodeRenameRoute(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
+  final MMFragmentPoolNode mmodel;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.center;
@@ -95,11 +96,13 @@ class NodeRenameRoute extends ToastRoute {
         if (result == null) {
           return showToast<bool>(text: '已取消', returnValue: true);
         } else if (result == 0) {
-          await RSqliteCurd<MMFragmentPoolNode<MBase>>.byModel(mmodel).toUpdateRow(
+          await RSqliteCurd<MMFragmentPoolNode>.byModel(mmodel).toUpdateRow(
             updateContent: <String, Object?>{mmodel.name: _textEditingController.text},
             isReturnNewModel: false,
             connectTransaction: null,
           );
+          mmodel.getRowJson.update(mmodel.name, (Object? value) => _textEditingController.text);
+          fatherContext.read<FragmentPoolController>().needInitStateForSetState(() {});
           return showToast<bool>(text: '修改成功', returnValue: true);
         } else {
           throw 'whenPop err: $result';

@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
-import 'package:jysp/MVC/Request/Sqlite/HomePage/RPoolNode.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool.dart';
 import 'package:jysp/FragmentPool/FragmentPoolChoice.dart';
 import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeJustCreatedRoute.dart';
@@ -38,35 +37,7 @@ class HomePageState extends State<HomePage> {
             ),
             onLongPressStart: (ScaleStartDetails details) {
               dLog(() => 'details.focalPoint', () => details.focalPoint);
-              showToastRoute(
-                context,
-                NodeJustCreatedRoute(
-                  left: details.focalPoint.dx,
-                  top: details.focalPoint.dy,
-                  future: (String text) async {
-                    // 若输入为空，则不进行插入
-                    if (text == '') {
-                      dLog(() => 'text: ', () => text);
-                      return;
-                    }
-
-                    // 若输入不为空，才进行插入
-                    await Future<void>.delayed(const Duration(seconds: 1));
-                    dLog(() => 'text: ', () => text);
-
-                    final bool result = await RPoolNode().insertNewNode(
-                      fragmentPoolController: context.read<FragmentPoolController>(),
-                      name: text,
-                      position: context.read<FragmentPoolController>().freeBoxController.screenToBoxTransform(details.focalPoint),
-                    );
-
-                    // 插入成功，插入失败不进行任何操作
-                    if (result) {
-                      context.read<FragmentPoolController>().needInitStateForSetState(() {});
-                    }
-                  },
-                ),
-              );
+              showToastRoute(context, NodeJustCreatedRoute(context, screenPosition: details.focalPoint));
             },
           ),
         ],

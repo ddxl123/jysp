@@ -3,7 +3,7 @@
 import 'package:jysp/Database/Run/Create.dart';
 import 'package:jysp/Database/Run/main.dart';
 
-abstract class FieldBase {
+abstract class CreateModelBase {
   void createModel() {
     CreateModel(
       modelCategory: modelCategory,

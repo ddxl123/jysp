@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
-import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/G.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 class SingleNode extends StatefulWidget {
   /// [baseModel] 当前 model，供调用 base 方法。其他参数 base 可能没有对应方法
   const SingleNode({required this.mmodel});
-  final MMFragmentPoolNode<MBase> mmodel;
+  final MMFragmentPoolNode mmodel;
 
   @override
   SingleNodeState createState() => SingleNodeState();
@@ -107,7 +107,7 @@ class SingleNodeState extends State<SingleNode> {
   void _longPressStart() {
     dLog(() => '_longPressStart');
     context.read<FragmentPoolController>().freeBoxController.disableTouch(true);
-    showToastRoute(context, NodeLongPressMenuRoute(mmodel: widget.mmodel));
+    showToastRoute(context, NodeLongPressMenuRoute(context, mmodel: widget.mmodel));
   }
 
   void _longPressMove() {
@@ -149,7 +149,7 @@ class SingleNodeState extends State<SingleNode> {
     return TextButton(
       child: Text(widget.mmodel.get_name ?? unknown),
       onPressed: () {
-        GNavigatorPush.pushSheetPage(context);
+        GNavigatorPush.pushSheetPage(context, mmodel: widget.mmodel);
       },
       style: TextButton.styleFrom(
         primary: Colors.red,

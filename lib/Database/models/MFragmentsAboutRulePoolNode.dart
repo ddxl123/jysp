@@ -4,17 +4,17 @@ import 'package:jysp/Database/Models/MBase.dart';
 
 
 
-class MRule implements MBase{
+class MFragmentsAboutRulePoolNode implements MBase{
 
-  MRule();
+  MFragmentsAboutRulePoolNode();
 
   /// 1. insert 时，无需传入 id ，id 是自增的。
   /// 2. 若只创建 model 而并非 inset，id 的值为 null。
-  MRule.createModel({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required int? created_at_v,required int? updated_at_v,}) {
+  MFragmentsAboutRulePoolNode.createModel({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required int? created_at_v,required int? updated_at_v,}) {
     getRowJson.addAll(<String, Object?>{aiid:aiid_v,uuid:uuid_v,raw_rule_aiid:raw_rule_aiid_v,raw_rule_uuid:raw_rule_uuid_v,pn_rule_pool_node_aiid:pn_rule_pool_node_aiid_v,pn_rule_pool_node_uuid:pn_rule_pool_node_uuid_v,created_at:created_at_v,updated_at:updated_at_v,});
   }
 
-  static String get tableName => 'rules';
+  static String get tableName => 'fragments_about_rule_pool_nodes';
 
   static String get id => 'id';
   static String get aiid => 'aiid';

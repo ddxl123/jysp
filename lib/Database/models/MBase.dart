@@ -1,5 +1,5 @@
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/Models/MVersionInfo.dart';import 'package:jysp/Database/Models/MToken.dart';import 'package:jysp/Database/Models/MUser.dart';import 'package:jysp/Database/Models/MUpload.dart';import 'package:jysp/Database/Models/MDownloadModule.dart';import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';import 'package:jysp/Database/Models/MPnRulePoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';import 'package:jysp/Database/Models/MRule.dart';
+import 'package:jysp/Database/Models/MVersionInfo.dart';import 'package:jysp/Database/Models/MToken.dart';import 'package:jysp/Database/Models/MUser.dart';import 'package:jysp/Database/Models/MUpload.dart';import 'package:jysp/Database/Models/MDownloadModule.dart';import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';import 'package:jysp/Database/Models/MPnRulePoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutRulePoolNode.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -66,22 +66,80 @@ abstract class MBase {
   /// 使用 tableName 创建模型
   static T createEmptyModelByTableName<T extends MBase>(String tableName){
     switch(tableName){
-      case 'version_infos': return MVersionInfo() as T;case 'tokens': return MToken() as T;case 'users': return MUser() as T;case 'uploads': return MUpload() as T;case 'download_modules': return MDownloadModule() as T;case 'pn_pending_pool_nodes': return MPnPendingPoolNode() as T;case 'pn_memory_pool_nodes': return MPnMemoryPoolNode() as T;case 'pn_complete_pool_nodes': return MPnCompletePoolNode() as T;case 'pn_rule_pool_nodes': return MPnRulePoolNode() as T;case 'fragments_about_pending_pool_nodes': return MFragmentsAboutPendingPoolNode() as T;case 'fragments_about_memory_pool_nodes': return MFragmentsAboutMemoryPoolNode() as T;case 'fragments_about_complete_pool_nodes': return MFragmentsAboutCompletePoolNode() as T;case 'rules': return MRule() as T;
+      case 'version_infos': return MVersionInfo() as T;case 'tokens': return MToken() as T;case 'users': return MUser() as T;case 'uploads': return MUpload() as T;case 'download_modules': return MDownloadModule() as T;case 'pn_pending_pool_nodes': return MPnPendingPoolNode() as T;case 'pn_memory_pool_nodes': return MPnMemoryPoolNode() as T;case 'pn_complete_pool_nodes': return MPnCompletePoolNode() as T;case 'pn_rule_pool_nodes': return MPnRulePoolNode() as T;case 'fragments_about_pending_pool_nodes': return MFragmentsAboutPendingPoolNode() as T;case 'fragments_about_memory_pool_nodes': return MFragmentsAboutMemoryPoolNode() as T;case 'fragments_about_complete_pool_nodes': return MFragmentsAboutCompletePoolNode() as T;case 'fragments_about_rule_pool_nodes': return MFragmentsAboutRulePoolNode() as T;
       default: throw 'unknown tableName: $tableName';
     }
   }
 
-  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryRowsAsJsons({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
+  /// 参数除了 connectTransaction，其他的与 db.query 相同
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons({
+    required Transaction? connectTransaction,
+    required String tableName,
+    bool? distinct,
+    List<String>? columns,
+    String? where,
+    List<Object?>? whereArgs,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
     if (connectTransaction != null) {
-      return await connectTransaction.query(tableName, where: where, whereArgs: whereArgs);
+      return await connectTransaction.query(
+        tableName,
+        distinct: distinct,
+        columns: columns,
+        where: where,
+        whereArgs: whereArgs,
+        groupBy: groupBy,
+        having: having,
+        orderBy: orderBy,
+        limit: limit,
+        offset: offset,
+      );
     }
-    return await db.query(tableName, where: where, whereArgs: whereArgs);
+    return await db.query(
+      tableName,
+      distinct: distinct,
+      columns: columns,
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    );
   }
 
-  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<T>> queryRowsAsModels<T extends MBase>({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
-    final List<Map<String, Object?>> rows = await queryRowsAsJsons(tableName: tableName, where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);
+  /// 参数除了 connectTransaction，其他的与 db.query 相同
+  static Future<List<T>> queryRowsAsModels<T extends MBase>({
+    required Transaction? connectTransaction,
+    required String tableName,
+    bool? distinct,
+    List<String>? columns,
+    String? where,
+    List<Object?>? whereArgs,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(
+      connectTransaction: connectTransaction,
+      tableName: tableName,
+      distinct: distinct,
+      columns: columns,
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    );
     final List<T> rowModels = <T>[];
     for (final Map<String, Object?> row in rows) {
       final T newRowModel = createEmptyModelByTableName(tableName) as T;
@@ -91,10 +149,9 @@ abstract class MBase {
     return rowModels;
   }
 
-
   /// 当前 Model 的类型
   static ModelCategory? modelCategory({required String tableName}){
-    return <String,ModelCategory>{'version_infos':ModelCategory.onlySqlite,'tokens':ModelCategory.onlySqlite,'users':ModelCategory.SqliteAndMysql,'uploads':ModelCategory.onlySqlite,'download_modules':ModelCategory.onlySqlite,'pn_pending_pool_nodes':ModelCategory.SqliteAndMysql,'pn_memory_pool_nodes':ModelCategory.SqliteAndMysql,'pn_complete_pool_nodes':ModelCategory.SqliteAndMysql,'pn_rule_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_pending_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_memory_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_complete_pool_nodes':ModelCategory.SqliteAndMysql,'rules':ModelCategory.SqliteAndMysql,}[tableName];
+    return <String,ModelCategory>{'version_infos':ModelCategory.onlySqlite,'tokens':ModelCategory.onlySqlite,'users':ModelCategory.SqliteAndMysql,'uploads':ModelCategory.onlySqlite,'download_modules':ModelCategory.onlySqlite,'pn_pending_pool_nodes':ModelCategory.SqliteAndMysql,'pn_memory_pool_nodes':ModelCategory.SqliteAndMysql,'pn_complete_pool_nodes':ModelCategory.SqliteAndMysql,'pn_rule_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_pending_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_memory_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_complete_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_rule_pool_nodes':ModelCategory.SqliteAndMysql,}[tableName];
   }
 }
 

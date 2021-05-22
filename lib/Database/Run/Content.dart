@@ -291,17 +291,75 @@ abstract class MBase {
     }
   }
 
-  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<Map<String, Object?>>> queryRowsAsJsons({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
+  /// 参数除了 connectTransaction，其他的与 db.query 相同
+  static Future<List<Map<String, Object?>>> queryRowsAsJsons({
+    required Transaction? connectTransaction,
+    required String tableName,
+    bool? distinct,
+    List<String>? columns,
+    String? where,
+    List<Object?>? whereArgs,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
     if (connectTransaction != null) {
-      return await connectTransaction.query(tableName, where: where, whereArgs: whereArgs);
+      return await connectTransaction.query(
+        tableName,
+        distinct: distinct,
+        columns: columns,
+        where: where,
+        whereArgs: whereArgs,
+        groupBy: groupBy,
+        having: having,
+        orderBy: orderBy,
+        limit: limit,
+        offset: offset,
+      );
     }
-    return await db.query(tableName, where: where, whereArgs: whereArgs);
+    return await db.query(
+      tableName,
+      distinct: distinct,
+      columns: columns,
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    );
   }
 
-  /// 若 [where]/[whereArgs] 为 null，则 query 的是全部 row。
-  static Future<List<T>> queryRowsAsModels<T extends MBase>({required String tableName, required String? where, required List<Object?>? whereArgs, required Transaction? connectTransaction}) async {
-    final List<Map<String, Object?>> rows = await queryRowsAsJsons(tableName: tableName, where: where, whereArgs: whereArgs, connectTransaction: connectTransaction);
+  /// 参数除了 connectTransaction，其他的与 db.query 相同
+  static Future<List<T>> queryRowsAsModels<T extends MBase>({
+    required Transaction? connectTransaction,
+    required String tableName,
+    bool? distinct,
+    List<String>? columns,
+    String? where,
+    List<Object?>? whereArgs,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
+    final List<Map<String, Object?>> rows = await queryRowsAsJsons(
+      connectTransaction: connectTransaction,
+      tableName: tableName,
+      distinct: distinct,
+      columns: columns,
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    );
     final List<T> rowModels = <T>[];
     for (final Map<String, Object?> row in rows) {
       final T newRowModel = createEmptyModelByTableName(tableName) as T;
@@ -311,12 +369,238 @@ abstract class MBase {
     return rowModels;
   }
 
-
   /// 当前 Model 的类型
   static ModelCategory? modelCategory({required String tableName}){
     return $modelCategorysContent[tableName];
   }
 }
 
+""";
+}
+
+/// mmodel
+String mmodelContent(String mmodelName, List<String> tableNames) {
+  String importContent = '';
+  String switchTypeContent = '';
+  String object = '';
+  String setValueContent = '';
+  final Set<String> fieldKeysNotRespeat = <String>{};
+  String getTableNameCallbackContent = '';
+  String getRowJsonCallbackContent = '';
+  for (int i = 0; i < tableNames.length; i++) {
+    importContent += '''import 'package:jysp/Database/Models/M${toCamelCaseWillRemoveS(tableNames[i])}.dart';''';
+    switchTypeContent += '''
+      case M${toCamelCaseWillRemoveS(tableNames[i])}:
+        m${toCamelCaseWillRemoveS(tableNames[i])} = model as M${toCamelCaseWillRemoveS(tableNames[i])};
+      break;''';
+    object += '''M${toCamelCaseWillRemoveS(tableNames[i])}? m${toCamelCaseWillRemoveS(tableNames[i])};''';
+    setValueContent += '''
+    if (m${toCamelCaseWillRemoveS(tableNames[i])} != null) {
+      return values[$i]();
+    }''';
+    fieldKeysNotRespeat.addAll(modelFields[tableNames[i]]!.keys);
+    getTableNameCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[i])}!.getTableName,''';
+    getRowJsonCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[i])}!.getRowJson,''';
+  }
+  final String getTableNameContent = '''
+  String get getTableName => setValue<String>(
+      <String Function()>[
+        $getTableNameCallbackContent
+        ]);
+  ''';
+
+  final String getRowJsonContent = '''
+  Map<String, Object?> get getRowJson => setValue<Map<String, Object?>>(
+      <Map<String, Object?> Function()>[
+        $getRowJsonCallbackContent
+      ]);
+  ''';
+
+  String fieldKeysContent = '';
+  String fieldValuesContent = '';
+  for (int i = 0; i < fieldKeysNotRespeat.length; i++) {
+    final Map<String, String?> tableNameAndFieldTypes = <String, String?>{};
+    for (int tn = 0; tn < tableNames.length; tn++) {
+      if (modelFields[tableNames[tn]]!.keys.contains(fieldKeysNotRespeat.elementAt(i))) {
+        final String fieldType = modelFields[tableNames[tn]]![fieldKeysNotRespeat.elementAt(i)]!.last as String;
+        tableNameAndFieldTypes.addAll(<String, String?>{tableNames[tn]: fieldType});
+      } else {
+        tableNameAndFieldTypes.addAll(<String, String?>{tableNames[tn]: null});
+      }
+    }
+
+    String fieldKeysCallbackContent = '';
+    for (int tn = 0; tn < tableNames.length; tn++) {
+      if (modelFields[tableNames[tn]]!.keys.contains(fieldKeysNotRespeat.elementAt(i))) {
+        fieldKeysCallbackContent += '''() => M${toCamelCaseWillRemoveS(tableNames[tn])}.${fieldKeysNotRespeat.elementAt(i)},''';
+      } else {
+        fieldKeysCallbackContent += '''argumentErr(),''';
+      }
+    }
+
+    fieldKeysContent += '''
+      String get ${fieldKeysNotRespeat.elementAt(i)} => setValue<String>(
+        <String Function()>[
+          $fieldKeysCallbackContent
+          ]);''';
+
+    final Set<String> fieldTypesNotRespeat = <String>{};
+    for (int tnaft = 0; tnaft < tableNameAndFieldTypes.length; tnaft++) {
+      final String? ft = tableNameAndFieldTypes.values.elementAt(tnaft);
+      if (ft != null) {
+        fieldTypesNotRespeat.add(ft);
+      }
+    }
+    if (fieldTypesNotRespeat.length == 1) {
+      String fieldValuesCallbackContent = '';
+      for (int tn = 0; tn < tableNames.length; tn++) {
+        if (modelFields[tableNames[tn]]!.keys.contains(fieldKeysNotRespeat.elementAt(i))) {
+          fieldValuesCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.get_${fieldKeysNotRespeat.elementAt(i)},''';
+        } else {
+          fieldValuesCallbackContent += '''argumentErr(),''';
+        }
+      }
+      fieldValuesContent += '''
+      ${fieldTypesNotRespeat.first}? get get_${fieldKeysNotRespeat.elementAt(i)} => setValue<${fieldTypesNotRespeat.first}?>(
+        <${fieldTypesNotRespeat.first}? Function()>[
+          $fieldValuesCallbackContent
+        ]);''';
+    } else {
+      for (int tnaft = 0; tnaft < tableNameAndFieldTypes.length; tnaft++) {
+        if (tableNameAndFieldTypes.values.elementAt(tnaft) != null) {
+          String fieldValuesCallbackContent = '';
+          for (int tn = 0; tn < tableNames.length; tn++) {
+            if (modelFields[tableNames[tn]]!.keys.contains(fieldKeysNotRespeat.elementAt(i))) {
+              final String fieldType = modelFields[tableNames[tn]]![fieldKeysNotRespeat.elementAt(i)]!.last as String;
+              if (fieldType == tableNameAndFieldTypes.values.elementAt(tnaft)) {
+                fieldValuesCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.get_${fieldKeysNotRespeat.elementAt(i)},''';
+              } else {
+                fieldValuesCallbackContent += '''argumentErr(),''';
+              }
+            } else {
+              fieldValuesCallbackContent += '''argumentErr(),''';
+            }
+          }
+          fieldValuesContent += '''
+      ${tableNameAndFieldTypes.values.elementAt(tnaft)}? get get_${fieldKeysNotRespeat.elementAt(i)}_${tableNameAndFieldTypes.keys.elementAt(tnaft)} => setValue<${tableNameAndFieldTypes.values.elementAt(tnaft)}?>(
+        <${tableNameAndFieldTypes.values.elementAt(tnaft)}? Function()>[
+          $fieldValuesCallbackContent
+        ]);''';
+        }
+      }
+    }
+  }
+
+  String getDeleteForeignKeyFollowCurrentForSingleContent = '';
+  String getDeleteForeignKeyFollowCurrentForSingleCallbackContent = '';
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    getDeleteForeignKeyFollowCurrentForSingleCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.getDeleteForeignKeyFollowCurrentForSingle,''';
+  }
+  getDeleteForeignKeyFollowCurrentForSingleContent += '''
+  Set<String> get getDeleteForeignKeyFollowCurrentForSingle => setValue<Set<String>>(<Set<String> Function()>[
+        $getDeleteForeignKeyFollowCurrentForSingleCallbackContent
+      ]);
+''';
+
+  String getDeleteForeignKeyFollowCurrentForTwoContent = '';
+  String getDeleteForeignKeyFollowCurrentForTwoCallbackContent = '';
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    getDeleteForeignKeyFollowCurrentForTwoCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.getDeleteForeignKeyFollowCurrentForTwo,''';
+  }
+  getDeleteForeignKeyFollowCurrentForTwoContent += '''
+  Set<String> get getDeleteForeignKeyFollowCurrentForTwo => setValue<Set<String>>(<Set<String> Function()>[
+        $getDeleteForeignKeyFollowCurrentForTwoCallbackContent
+      ]);
+''';
+
+  String getDeleteManyForeignKeyForSingleContent = '';
+  String getDeleteManyForeignKeyForSingleCallbackContent = '';
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    getDeleteManyForeignKeyForSingleCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.getDeleteManyForeignKeyForSingle,''';
+  }
+  getDeleteManyForeignKeyForSingleContent += '''
+  List<String> get getDeleteManyForeignKeyForSingle => setValue<List<String>>(<List<String> Function()>[
+        $getDeleteManyForeignKeyForSingleCallbackContent
+      ]);
+''';
+
+  String getDeleteManyForeignKeyForTwoContent = '';
+  String getDeleteManyForeignKeyForTwoCallbackContent = '';
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    getDeleteManyForeignKeyForTwoCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.getDeleteManyForeignKeyForTwo,''';
+  }
+  getDeleteManyForeignKeyForTwoContent += '''
+  List<String> get getDeleteManyForeignKeyForTwo => setValue<List<String>>(<List<String> Function()>[
+        $getDeleteManyForeignKeyForTwoCallbackContent
+      ]);
+''';
+
+  String getForeignKeyBelongsTosContent = '';
+  String getForeignKeyBelongsTosCallbackContent = '';
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    getForeignKeyBelongsTosCallbackContent += '''() => m${toCamelCaseWillRemoveS(tableNames[tn])}!.getForeignKeyBelongsTos(foreignKeyName: foreignKeyName),''';
+  }
+  getForeignKeyBelongsTosContent += '''
+  String? getForeignKeyBelongsTos({required String foreignKeyName}) => setValue<String?>(<String? Function()>[
+        $getForeignKeyBelongsTosCallbackContent
+      ]);
+''';
+
+  String isGlobalEnumContent = '';
+  bool isGlobalEnum = false;
+  for (int tn = 0; tn < tableNames.length; tn++) {
+    if (extraGlobalEnumContents[tableNames[tn]] == true) {
+      isGlobalEnum = true;
+    }
+  }
+  isGlobalEnumContent += isGlobalEnum == true ? 'import \'package:jysp/Database/Models/MGlobalEnum.dart\';' : '';
+
+  return """
+// ignore_for_file: non_constant_identifier_names
+import 'package:jysp/Database/Models/MBase.dart';
+
+$isGlobalEnumContent
+
+$importContent
+
+class $mmodelName {
+  $mmodelName({required MBase model}) {
+    switch (model.runtimeType) {
+      $switchTypeContent
+      default:
+    }
+  }
+
+  $object
+
+  /// [values] 必须严格按照 0-1 对应的模型顺序
+  V setValue<V>(List<V Function()> values) {
+    $setValueContent
+    throw 'unknown model';
+  }
+
+  V Function() argumentErr<V>() {
+    throw 'argument err';
+  }
+
+$getTableNameContent
+
+$fieldKeysContent
+
+$getRowJsonContent
+
+$fieldValuesContent
+
+$getDeleteForeignKeyFollowCurrentForSingleContent
+
+$getDeleteForeignKeyFollowCurrentForTwoContent
+
+$getDeleteManyForeignKeyForSingleContent
+
+$getDeleteManyForeignKeyForTwoContent
+
+$getForeignKeyBelongsTosContent
+
+}
 """;
 }

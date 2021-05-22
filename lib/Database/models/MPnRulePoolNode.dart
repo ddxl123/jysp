@@ -50,7 +50,7 @@ class MPnRulePoolNode implements MBase{
   // ====================================================================
 
   @override
-  List<String> get getDeleteManyForeignKeyForTwo => <String>['rules.pn_rule_pool_node.',];
+  List<String> get getDeleteManyForeignKeyForTwo => <String>['fragments_about_rule_pool_nodes.pn_rule_pool_node.',];
 
   @override
   List<String> get getDeleteManyForeignKeyForSingle => <String>[];

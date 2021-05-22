@@ -72,6 +72,9 @@ Map<String, ModelCategory> modelCategorys = <String, ModelCategory>{};
 /// 模型名称、字段。eg. {"table_name":{"field1":[SqliteType.TEXT,"int"]}}
 Map<String, Map<String, List<Object>>> modelFields = <String, Map<String, List<Object>>>{};
 
+/// mmodel 模型名称、表名。eg. {'mmodel_name':['table_name1','table_name']}
+Map<String, List<String>> mmodels = <String, List<String>>{};
+
 /// 模型对应的额外枚举内容。eg. {"table_name":"enum ABC {a,b,c}"}
 ///
 /// 值不能为 []，要么是 null 要么元素至少一个
@@ -81,6 +84,7 @@ Map<String, String> extraEnumContents = <String, String>{};
 Map<String, bool> extraGlobalEnumContents = <String, bool>{};
 
 String modelsPath = 'lib/Database/Models';
+String mmodelsPath = 'lib/Database/MergeModels';
 
 // ===============================================================================
 // ===============================================================================
@@ -138,6 +142,7 @@ Future<void> main(List<String> args) async {
   runCreateModels();
   afterRunCreateModels();
   await runWriteModels();
+  await runWriteMModels();
   await runParseIntoSqls();
   await runWriteGlobalEnum();
   await runWriteMBase();
@@ -189,6 +194,16 @@ Future<void> setPath() async {
   } else {
     await Directory(modelsPath).create();
   }
+  // ignore: avoid_slow_async_io
+  if (await Directory(mmodelsPath).exists()) {
+    await Directory(mmodelsPath).list().forEach((FileSystemEntity element) {
+      if (element.uri.pathSegments.last[0] != 'M' && element.uri.pathSegments.last[1] != 'M') {
+        throw 'Unknown file in MModels folder: ${element.uri.pathSegments.last}';
+      }
+    });
+  } else {
+    await Directory(mmodelsPath).create();
+  }
 }
 
 Future<void> runWriteModels() async {
@@ -198,6 +213,13 @@ Future<void> runWriteModels() async {
 
     await File('$modelsPath/M${toCamelCaseWillRemoveS(tableNameWithS)}.dart').writeAsString(modelContent(tableNameWithS, fields));
     print("Named '$tableNameWithS''s table model file is created successfully!");
+  }
+}
+
+Future<void> runWriteMModels() async {
+  for (int i = 0; i < mmodels.length; i++) {
+    await File('$mmodelsPath/${mmodels.keys.elementAt(i)}.dart').writeAsString(mmodelContent(mmodels.keys.elementAt(i), mmodels.values.elementAt(i)));
+    print("Named '${mmodels.keys.elementAt(i)}''s table model file is created successfully!");
   }
 }
 

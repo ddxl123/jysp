@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
-import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeReNameRoute.dart';
 import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:jysp/Tools/Toast/Toast.dart';
+import 'package:provider/provider.dart';
 
 class NodeLongPressMenuRoute extends ToastRoute {
-  NodeLongPressMenuRoute({required this.mmodel});
-  final MMFragmentPoolNode<MBase> mmodel;
+  NodeLongPressMenuRoute(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
+
+  final MMFragmentPoolNode mmodel;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.center;
@@ -43,7 +45,7 @@ class NodeLongPressMenuRoute extends ToastRoute {
                 onPressed: () {
                   Navigator.pop<int>(context, null);
                   // 不仅返回时执行 future ，点击键盘的提交按钮时也 pop->future
-                  showToastRoute(context, NodeRenameRoute(mmodel: mmodel));
+                  showToastRoute(context, NodeRenameRoute(fatherContext, mmodel: mmodel));
                 },
               ),
               TextButton(
@@ -63,8 +65,10 @@ class NodeLongPressMenuRoute extends ToastRoute {
           if (result == null) {
             return showToast(text: '未选择', returnValue: true);
           } else if (result == 0) {
-            final bool isOk = await RSqliteCurd<MMFragmentPoolNode<MBase>>.byModel(mmodel).toDeleteRow(connectTransaction: null);
+            final bool isOk = await RSqliteCurd<MMFragmentPoolNode>.byModel(mmodel).toDeleteRow(connectTransaction: null);
             if (isOk) {
+              fatherContext.read<FragmentPoolController>().getPoolTypeNodesList().remove(mmodel);
+              fatherContext.read<FragmentPoolController>().needInitStateForSetState(() {});
               return showToast(text: '删除成功', returnValue: true);
             } else {
               return showToast(text: '删除失败', returnValue: false);

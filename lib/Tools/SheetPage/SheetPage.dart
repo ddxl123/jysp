@@ -5,21 +5,34 @@ import 'package:flutter/rendering.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-class SheetPage extends OverlayRoute<void> {
+class SheetPage<T, M> extends OverlayRoute<void> {
   ///
 
-  /// [slivers]：内部滑动的 Widget 数据。
+  /// [T]：[bodyData] 的类型
   ///
-  /// [dataFuture]：内部滑动的数据数组。
+  /// [M]：标记类型
   ///
-  /// [sliverFillRemaining]：若为 false，则多余部分为透明；若为 false，则多余部分为 [LoadingArea]。
-  SheetPage({required Slivers slivers, required BodyDataFuture bodyDataFuture}) {
-    sheetPageController.sheetRoute = this;
-    sheetPageController.slivers = slivers;
+  /// [sheetPageController]：若为 null，则自动创建一个 sheetPageController()
+  ///
+  /// [bodyDataFuture]：内部滑动的数据数组。每次触发加载区都会触发该异步。
+  ///   - [bodyData]：可改变该数组元素（不能改变地址）来改变 bodyData。
+  ///
+  /// [header]：返回值必须是一个 sliver
+  ///
+  /// [body]：返回值必须是一个 sliver
+  SheetPage({
+    required this.sheetPageController,
+    required Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture,
+    required Widget Function(SheetPageController<T, M> sheetPageController) header,
+    required Widget Function(SheetPageController<T, M> sheetPageController) body,
+  }) {
     sheetPageController.bodyDataFuture = bodyDataFuture;
+    sheetPageController.header = header;
+    sheetPageController.body = body;
+    sheetPageController.sheetRoute = this;
   }
 
-  final SheetPageController sheetPageController = SheetPageController();
+  final SheetPageController<T, M> sheetPageController;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
@@ -55,7 +68,7 @@ class SheetPage extends OverlayRoute<void> {
   }
 
   Widget _sheet() {
-    return Sheet(sheetPageController: sheetPageController);
+    return Sheet<T, M>(sheetPageController: sheetPageController);
   }
 
   /// 返回监听:
@@ -84,16 +97,16 @@ class SheetPage extends OverlayRoute<void> {
 ///
 ///
 ///
-class Sheet extends StatefulWidget {
+class Sheet<T, M> extends StatefulWidget {
   const Sheet({required this.sheetPageController});
 
-  final SheetPageController sheetPageController;
+  final SheetPageController<T, M> sheetPageController;
 
   @override
-  _SheetState createState() => _SheetState();
+  _SheetState<T, M> createState() => _SheetState<T, M>();
 }
 
-class _SheetState extends State<Sheet> with SingleTickerProviderStateMixin {
+class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -138,12 +151,11 @@ class _SheetState extends State<Sheet> with SingleTickerProviderStateMixin {
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 controller: widget.sheetPageController.scrollController,
-                slivers: widget.sheetPageController.slivers(
-                  sheetPageController: widget.sheetPageController,
-                  header: widget.sheetPageController.header,
-                  body: widget.sheetPageController.body,
-                  loadArea: widget.sheetPageController.loadArea,
-                ),
+                slivers: <Widget>[
+                  widget.sheetPageController.headerStateful(),
+                  widget.sheetPageController.bodyStateful(),
+                  widget.sheetPageController.loadArea(),
+                ],
               ),
             ),
           ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
@@ -51,69 +54,75 @@ class GNavigatorPush {
     );
   }
 
-  GNavigatorPush.pushSheetPage(BuildContext context) {
+  GNavigatorPush.pushSheetPage(BuildContext context, {required MMFragmentPoolNode mmodel}) {
     Navigator.push(
       context,
-      SheetPage(
-        bodyDataFuture: (List<Map<String, String>> bodyData) async {
-          await Future<void>.delayed(const Duration(seconds: 2));
+      SheetPage<String, int>(
+        sheetPageController: SheetPageController<String, int>(),
+        bodyDataFuture: (List<String> bodyData, Mark<int> mark) async {
+          try {
+            const int readCount = 10;
+            mark.value ??= 0;
+            await Future<void>.delayed(const Duration(seconds: 2));
+          dasdasdads  final List<MBase> queryResults = await MBase.queryRowsAsModels(
+              connectTransaction: null,
+              tableName: mmodel.getTableName,
+              columns: <String>[mmodel.name], // 只获取该列
+              limit: readCount,
+              offset: mark.value, // 会从 mark.value + 1 的 index 开始
+            );
+
+            // 全部成功后才能对其增值
+            // 当第一次取 0-10 个时, 下一次取 11-20 个、
+            mark.value = mark.value! + readCount;
+          } catch (e) {}
 
           return BodyDataFutureResult.success;
         },
-        slivers: ({
-          required SheetPageController sheetPageController,
-          required Widget Function(Widget) header,
-          required Widget Function(Widget) body,
-          required Widget Function() loadArea,
-        }) {
-          return <Widget>[
-            header(
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 50,
-                  color: Colors.orange,
-                  child: const Text('data'),
-                ),
-              ),
+        header: (SheetPageController<String, int> sheetPageController) {
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 50,
+              color: Colors.orange,
+              child: const Text('data'),
             ),
-            body(
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (_, int index) {
-                    bool isCheck = false;
-                    return Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.all(0),
-                              backgroundColor: Colors.purple,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            onPressed: () {},
-                            child: Text(sheetPageController.bodyData[index].toString()),
-                          ),
+          );
+        },
+        body: (SheetPageController<String, int> sheetPageController) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) {
+                bool isCheck = false;
+                return Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.all(0),
+                          backgroundColor: Colors.purple,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        StatefulBuilder(
-                          builder: (BuildContext context, void Function(void Function()) rebuild) {
-                            return Checkbox(
-                              value: isCheck,
-                              onChanged: (bool? check) {
-                                isCheck = !isCheck;
-                                rebuild(() {});
-                              },
-                            );
+                        onPressed: () {},
+                        child: Text(sheetPageController.bodyData[index].toString()),
+                      ),
+                    ),
+                    StatefulBuilder(
+                      builder: (BuildContext context, void Function(void Function()) rebuild) {
+                        return Checkbox(
+                          value: isCheck,
+                          onChanged: (bool? check) {
+                            isCheck = !isCheck;
+                            rebuild(() {});
                           },
-                        ),
-                      ],
-                    );
-                  },
-                  childCount: sheetPageController.bodyData.length,
-                ),
-              ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+              childCount: sheetPageController.bodyData.length,
             ),
-            loadArea(),
-          ];
+          );
         },
       ),
     );

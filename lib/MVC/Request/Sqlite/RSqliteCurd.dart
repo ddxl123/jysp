@@ -289,7 +289,7 @@ class RSqliteCurd<T extends MBase> {
     }
 
     // C
-    if (uploadModel.get_curd_status == CurdStatus.C) {
+    else if (uploadModel.get_curd_status == CurdStatus.C) {
       await connectTransaction.update(
         MUpload.tableName,
         <String, Object?>{
@@ -343,7 +343,7 @@ class RSqliteCurd<T extends MBase> {
       await connectTransaction.update(
         MUpload.tableName,
         <String, Object?>{
-          MUpload.curd_status: CurdStatus.D,
+          MUpload.curd_status: CurdStatus.D.index,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
         where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',

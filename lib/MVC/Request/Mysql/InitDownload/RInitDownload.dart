@@ -1,11 +1,11 @@
 import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
+import 'package:jysp/Database/Models/MFragmentsAboutRulePoolNode.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
-import 'package:jysp/Database/Models/MRule.dart';
 import 'package:jysp/Database/Models/MUser.dart';
 import 'package:jysp/G/GHttp/GHttp.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
@@ -419,27 +419,27 @@ class RInitDownload {
       resultCallback: (int code, List<Map<String, dynamic>> data) async {
         switch (code) {
           case 315:
-            await db.delete(MRule.tableName);
+            await db.delete(MFragmentsAboutRulePoolNode.tableName);
 
             await Future.forEach<Map<String, dynamic>>(
               data,
               (Map<String, dynamic> element) async {
                 await db.insert(
-                  MRule.tableName,
-                  MRule.asJsonNoId(
+                  MFragmentsAboutRulePoolNode.tableName,
+                  MFragmentsAboutRulePoolNode.asJsonNoId(
                     aiid_v: element['id'] as int?,
                     uuid_v: null,
                     raw_rule_aiid_v: element['belongs_to_raw_rule'] == null ? null : element['belongs_to_raw_rule']['id'] as int?,
                     raw_rule_uuid_v: null,
-                    pn_rule_pool_node_aiid_v: element[MRule.pn_rule_pool_node_aiid] as int?,
+                    pn_rule_pool_node_aiid_v: element[MFragmentsAboutRulePoolNode.pn_rule_pool_node_aiid] as int?,
                     pn_rule_pool_node_uuid_v: null,
-                    created_at_v: element[MRule.created_at] as int?,
-                    updated_at_v: element[MRule.updated_at] as int?,
+                    created_at_v: element[MFragmentsAboutRulePoolNode.created_at] as int?,
+                    updated_at_v: element[MFragmentsAboutRulePoolNode.updated_at] as int?,
                   ),
                 );
               },
             );
-            dLog(() => 'getRulePoolNodeFragments:', null, () async => await db.query(MRule.tableName));
+            dLog(() => 'getRulePoolNodeFragments:', null, () async => await db.query(MFragmentsAboutRulePoolNode.tableName));
             getDataResultType = GetDataResultType.ok;
             break;
           default:
