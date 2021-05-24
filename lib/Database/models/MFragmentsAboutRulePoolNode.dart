@@ -10,8 +10,8 @@ class MFragmentsAboutRulePoolNode implements MBase{
 
   /// 1. insert 时，无需传入 id ，id 是自增的。
   /// 2. 若只创建 model 而并非 inset，id 的值为 null。
-  MFragmentsAboutRulePoolNode.createModel({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required int? created_at_v,required int? updated_at_v,}) {
-    getRowJson.addAll(<String, Object?>{aiid:aiid_v,uuid:uuid_v,raw_rule_aiid:raw_rule_aiid_v,raw_rule_uuid:raw_rule_uuid_v,pn_rule_pool_node_aiid:pn_rule_pool_node_aiid_v,pn_rule_pool_node_uuid:pn_rule_pool_node_uuid_v,created_at:created_at_v,updated_at:updated_at_v,});
+  MFragmentsAboutRulePoolNode.createModel({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required String? title_v,required int? created_at_v,required int? updated_at_v,}) {
+    getRowJson.addAll(<String, Object?>{aiid:aiid_v,uuid:uuid_v,raw_rule_aiid:raw_rule_aiid_v,raw_rule_uuid:raw_rule_uuid_v,pn_rule_pool_node_aiid:pn_rule_pool_node_aiid_v,pn_rule_pool_node_uuid:pn_rule_pool_node_uuid_v,title:title_v,created_at:created_at_v,updated_at:updated_at_v,});
   }
 
   static String get tableName => 'fragments_about_rule_pool_nodes';
@@ -23,17 +23,18 @@ class MFragmentsAboutRulePoolNode implements MBase{
   static String get raw_rule_uuid => 'raw_rule_uuid';
   static String get pn_rule_pool_node_aiid => 'pn_rule_pool_node_aiid';
   static String get pn_rule_pool_node_uuid => 'pn_rule_pool_node_uuid';
+  static String get title => 'title';
   static String get created_at => 'created_at';
   static String get updated_at => 'updated_at';
 
 
-  static Map<String, Object?> asJsonNoId({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required int? created_at_v,required int? updated_at_v,}
+  static Map<String, Object?> asJsonNoId({required int? aiid_v,required String? uuid_v,required int? raw_rule_aiid_v,required String? raw_rule_uuid_v,required int? pn_rule_pool_node_aiid_v,required String? pn_rule_pool_node_uuid_v,required String? title_v,required int? created_at_v,required int? updated_at_v,}
   ) {
-    return <String, Object?>{aiid:aiid_v,uuid:uuid_v,raw_rule_aiid:raw_rule_aiid_v,raw_rule_uuid:raw_rule_uuid_v,pn_rule_pool_node_aiid:pn_rule_pool_node_aiid_v,pn_rule_pool_node_uuid:pn_rule_pool_node_uuid_v,created_at:created_at_v,updated_at:updated_at_v,};
+    return <String, Object?>{aiid:aiid_v,uuid:uuid_v,raw_rule_aiid:raw_rule_aiid_v,raw_rule_uuid:raw_rule_uuid_v,pn_rule_pool_node_aiid:pn_rule_pool_node_aiid_v,pn_rule_pool_node_uuid:pn_rule_pool_node_uuid_v,title:title_v,created_at:created_at_v,updated_at:updated_at_v,};
   }
 
   static Map<String, Object?> asModelNoId(Map<String, Object?> json) {
-    return <String, Object?>{aiid:json[aiid],uuid:json[uuid],raw_rule_aiid:json[raw_rule_aiid],raw_rule_uuid:json[raw_rule_uuid],pn_rule_pool_node_aiid:json[pn_rule_pool_node_aiid],pn_rule_pool_node_uuid:json[pn_rule_pool_node_uuid],created_at:json[created_at],updated_at:json[updated_at],};
+    return <String, Object?>{aiid:json[aiid],uuid:json[uuid],raw_rule_aiid:json[raw_rule_aiid],raw_rule_uuid:json[raw_rule_uuid],pn_rule_pool_node_aiid:json[pn_rule_pool_node_aiid],pn_rule_pool_node_uuid:json[pn_rule_pool_node_uuid],title:json[title],created_at:json[created_at],updated_at:json[updated_at],};
   }
 
   // ====================================================================
@@ -68,5 +69,5 @@ class MFragmentsAboutRulePoolNode implements MBase{
   @override
   String get getTableName => tableName;
 
-@override int? get get_id => getRowJson[id] as int?;@override int? get get_aiid => getRowJson[aiid] as int?;@override String? get get_uuid => getRowJson[uuid] as String?; int? get get_raw_rule_aiid => getRowJson[raw_rule_aiid] as int?; String? get get_raw_rule_uuid => getRowJson[raw_rule_uuid] as String?; int? get get_pn_rule_pool_node_aiid => getRowJson[pn_rule_pool_node_aiid] as int?; String? get get_pn_rule_pool_node_uuid => getRowJson[pn_rule_pool_node_uuid] as String?;@override int? get get_created_at => getRowJson[created_at] as int?;@override int? get get_updated_at => getRowJson[updated_at] as int?;
+@override int? get get_id => getRowJson[id] as int?;@override int? get get_aiid => getRowJson[aiid] as int?;@override String? get get_uuid => getRowJson[uuid] as String?; int? get get_raw_rule_aiid => getRowJson[raw_rule_aiid] as int?; String? get get_raw_rule_uuid => getRowJson[raw_rule_uuid] as String?; int? get get_pn_rule_pool_node_aiid => getRowJson[pn_rule_pool_node_aiid] as int?; String? get get_pn_rule_pool_node_uuid => getRowJson[pn_rule_pool_node_uuid] as String?; String? get get_title => getRowJson[title] as String?;@override int? get get_created_at => getRowJson[created_at] as int?;@override int? get get_updated_at => getRowJson[updated_at] as int?;
 }

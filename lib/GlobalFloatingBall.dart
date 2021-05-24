@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
@@ -262,11 +263,18 @@ class _TableForTableDataState extends State<TableForTableData> {
     super.initState();
 
     SqliteTools().getTableInfo(widget.tableName).then(
-      (List<Map<String, Object?>> tableInfo) {
+      (List<Map<String, Object?>> tableInfo) async {
         for (int i = 0; i < tableInfo.length; i++) {
           columnNames.add(tableInfo[i]['name']! as String);
         }
-        MBase.queryRowsAsModels(tableName: widget.tableName, where: null, whereArgs: null, connectTransaction: null).then(
+        await MBase.queryRowsAsModels<MBase, MMBase, MBase>(
+          tableName: widget.tableName,
+          where: null,
+          whereArgs: null,
+          connectTransaction: null,
+          returnMWhere: (MBase model) => model,
+          returnMMWhere: null,
+        ).then(
           (List<MBase> value) {
             data.addAll(value);
             setState(() {});

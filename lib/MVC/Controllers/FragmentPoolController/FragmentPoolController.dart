@@ -2,7 +2,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
@@ -19,10 +19,10 @@ class FragmentPoolController extends ChangeNotifier {
   final FreeBoxController freeBoxController = FreeBoxController();
 
   /// 需要显示在池内的节点
-  final List<MMFragmentPoolNode> pendingPoolNodes = <MMFragmentPoolNode>[];
-  final List<MMFragmentPoolNode> memoryPoolNodes = <MMFragmentPoolNode>[];
-  final List<MMFragmentPoolNode> completePoolNodes = <MMFragmentPoolNode>[];
-  final List<MMFragmentPoolNode> rulePoolNodes = <MMFragmentPoolNode>[];
+  final List<MMPoolNode> pendingPoolNodes = <MMPoolNode>[];
+  final List<MMPoolNode> memoryPoolNodes = <MMPoolNode>[];
+  final List<MMPoolNode> completePoolNodes = <MMPoolNode>[];
+  final List<MMPoolNode> rulePoolNodes = <MMPoolNode>[];
 
   /// 当前展现的碎片池类型
   /// 必须设置默认值：
@@ -105,9 +105,9 @@ class FragmentPoolController extends ChangeNotifier {
   /// [toPoolType] 为 null 时为当前池类型
   ///
   /// <T>：若已知类型，则传入其类型
-  List<MMFragmentPoolNode> getPoolTypeNodesList([PoolType? toPoolType]) {
+  List<MMPoolNode> getPoolTypeNodesList([PoolType? toPoolType]) {
     final PoolType poolType = toPoolType ?? getCurrentPoolType;
-    return poolTypeSwitch<List<MMFragmentPoolNode>>(
+    return poolTypeSwitch<List<MMPoolNode>>(
       toPoolType: poolType,
       pendingPoolCB: () => pendingPoolNodes,
       memoryPoolCB: () => memoryPoolNodes,
@@ -150,7 +150,7 @@ class FragmentPoolController extends ChangeNotifier {
       isLoadingBarrierRebuildHandler.rebuildHandle(LoadingBarrierHandlerEnum.enabled);
 
       // 获取数据：[toPoolType] 的数据
-      final bool result = await retrievePoolNodes(toPoolType);
+      final bool result = await retrievePoolNodes();
 
       switch (result) {
         case true:
@@ -185,46 +185,49 @@ class FragmentPoolController extends ChangeNotifier {
   }
 
   /// 读取当前池的全部节点
-  Future<bool> retrievePoolNodes(PoolType toPoolType) async {
+  Future<bool> retrievePoolNodes() async {
     try {
       // 虽然清除后再重新 addAll，但清除的是 MBase 数据，而 list widget 的 index 没有被重置，因此 clear data 后仍保持相同的 state
-      getPoolTypeNodesList(toPoolType).clear();
-      final List<MMFragmentPoolNode> mmnodes = await poolTypeSwitchFuture<List<MMFragmentPoolNode>>(
-        toPoolType: toPoolType,
+      getPoolTypeNodesList().clear();
+      final List<MMPoolNode> mmnodes = await poolTypeSwitchFuture<List<MMPoolNode>>(
         pendingPoolCB: () async {
-          final List<MPnPendingPoolNode> models = await MBase.queryRowsAsModels<MPnPendingPoolNode>(tableName: MPnPendingPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
-          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
-          for (final MPnPendingPoolNode model in models) {
-            mmodels.add(MMFragmentPoolNode(model: model));
-          }
+          final List<MMPoolNode> mmodels = await MBase.queryRowsAsModels<MPnPendingPoolNode, MMPoolNode, MMPoolNode>(
+            tableName: MPnPendingPoolNode.tableName,
+            returnMWhere: null,
+            returnMMWhere: (MPnPendingPoolNode model) => MMPoolNode(model: model),
+            connectTransaction: null,
+          );
           return mmodels;
         },
         memoryPoolCB: () async {
-          final List<MPnMemoryPoolNode> models = await MBase.queryRowsAsModels<MPnMemoryPoolNode>(tableName: MPnMemoryPoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
-          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
-          for (final MPnMemoryPoolNode model in models) {
-            mmodels.add(MMFragmentPoolNode(model: model));
-          }
+          final List<MMPoolNode> mmodels = await MBase.queryRowsAsModels<MPnMemoryPoolNode, MMPoolNode, MMPoolNode>(
+            tableName: MPnMemoryPoolNode.tableName,
+            connectTransaction: null,
+            returnMWhere: null,
+            returnMMWhere: (MPnMemoryPoolNode model) => MMPoolNode(model: model),
+          );
           return mmodels;
         },
         completePoolCB: () async {
-          final List<MPnCompletePoolNode> models = await MBase.queryRowsAsModels<MPnCompletePoolNode>(tableName: MPnCompletePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
-          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
-          for (final MPnCompletePoolNode model in models) {
-            mmodels.add(MMFragmentPoolNode(model: model));
-          }
+          final List<MMPoolNode> mmodels = await MBase.queryRowsAsModels<MPnCompletePoolNode, MMPoolNode, MMPoolNode>(
+            tableName: MPnCompletePoolNode.tableName,
+            connectTransaction: null,
+            returnMWhere: null,
+            returnMMWhere: (MPnCompletePoolNode model) => MMPoolNode(model: model),
+          );
           return mmodels;
         },
         rulePoolCB: () async {
-          final List<MPnRulePoolNode> models = await MBase.queryRowsAsModels<MPnRulePoolNode>(tableName: MPnRulePoolNode.tableName, where: null, whereArgs: null, connectTransaction: null);
-          final List<MMFragmentPoolNode> mmodels = <MMFragmentPoolNode>[];
-          for (final MPnRulePoolNode model in models) {
-            mmodels.add(MMFragmentPoolNode(model: model));
-          }
+          final List<MMPoolNode> mmodels = await MBase.queryRowsAsModels<MPnRulePoolNode, MMPoolNode, MMPoolNode>(
+            tableName: MPnRulePoolNode.tableName,
+            connectTransaction: null,
+            returnMWhere: null,
+            returnMMWhere: (MPnRulePoolNode model) => MMPoolNode(model: model),
+          );
           return mmodels;
         },
       );
-      getPoolTypeNodesList(toPoolType).addAll(mmnodes);
+      getPoolTypeNodesList().addAll(mmnodes);
       return true;
     } catch (e) {
       dLog(() => 'retrievePoolNodes err: ', () => e);

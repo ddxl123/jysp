@@ -1,3 +1,4 @@
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MGlobalEnum.dart';
 import 'package:jysp/Database/Models/MUpload.dart';
@@ -104,11 +105,13 @@ class RSqliteCurd<T extends MBase> {
     // 只检查 model 的 aiid/uuid ,而不用再检查 sqlite，因为 model get_xx 是只读的。
 
     // 判断当前 model 的 id 是否存在
-    final List<MBase> queryResult = await MBase.queryRowsAsModels(
+    final List<T> queryResult = await MBase.queryRowsAsModels<T, MMBase, T>(
       tableName: model.getTableName,
       where: 'id = ?',
       whereArgs: <Object?>[model.get_id],
       connectTransaction: connectTransaction,
+      returnMWhere: (T model) => model,
+      returnMMWhere: null,
     );
     // 2种情况：model.get_id == null 或 查询到 0 个
     if (queryResult.isEmpty) {
@@ -125,11 +128,13 @@ class RSqliteCurd<T extends MBase> {
   /// 获取并检验 MUpload
   Future<void> _getMUploadAndcheck({required Transaction connectTransaction}) async {
     // 通过 MUpload 的 row_id 进行 find
-    final List<MUpload> uploadModels = await MBase.queryRowsAsModels(
+    final List<MUpload> uploadModels = await MBase.queryRowsAsModels<MUpload, MMBase, MUpload>(
       tableName: MUpload.tableName,
       where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
       whereArgs: <Object?>[model.get_id, model.getTableName],
       connectTransaction: connectTransaction,
+      returnMWhere: (MUpload model) => model,
+      returnMMWhere: null,
     );
 
     // 若不存在时，代表只进行过 R
@@ -190,8 +195,7 @@ class RSqliteCurd<T extends MBase> {
       throw '${model.get_uuid}.${model.get_aiid}';
     }
     // 检查模型是否已存在
-
-    final List<Map<String, Object?>> queryResult = await MBase.queryRowsAsModels(
+    final List<Map<String, Object?>> queryResult = await MBase.queryRowsAsJsons(
       tableName: model.getTableName,
       where: 'uuid = ?',
       whereArgs: <Object>[model.get_uuid!],
@@ -253,11 +257,13 @@ class RSqliteCurd<T extends MBase> {
 
     T? newModel;
     if (isReturnNewModel) {
-      final List<T> queryResults = await MBase.queryRowsAsModels<T>(
+      final List<T> queryResults = await MBase.queryRowsAsModels<T, MMBase, T>(
         tableName: model.getTableName,
         where: 'id = ?',
         whereArgs: <Object?>[model.get_id],
         connectTransaction: connectTransaction,
+        returnMWhere: (T model) => model,
+        returnMMWhere: null,
       );
       if (queryResults.isEmpty) {
         throw 'query result is empty';
@@ -527,11 +533,13 @@ class RSqliteCurd<T extends MBase> {
   /// 对每个被筛选出来的外键所对应的 row 进行递归 delete
   Future<void> _recursionDelete({required String tableName, required String columnName, required Object columnNameValue, required Transaction connectTransaction}) async {
     // 查询外键对应的 row 模型
-    final List<MBase> queryResult = await MBase.queryRowsAsModels(
+    final List<MBase> queryResult = await MBase.queryRowsAsModels<MBase, MMBase, MBase>(
       tableName: tableName,
       where: '$columnName = ?',
       whereArgs: <Object>[columnNameValue],
       connectTransaction: connectTransaction,
+      returnMWhere: (MBase model) => model,
+      returnMMWhere: null,
     );
 
     // 把查询到的进行递归 delete

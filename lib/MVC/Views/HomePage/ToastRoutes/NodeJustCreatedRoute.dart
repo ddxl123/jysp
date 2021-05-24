@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
 import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
@@ -115,8 +115,8 @@ class NodeJustCreatedRoute extends ToastRoute {
             pendingPoolCB: () => MPnPendingPoolNode.createModel(
               aiid_v: null,
               uuid_v: const Uuid().v4(),
-              recommend_raw_rule_aiid_v: null,
-              recommend_raw_rule_uuid_v: null,
+              recommend_rule_aiid_v: null,
+              recommend_rule_uuid_v: null,
               type_v: PendingPoolNodeType.ordinary,
               name_v: name,
               position_v: '${position.dx},${position.dy}',
@@ -126,8 +126,8 @@ class NodeJustCreatedRoute extends ToastRoute {
             memoryPoolCB: () => MPnMemoryPoolNode.createModel(
               aiid_v: null,
               uuid_v: const Uuid().v4(),
-              using_raw_rule_aiid_v: null,
-              using_raw_rule_uuid_v: null,
+              using_rule_aiid_v: null,
+              using_rule_uuid_v: null,
               type_v: MemoryPoolNodeType.ordinary,
               name_v: name,
               position_v: '${position.dx},${position.dy}',
@@ -137,8 +137,8 @@ class NodeJustCreatedRoute extends ToastRoute {
             completePoolCB: () => MPnCompletePoolNode.createModel(
               aiid_v: null,
               uuid_v: const Uuid().v4(),
-              used_raw_rule_aiid_v: null,
-              used_raw_rule_uuid_v: null,
+              used_rule_aiid_v: null,
+              used_rule_uuid_v: null,
               type_v: CompletePoolNodeType.ordinary,
               name_v: name,
               position_v: '${position.dx},${position.dy}',
@@ -162,7 +162,7 @@ class NodeJustCreatedRoute extends ToastRoute {
       // 让 state 变化
       if (insertReuslt != null) {
         // 不能把 newNodeModel 插入，而是把 insertReuslt 插入，因为前者没有 id
-        fatherContext.read<FragmentPoolController>().getPoolTypeNodesList().add(MMFragmentPoolNode(model: insertReuslt));
+        fatherContext.read<FragmentPoolController>().getPoolTypeNodesList().add(MMPoolNode(model: insertReuslt));
         return true;
       }
 

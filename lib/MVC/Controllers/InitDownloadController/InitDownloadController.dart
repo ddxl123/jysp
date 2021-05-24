@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MDownloadModule.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
@@ -74,7 +75,14 @@ class InitDownloadController extends ChangeNotifier {
     await Future<void>.delayed(const Duration(seconds: 2));
     downloadModuleModels.clear();
     downloadModuleModelModuleNames.clear();
-    downloadModuleModels = await MBase.queryRowsAsModels(tableName: MDownloadModule.tableName, where: null, whereArgs: null, connectTransaction: null);
+    downloadModuleModels = await MBase.queryRowsAsModels<MDownloadModule, MMBase, MDownloadModule>(
+      tableName: MDownloadModule.tableName,
+      where: null,
+      whereArgs: null,
+      connectTransaction: null,
+      returnMWhere: (MDownloadModule model) => model,
+      returnMMWhere: null,
+    );
     for (final MDownloadModule model in downloadModuleModels) {
       downloadModuleModelModuleNames.add(model.get_module_name!);
     }

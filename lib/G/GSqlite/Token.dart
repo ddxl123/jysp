@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/Database/Models/MToken.dart';
 import 'package:jysp/G/GSqlite/GSqlite.dart';
@@ -27,7 +28,14 @@ class Token {
         throw 'tokenType is null';
       }
       String token = '';
-      final List<MToken> results = await MBase.queryRowsAsModels(tableName: MToken.tableName, where: null, whereArgs: null, connectTransaction: null);
+      final List<MToken> results = await MBase.queryRowsAsModels<MToken, MMBase, MToken>(
+        tableName: MToken.tableName,
+        where: null,
+        whereArgs: null,
+        connectTransaction: null,
+        returnMWhere: (MToken model) => model,
+        returnMMWhere: null,
+      );
       if (results.isNotEmpty) {
         token = results.first.getRowJson[tokenType].toString(); // 当值为 null 时结果为 ''
       }

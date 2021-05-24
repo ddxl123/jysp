@@ -96,7 +96,7 @@ String asModelNoId(Map<String, List<Object>> fields) {
   return out;
 }
 
-/// 模型内容
+/// model
 String modelContent(String tableNameWithS, Map<String, List<Object>> fields) {
   return """
 // ignore_for_file: non_constant_identifier_names
@@ -193,7 +193,7 @@ class MParseIntoSqls {
 }
 
 /// MBase
-String baseModelContent() {
+String modelBaseContent() {
   String importContent = '';
   String createEmptyModelByTableNameContent = '';
   for (int i = 0; i < modelFields.keys.length; i++) {
@@ -219,6 +219,7 @@ String baseModelContent() {
 
   return """
 // ignore_for_file: non_constant_identifier_names
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 $importContent
 import 'package:jysp/G/GSqlite/GSqlite.dart';
 import 'package:sqflite/sqflite.dart';
@@ -333,9 +334,21 @@ abstract class MBase {
     );
   }
 
-  /// 参数除了 connectTransaction，其他的与 db.query 相同
-  static Future<List<T>> queryRowsAsModels<T extends MBase>({
+  /// [M]：MBase 类型
+  ///
+  /// [MM]：MMBase 类型
+  ///
+  /// [R]：要返回的元素类型，[M] 与 [MM] 二选一
+  ///
+  /// [returnMWhere]: 对每个 model 进行操作, 并返回 models
+  ///
+  /// [returnMMWhere]：对每个 model 进行操作, 并将 Model 类型元素转换成 MModel 类型元素进行返回
+  ///
+  /// [returnMWhere] 与 [returnMMWhere] 不能同时为 null，且不能同时不为 null
+  static Future<List<R>> queryRowsAsModels<M extends MBase, MM extends MMBase, R>({
     required Transaction? connectTransaction,
+    required M Function(M model)? returnMWhere,
+    required MM Function(M model)? returnMMWhere,
     required String tableName,
     bool? distinct,
     List<String>? columns,
@@ -347,6 +360,14 @@ abstract class MBase {
     int? limit,
     int? offset,
   }) async {
+    if (R.runtimeType != M.runtimeType && R.runtimeType != MM.runtimeType){
+      throw 'R type is not M or MM';
+    }
+    if (returnMWhere == null && returnMMWhere == null || returnMWhere != null && returnMMWhere != null)
+    {
+      throw 'returnMWhere and returnMMWhere err';
+    }
+
     final List<Map<String, Object?>> rows = await queryRowsAsJsons(
       connectTransaction: connectTransaction,
       tableName: tableName,
@@ -360,13 +381,30 @@ abstract class MBase {
       limit: limit,
       offset: offset,
     );
-    final List<T> rowModels = <T>[];
-    for (final Map<String, Object?> row in rows) {
-      final T newRowModel = createEmptyModelByTableName(tableName) as T;
-      newRowModel.getRowJson.addAll(row);
-      rowModels.add(newRowModel);
+
+    if (returnMWhere != null) {
+      final List<M> rowModels = <M>[];
+      for (final Map<String, Object?> row in rows) {
+        final M newRowModel = createEmptyModelByTableName(tableName) as M;
+        newRowModel.getRowJson.addAll(row);
+        rowModels.add(newRowModel);
+        returnMWhere(newRowModel);
+      }
+      return rowModels as List<R>;
     }
-    return rowModels;
+
+    if (returnMMWhere != null) {
+      final List<MM> rowMModels = <MM>[];
+      for (final Map<String, Object?> row in rows) {
+        final M newRowModel = createEmptyModelByTableName(tableName) as M;
+        newRowModel.getRowJson.addAll(row);
+        final MM mm = returnMMWhere(newRowModel);
+        rowMModels.add(mm);
+      }
+      return rowMModels as List<R>;
+    }
+
+    throw 'unknown return';
   }
 
   /// 当前 Model 的类型
@@ -382,7 +420,8 @@ abstract class MBase {
 String mmodelContent(String mmodelName, List<String> tableNames) {
   String importContent = '';
   String switchTypeContent = '';
-  String object = '';
+  String objectContent = '';
+  String modelContent = '';
   String setValueContent = '';
   final Set<String> fieldKeysNotRespeat = <String>{};
   String getTableNameCallbackContent = '';
@@ -393,7 +432,11 @@ String mmodelContent(String mmodelName, List<String> tableNames) {
       case M${toCamelCaseWillRemoveS(tableNames[i])}:
         m${toCamelCaseWillRemoveS(tableNames[i])} = model as M${toCamelCaseWillRemoveS(tableNames[i])};
       break;''';
-    object += '''M${toCamelCaseWillRemoveS(tableNames[i])}? m${toCamelCaseWillRemoveS(tableNames[i])};''';
+    objectContent += '''M${toCamelCaseWillRemoveS(tableNames[i])}? m${toCamelCaseWillRemoveS(tableNames[i])};''';
+    modelContent += '''
+    if (m${toCamelCaseWillRemoveS(tableNames[i])} != null) {
+      return m${toCamelCaseWillRemoveS(tableNames[i])}!;
+    }''';
     setValueContent += '''
     if (m${toCamelCaseWillRemoveS(tableNames[i])} != null) {
       return values[$i]();
@@ -558,20 +601,27 @@ String mmodelContent(String mmodelName, List<String> tableNames) {
   return """
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 
 $isGlobalEnumContent
 
 $importContent
 
-class $mmodelName {
+class $mmodelName implements MMBase{
   $mmodelName({required MBase model}) {
     switch (model.runtimeType) {
       $switchTypeContent
       default:
+      throw 'model type is bad';
     }
   }
 
-  $object
+  $objectContent
+
+  MBase get model {
+    $modelContent
+    throw 'model is not exsit';
+  }
 
   /// [values] 必须严格按照 0-1 对应的模型顺序
   V setValue<V>(List<V Function()> values) {
@@ -603,4 +653,9 @@ $getForeignKeyBelongsTosContent
 
 }
 """;
+}
+
+/// MMBase
+String mmodelBaseContent() {
+  return '''abstract class MMBase {}''';
 }

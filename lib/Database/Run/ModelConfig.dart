@@ -353,6 +353,7 @@ class _fragments_about_memory_pool_nodes extends CreateModelBase {
   String using_rule_uuid = 'using_rule_uuid';
   String pn_memory_pool_node_aiid = 'pn_memory_pool_node_aiid';
   String pn_memory_pool_node_uuid = 'pn_memory_pool_node_uuid';
+  String title = 'title';
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
@@ -392,6 +393,7 @@ class _fragments_about_memory_pool_nodes extends CreateModelBase {
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: true,
         ),
+        setField_normal(fieldName: title, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
@@ -408,6 +410,7 @@ class _fragments_about_complete_pool_nodes extends CreateModelBase {
   String used_rule_uuid = 'used_rule_uuid';
   String pn_complete_pool_node_aiid = 'pn_complete_pool_node_aiid';
   String pn_complete_pool_node_uuid = 'pn_complete_pool_node_uuid';
+  String title = 'title';
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
@@ -447,6 +450,7 @@ class _fragments_about_complete_pool_nodes extends CreateModelBase {
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: true,
         ),
+        setField_normal(fieldName: title, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
@@ -461,6 +465,7 @@ class _fragments_about_rule_pool_nodes extends CreateModelBase {
   String raw_rule_uuid = 'raw_rule_uuid';
   String pn_rule_pool_node_aiid = 'pn_rule_pool_node_aiid';
   String pn_rule_pool_node_uuid = 'pn_rule_pool_node_uuid';
+  String title = 'title';
 
   @override
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
@@ -488,5 +493,6 @@ class _fragments_about_rule_pool_nodes extends CreateModelBase {
           isDeleteForeignKeyFollowCurrent: false,
           isDeleteCurrentFollowForeignKey: true,
         ),
+        setField_normal(fieldName: title, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }

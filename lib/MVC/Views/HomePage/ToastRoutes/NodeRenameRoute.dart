@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/RoundedBox..dart';
@@ -10,7 +11,7 @@ import 'package:provider/provider.dart';
 
 class NodeRenameRoute extends ToastRoute {
   NodeRenameRoute(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
-  final MMFragmentPoolNode mmodel;
+  final MMPoolNode mmodel;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.center;
@@ -96,7 +97,7 @@ class NodeRenameRoute extends ToastRoute {
         if (result == null) {
           return showToast<bool>(text: '已取消', returnValue: true);
         } else if (result == 0) {
-          await RSqliteCurd<MMFragmentPoolNode>.byModel(mmodel).toUpdateRow(
+          await RSqliteCurd<MBase>.byModel(mmodel.model).toUpdateRow(
             updateContent: <String, Object?>{mmodel.name: _textEditingController.text},
             isReturnNewModel: false,
             connectTransaction: null,

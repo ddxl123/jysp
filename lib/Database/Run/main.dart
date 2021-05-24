@@ -142,10 +142,11 @@ Future<void> main(List<String> args) async {
   runCreateModels();
   afterRunCreateModels();
   await runWriteModels();
+  await runWriteMBase();
   await runWriteMModels();
+  await runWriteMMBase();
   await runParseIntoSqls();
   await runWriteGlobalEnum();
-  await runWriteMBase();
 }
 
 void afterRunCreateModels() {
@@ -216,11 +217,21 @@ Future<void> runWriteModels() async {
   }
 }
 
+Future<void> runWriteMBase() async {
+  await File('$modelsPath/MBase.dart').writeAsString(modelBaseContent());
+  print("'MBase' file is created successfully!");
+}
+
 Future<void> runWriteMModels() async {
   for (int i = 0; i < mmodels.length; i++) {
     await File('$mmodelsPath/${mmodels.keys.elementAt(i)}.dart').writeAsString(mmodelContent(mmodels.keys.elementAt(i), mmodels.values.elementAt(i)));
     print("Named '${mmodels.keys.elementAt(i)}''s table model file is created successfully!");
   }
+}
+
+Future<void> runWriteMMBase() async {
+  await File('$mmodelsPath/MMBase.dart').writeAsString(mmodelBaseContent());
+  print("'MMBase' file is created successfully!");
 }
 
 Future<void> runParseIntoSqls() async {
@@ -254,9 +265,4 @@ Future<void> runWriteGlobalEnum() async {
   }
   await File('$modelsPath/MGlobalEnum.dart').writeAsString(globalEnumString);
   print("'MGlobalEnum' file is created successfully!");
-}
-
-Future<void> runWriteMBase() async {
-  await File('$modelsPath/MBase.dart').writeAsString(baseModelContent());
-  print("'MBase' file is created successfully!");
 }

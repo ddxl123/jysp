@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMFragmentPoolNode.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
+import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeReNameRoute.dart';
@@ -12,7 +13,7 @@ import 'package:provider/provider.dart';
 class NodeLongPressMenuRoute extends ToastRoute {
   NodeLongPressMenuRoute(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
 
-  final MMFragmentPoolNode mmodel;
+  final MMPoolNode mmodel;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.center;
@@ -65,7 +66,7 @@ class NodeLongPressMenuRoute extends ToastRoute {
           if (result == null) {
             return showToast(text: '未选择', returnValue: true);
           } else if (result == 0) {
-            final bool isOk = await RSqliteCurd<MMFragmentPoolNode>.byModel(mmodel).toDeleteRow(connectTransaction: null);
+            final bool isOk = await RSqliteCurd<MBase>.byModel(mmodel.model).toDeleteRow(connectTransaction: null);
             if (isOk) {
               fatherContext.read<FragmentPoolController>().getPoolTypeNodesList().remove(mmodel);
               fatherContext.read<FragmentPoolController>().needInitStateForSetState(() {});

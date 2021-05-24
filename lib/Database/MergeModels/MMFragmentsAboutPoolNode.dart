@@ -1,11 +1,12 @@
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 
 
 
 import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';import 'package:jysp/Database/Models/MFragmentsAboutRulePoolNode.dart';
 
-class MMFragmentsAboutPoolNode {
+class MMFragmentsAboutPoolNode implements MMBase{
   MMFragmentsAboutPoolNode({required MBase model}) {
     switch (model.runtimeType) {
             case MFragmentsAboutPendingPoolNode:
@@ -18,10 +19,24 @@ class MMFragmentsAboutPoolNode {
         mFragmentsAboutRulePoolNode = model as MFragmentsAboutRulePoolNode;
       break;
       default:
+      throw 'model type is bad';
     }
   }
 
   MFragmentsAboutPendingPoolNode? mFragmentsAboutPendingPoolNode;MFragmentsAboutMemoryPoolNode? mFragmentsAboutMemoryPoolNode;MFragmentsAboutCompletePoolNode? mFragmentsAboutCompletePoolNode;MFragmentsAboutRulePoolNode? mFragmentsAboutRulePoolNode;
+
+  MBase get model {
+        if (mFragmentsAboutPendingPoolNode != null) {
+      return mFragmentsAboutPendingPoolNode!;
+    }    if (mFragmentsAboutMemoryPoolNode != null) {
+      return mFragmentsAboutMemoryPoolNode!;
+    }    if (mFragmentsAboutCompletePoolNode != null) {
+      return mFragmentsAboutCompletePoolNode!;
+    }    if (mFragmentsAboutRulePoolNode != null) {
+      return mFragmentsAboutRulePoolNode!;
+    }
+    throw 'model is not exsit';
+  }
 
   /// [values] 必须严格按照 0-1 对应的模型顺序
   V setValue<V>(List<V Function()> values) {
@@ -76,7 +91,7 @@ class MMFragmentsAboutPoolNode {
           () => MFragmentsAboutPendingPoolNode.recommend_rule_uuid,argumentErr(),argumentErr(),argumentErr(),
           ]);      String get title => setValue<String>(
         <String Function()>[
-          () => MFragmentsAboutPendingPoolNode.title,argumentErr(),argumentErr(),argumentErr(),
+          () => MFragmentsAboutPendingPoolNode.title,() => MFragmentsAboutMemoryPoolNode.title,() => MFragmentsAboutCompletePoolNode.title,() => MFragmentsAboutRulePoolNode.title,
           ]);      String get created_at => setValue<String>(
         <String Function()>[
           () => MFragmentsAboutPendingPoolNode.created_at,() => MFragmentsAboutMemoryPoolNode.created_at,() => MFragmentsAboutCompletePoolNode.created_at,() => MFragmentsAboutRulePoolNode.created_at,
@@ -162,7 +177,7 @@ class MMFragmentsAboutPoolNode {
           () => mFragmentsAboutPendingPoolNode!.get_recommend_rule_uuid,argumentErr(),argumentErr(),argumentErr(),
         ]);      String? get get_title => setValue<String?>(
         <String? Function()>[
-          () => mFragmentsAboutPendingPoolNode!.get_title,argumentErr(),argumentErr(),argumentErr(),
+          () => mFragmentsAboutPendingPoolNode!.get_title,() => mFragmentsAboutMemoryPoolNode!.get_title,() => mFragmentsAboutCompletePoolNode!.get_title,() => mFragmentsAboutRulePoolNode!.get_title,
         ]);      int? get get_created_at => setValue<int?>(
         <int? Function()>[
           () => mFragmentsAboutPendingPoolNode!.get_created_at,() => mFragmentsAboutMemoryPoolNode!.get_created_at,() => mFragmentsAboutCompletePoolNode!.get_created_at,() => mFragmentsAboutRulePoolNode!.get_created_at,

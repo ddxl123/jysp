@@ -1,11 +1,12 @@
 // ignore_for_file: non_constant_identifier_names
 import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/Database/MergeModels/MMBase.dart';
 
 
 
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
 
-class MMPoolNode {
+class MMPoolNode implements MMBase{
   MMPoolNode({required MBase model}) {
     switch (model.runtimeType) {
             case MPnPendingPoolNode:
@@ -18,10 +19,24 @@ class MMPoolNode {
         mPnRulePoolNode = model as MPnRulePoolNode;
       break;
       default:
+      throw 'model type is bad';
     }
   }
 
   MPnPendingPoolNode? mPnPendingPoolNode;MPnMemoryPoolNode? mPnMemoryPoolNode;MPnCompletePoolNode? mPnCompletePoolNode;MPnRulePoolNode? mPnRulePoolNode;
+
+  MBase get model {
+        if (mPnPendingPoolNode != null) {
+      return mPnPendingPoolNode!;
+    }    if (mPnMemoryPoolNode != null) {
+      return mPnMemoryPoolNode!;
+    }    if (mPnCompletePoolNode != null) {
+      return mPnCompletePoolNode!;
+    }    if (mPnRulePoolNode != null) {
+      return mPnRulePoolNode!;
+    }
+    throw 'model is not exsit';
+  }
 
   /// [values] 必须严格按照 0-1 对应的模型顺序
   V setValue<V>(List<V Function()> values) {

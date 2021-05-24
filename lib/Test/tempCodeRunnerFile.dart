@@ -11,18 +11,9 @@
 ///
 
 void main(List<String> args) {
-  print(a<B>().runtimeType);
+  print(B() is A);
 }
 
-T a<T extends A>() {
-  return B() as T;
-}
+abstract class A {}
 
-abstract class A {
-  int get i;
-}
-
-class B implements A {
-  @override
-  int get i => 1111;
-}
+class B implements A {}

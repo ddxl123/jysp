@@ -14,7 +14,7 @@ class SheetPage<T, M> extends OverlayRoute<void> {
   ///
   /// [sheetPageController]：若为 null，则自动创建一个 sheetPageController()
   ///
-  /// [bodyDataFuture]：内部滑动的数据数组。每次触发加载区都会触发该异步。
+  /// [bodyDataFuture]：内部滑动的数据数组。每次触发加载区都会触发该异步，并自动 setState。
   ///   - [bodyData]：可改变该数组元素（不能改变地址）来改变 bodyData。
   ///
   /// [header]：返回值必须是一个 sliver
