@@ -53,33 +53,6 @@ extension NodeSelectedTypeExt on NodeType {
   }
 }
 
-/// 1. 当 [PoolType.index] 时，获取的是 [int]。
-/// 2. 当 [PoolType.value] 时，获取的是 [string]。
-enum PoolType {
-  pendingPool, // 0
-  memoryPool, // 1
-  completePool, // 2
-  rulePool, // 3
-}
-
-extension PoolSelectedTypeExt on PoolType {
-  String get text {
-    switch (index) {
-      case 0:
-        return '待定池';
-      case 1:
-        return '记忆池';
-      case 2:
-        return '完成池';
-      case 3:
-        return '规则池';
-      case 4:
-      default:
-        throw Exception('Index is unknown!');
-    }
-  }
-}
-
 enum PoolRefreshStatus {
   none,
   refreshLayout,

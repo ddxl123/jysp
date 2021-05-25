@@ -4,12 +4,27 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 
+class PopResult {
+  PopResult({required this.popResultSelect, required this.value});
+  PopResultSelect popResultSelect;
+  Object? value;
+}
+
+enum PopResultSelect {
+  clickBackground,
+  one,
+  two,
+  three,
+  four,
+  five,
+}
+
 ///
 ///
 ///
 ///
 /// [ToastRoute] 具有触发返回功能
-abstract class ToastRoute extends OverlayRoute<int> {
+abstract class ToastRoute extends OverlayRoute<PopResult> {
   ///
 
   ToastRoute(this.fatherContext);
@@ -27,10 +42,10 @@ abstract class ToastRoute extends OverlayRoute<int> {
   /// - 若返回 false，则异步完后 route 不进行 pop，只有等待页面被 pop。
   ///
   /// 参数值 [result]：
-  /// - 若参数值为 null，则代表(或充当)'点击背景'、'物理返回'。
+  /// - 若参数值为 null，则代表(或充当)'物理返回'。
   ///
-  /// 已经被设定成只会执行一次
-  Future<Toast<bool>> Function(int? result)? get whenPop;
+  /// 已经被设定多次触发时只会执行第一次
+  Future<Toast<bool>> Function(PopResult? result)? get whenPop;
 
   /// 默认定位
   AlignmentDirectional get stackAlignment;
@@ -71,7 +86,7 @@ abstract class ToastRoute extends OverlayRoute<int> {
 
   /// 1. 点击背景调用
   /// 2. 触发物理返回调用
-  Future<void> _toPop(int? result) async {
+  Future<void> _toPop(PopResult? result) async {
     if (_isToPoping) {
       return;
     }
@@ -95,9 +110,9 @@ abstract class ToastRoute extends OverlayRoute<int> {
     }
   }
 
-  /// 物理返回的 [result] 为 null
+  /// 物理返回 的 [result] 为 null
   @override
-  bool didPop(int? result) {
+  bool didPop(PopResult? result) {
     if (_isPop == true) {
       super.didPop(null);
       return true;

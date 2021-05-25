@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/Database/Models/MBase.dart';
-import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
-import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
-import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:jysp/Tools/Toast/Toast.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
-class NodeJustCreatedRoute extends ToastRoute {
-  NodeJustCreatedRoute(BuildContext fatherContext, {required this.screenPosition}) : super(fatherContext);
+class NodeJustCreatedCommon extends ToastRoute {
+  NodeJustCreatedCommon(
+    BuildContext fatherContext, {
+    required this.screenPosition,
+    required this.newNodeModelCallback,
+  }) : super(fatherContext);
 
   /// 将要把输入框放在屏幕 left 多远的地方
   final Offset screenPosition;
+
+  /// 新节点模型
+  MBase Function(Offset poolPositon, String name) newNodeModelCallback;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.topStart;
@@ -63,7 +66,7 @@ class NodeJustCreatedRoute extends ToastRoute {
           controller: _txtEditingController,
           onEditingComplete: () {
             // 不仅返回时执行 future ，点击键盘的提交按钮时也 pop->future
-            Navigator.pop(context);
+            Navigator.pop(context, null);
           },
         ),
       ),
@@ -71,8 +74,8 @@ class NodeJustCreatedRoute extends ToastRoute {
   }
 
   @override
-  Future<Toast<bool>> Function(int?) get whenPop {
-    return (int? result) async {
+  Future<Toast<bool>> Function(PopResult? popResult) get whenPop {
+    return (PopResult? result) async {
       try {
         if (result == null) {
           await _toInsert();
@@ -111,50 +114,7 @@ class NodeJustCreatedRoute extends ToastRoute {
     final String name = _txtEditingController.text;
     final Offset position = fatherContext.read<FragmentPoolController>().freeBoxController.screenToBoxTransform(screenPosition);
     try {
-      final MBase newNodeModel = fatherContext.read<FragmentPoolController>().poolTypeSwitch<MBase>(
-            pendingPoolCB: () => MPnPendingPoolNode.createModel(
-              aiid_v: null,
-              uuid_v: const Uuid().v4(),
-              recommend_rule_aiid_v: null,
-              recommend_rule_uuid_v: null,
-              type_v: PendingPoolNodeType.ordinary,
-              name_v: name,
-              position_v: '${position.dx},${position.dy}',
-              created_at_v: DateTime.now().millisecondsSinceEpoch,
-              updated_at_v: DateTime.now().millisecondsSinceEpoch,
-            ),
-            memoryPoolCB: () => MPnMemoryPoolNode.createModel(
-              aiid_v: null,
-              uuid_v: const Uuid().v4(),
-              using_rule_aiid_v: null,
-              using_rule_uuid_v: null,
-              type_v: MemoryPoolNodeType.ordinary,
-              name_v: name,
-              position_v: '${position.dx},${position.dy}',
-              created_at_v: DateTime.now().millisecondsSinceEpoch,
-              updated_at_v: DateTime.now().millisecondsSinceEpoch,
-            ),
-            completePoolCB: () => MPnCompletePoolNode.createModel(
-              aiid_v: null,
-              uuid_v: const Uuid().v4(),
-              used_rule_aiid_v: null,
-              used_rule_uuid_v: null,
-              type_v: CompletePoolNodeType.ordinary,
-              name_v: name,
-              position_v: '${position.dx},${position.dy}',
-              created_at_v: DateTime.now().millisecondsSinceEpoch,
-              updated_at_v: DateTime.now().millisecondsSinceEpoch,
-            ),
-            rulePoolCB: () => MPnRulePoolNode.createModel(
-              aiid_v: null,
-              uuid_v: const Uuid().v4(),
-              type_v: RulePoolNodeType.ordinary,
-              name_v: name,
-              position_v: '${position.dx},${position.dy}',
-              created_at_v: DateTime.now().millisecondsSinceEpoch,
-              updated_at_v: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
+      final MBase newNodeModel = newNodeModelCallback(position, name);
 
       // 插入 new node
       final MBase? insertReuslt = await RSqliteCurd<MBase>.byModel(newNodeModel).toInsertRow(connectTransaction: null);
@@ -162,7 +122,7 @@ class NodeJustCreatedRoute extends ToastRoute {
       // 让 state 变化
       if (insertReuslt != null) {
         // 不能把 newNodeModel 插入，而是把 insertReuslt 插入，因为前者没有 id
-        fatherContext.read<FragmentPoolController>().getPoolTypeNodesList().add(MMPoolNode(model: insertReuslt));
+        fatherContext.read<HomePageController>().getCurrentFragmentPoolController().poolNodes.add(MMPoolNode(model: insertReuslt));
         return true;
       }
 

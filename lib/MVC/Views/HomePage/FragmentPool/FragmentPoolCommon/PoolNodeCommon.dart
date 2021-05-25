@@ -3,23 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/G/GNavigatorPush.dart';
-import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
-import 'package:jysp/MVC/Views/HomePage/ToastRoutes/NodeLongPressMenuRoute.dart';
+import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/Tools/TDebug.dart';
-import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:provider/provider.dart';
 
-class SingleNode extends StatefulWidget {
+class PoolNodeCommon extends StatefulWidget {
   /// [baseModel] 当前 model，供调用 base 方法。其他参数 base 可能没有对应方法
-  const SingleNode({required this.mmodel});
-  final MMPoolNode mmodel;
+  const PoolNodeCommon({required this.poolNodeMModel});
+  final MMPoolNode poolNodeMModel;
 
   @override
-  SingleNodeState createState() => SingleNodeState();
+  PoolNodeCommonState createState() => PoolNodeCommonState();
 }
 
-class SingleNodeState extends State<SingleNode> {
+class PoolNodeCommonState extends State<PoolNodeCommon> {
   ///
 
   final Offset _onLongPressMoveUpdateOffset = Offset.zero;
@@ -37,7 +34,7 @@ class SingleNodeState extends State<SingleNode> {
 
   void _parsePosition() {
     try {
-      final List<String> sp = widget.mmodel.get_position!.split(',');
+      final List<String> sp = widget.poolNodeMModel.get_position!.split(',');
       _left = double.parse(sp[0]);
       _top = double.parse(sp[1]);
     } catch (e) {
@@ -82,7 +79,7 @@ class SingleNodeState extends State<SingleNode> {
             _isLongPress = false;
             _longPressUp();
           }
-          context.read<FragmentPoolController>().freeBoxController.disableTouch(false);
+          context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(false);
         },
         onPointerCancel: (_) {
           dLog(() => 'cancel');
@@ -96,7 +93,7 @@ class SingleNodeState extends State<SingleNode> {
             _isLongPress = false;
             _longPressCancel();
           }
-          context.read<FragmentPoolController>().freeBoxController.disableTouch(false);
+          context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(false);
         },
         child: _body(),
       ),
@@ -105,8 +102,8 @@ class SingleNodeState extends State<SingleNode> {
 
   void _longPressStart() {
     dLog(() => '_longPressStart');
-    context.read<FragmentPoolController>().freeBoxController.disableTouch(true);
-    showToastRoute(context, NodeLongPressMenuRoute(context, mmodel: widget.mmodel));
+    context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(true);
+    // showToastRoute(context, NodeLongPressMenuRoute(context, poolNodeMModel: widget.poolNodeMModel));
   }
 
   void _longPressMove() {
@@ -146,9 +143,9 @@ class SingleNodeState extends State<SingleNode> {
 
   Widget _body() {
     return TextButton(
-      child: Text(widget.mmodel.get_name ?? unknown),
+      child: Text(widget.poolNodeMModel.get_name ?? unknown),
       onPressed: () {
-        GNavigatorPush.pushSheetPage(context);
+        // GNavigatorPush.pushSheetPage(context);
       },
       style: TextButton.styleFrom(
         primary: Colors.red,
