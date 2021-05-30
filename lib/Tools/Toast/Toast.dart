@@ -8,6 +8,11 @@ class PopResult {
   PopResult({required this.popResultSelect, required this.value});
   PopResultSelect popResultSelect;
   Object? value;
+
+  @override
+  String toString() {
+    return 'popResultSelect: $popResultSelect, value: $value';
+  }
 }
 
 enum PopResultSelect {
@@ -158,13 +163,17 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
     widget.toastRoute.rebuild();
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Stack(
-        alignment: widget.toastRoute.stackAlignment,
-        children: <Widget>[
-          background(),
-          ...widget.toastRoute.body(),
-          popWaiting(),
-        ],
+      body: Container(
+        width: MediaQueryData.fromWindow(window).size.width,
+        height: MediaQueryData.fromWindow(window).size.height,
+        child: Stack(
+          alignment: widget.toastRoute.stackAlignment,
+          children: <Widget>[
+            background(),
+            ...widget.toastRoute.body(),
+            popWaiting(),
+          ],
+        ),
       ),
     );
   }
@@ -173,15 +182,17 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
   Widget background() {
     return Positioned(
       top: 0,
-      width: MediaQueryData.fromWindow(window).size.width,
-      height: MediaQueryData.fromWindow(window).size.height,
       child: Listener(
         onPointerUp: (_) {
-          widget.toastRoute._toPop(null);
+          widget.toastRoute._toPop(PopResult(value: null, popResultSelect: PopResultSelect.clickBackground));
         },
         child: Opacity(
           opacity: 0.5,
-          child: Container(color: Colors.black),
+          child: Container(
+            width: MediaQueryData.fromWindow(window).size.width,
+            height: MediaQueryData.fromWindow(window).size.height,
+            color: Colors.black,
+          ),
         ),
       ),
     );
@@ -191,13 +202,13 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
   Widget popWaiting() {
     return Positioned(
       top: 0,
-      width: MediaQueryData.fromWindow(window).size.width,
-      height: MediaQueryData.fromWindow(window).size.height,
       child: Offstage(
         offstage: !widget.toastRoute._isPopWaiting,
         child: Opacity(
           opacity: 0.5,
           child: Container(
+            width: MediaQueryData.fromWindow(window).size.width,
+            height: MediaQueryData.fromWindow(window).size.height,
             alignment: Alignment.center,
             color: Colors.white,
             child: const Text('等待中...'),

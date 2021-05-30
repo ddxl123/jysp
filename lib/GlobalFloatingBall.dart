@@ -6,6 +6,7 @@ import 'package:jysp/Database/Models/MBase.dart';
 import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 ///
@@ -213,9 +214,19 @@ class _TableContentState extends State<TableContent> {
       child: FreeBox(
         freeBoxController: FreeBoxController(),
         backgroundColor: Colors.green,
-        viewableWidth: null,
-        viewableHeight: null,
-        fixedLayerBuilder: (BuildContext freeBoxProxyContext) {
+        boxWidth: 1000,
+        boxHeight: 1000,
+        freeMoveScaleLayerBuilder: (FreeBoxPositioned freeBoxPositioned, SetState setState) {
+          return Stack(
+            children: <Widget>[
+              freeBoxPositioned(
+                child: TableForTableData(tableName: widget.tableName),
+                boxPosition: Offset.zero,
+              ),
+            ],
+          );
+        },
+        fixedLayerBuilder: (SetState setState) {
           return Stack(
             children: <Widget>[
               Positioned(
@@ -225,17 +236,6 @@ class _TableContentState extends State<TableContent> {
                   color: Colors.blue,
                   child: Text(widget.tableName),
                 ),
-              ),
-            ],
-          );
-        },
-        freeMoveScaleLayerBuilder: (BuildContext freeBoxProxyContext) {
-          return Stack(
-            children: <Widget>[
-              Positioned(
-                top: MediaQueryData.fromWindow(window).size.height * 1 / 6,
-                left: MediaQueryData.fromWindow(window).size.width * 1 / 4,
-                child: TableForTableData(tableName: widget.tableName),
               ),
             ],
           );

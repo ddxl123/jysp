@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePageToastRoutes/FragmentPoolChoice.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolIndex.dart';
+import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,7 +18,10 @@ class HomePageState extends State<HomePage> {
     return Material(
       child: Stack(
         children: <Widget>[
-          FragmentPoolIndex(),
+          Positioned(
+            top: 0,
+            child: FragmentPoolIndex(),
+          ),
           _bottomWidgets(),
         ],
       ),
@@ -37,9 +41,9 @@ class HomePageState extends State<HomePage> {
             Expanded(
               child: TextButton(
                 onPressed: () {
-                  FragmentPoolChoiceRoute(context);
+                  showToastRoute(context, FragmentPoolChoiceRoute(context));
                 },
-                child: Text(context.select<HomePageController, PoolType>((HomePageController value) => value.getCurrentPoolType).text),
+                child: Text(context.read<HomePageController>().getCurrentPoolType.text),
               ),
             ),
             Expanded(child: TextButton(onPressed: () {}, child: const Text('我'))),

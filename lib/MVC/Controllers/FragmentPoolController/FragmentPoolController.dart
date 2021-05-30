@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/Helper.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 class FragmentPoolController extends ChangeNotifier {
   ///
@@ -19,11 +21,17 @@ class FragmentPoolController extends ChangeNotifier {
   double defaultViewScale = 1.0;
 
   /// [FragmentPool] 的 setState 函数
-  Function(Function()) needInitStateForSetState = (_) {};
+  SetState poolNodesSetState = (_) {};
 
   final List<MMPoolNode> poolNodes = <MMPoolNode>[];
 
   final FreeBoxController freeBoxController = FreeBoxController();
+
+  @override
+  void dispose() {
+    dLog(() => 'FragmentPoolController dispose');
+    super.dispose();
+  }
 
   ///
 }

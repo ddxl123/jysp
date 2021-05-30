@@ -12,15 +12,18 @@ import 'package:provider/provider.dart';
 class NodeJustCreatedCommon extends ToastRoute {
   NodeJustCreatedCommon(
     BuildContext fatherContext, {
+    required this.poolType,
     required this.screenPosition,
     required this.newNodeModelCallback,
   }) : super(fatherContext);
+
+  final PoolType poolType;
 
   /// 将要把输入框放在屏幕 left 多远的地方
   final Offset screenPosition;
 
   /// 新节点模型
-  MBase Function(Offset poolPositon, String name) newNodeModelCallback;
+  MBase Function(Offset boxPosition, String name) newNodeModelCallback;
 
   @override
   AlignmentDirectional get stackAlignment => AlignmentDirectional.topStart;
@@ -31,8 +34,13 @@ class NodeJustCreatedCommon extends ToastRoute {
   /// 键盘有关
   final FocusNode _focusNode = FocusNode();
 
+  /// 当前碎片池
+  late final FragmentPoolController _fragmentPoolController;
+
   @override
-  void init() {}
+  void init() {
+    _fragmentPoolController = fatherContext.read<HomePageController>().getFragmentPoolController(poolType);
+  }
 
   @override
   void rebuild() {
@@ -80,6 +88,8 @@ class NodeJustCreatedCommon extends ToastRoute {
         if (result == null) {
           await _toInsert();
           return showToast(text: '创建成功', returnValue: true);
+        } else if (result.popResultSelect == PopResultSelect.clickBackground) {
+          return showToast(text: '已取消', returnValue: true);
         } else {
           throw 'result err: $result';
         }
@@ -105,16 +115,15 @@ class NodeJustCreatedCommon extends ToastRoute {
 
     // 插入成功。插入失败不进行任何操作
     if (result) {
-      fatherContext.read<FragmentPoolController>().needInitStateForSetState(() {});
+      _fragmentPoolController.poolNodesSetState(() {});
     }
   }
 
   /// 在当前池内插入新节点
   Future<bool> insertNewNode() async {
     final String name = _txtEditingController.text;
-    final Offset position = fatherContext.read<FragmentPoolController>().freeBoxController.screenToBoxTransform(screenPosition);
     try {
-      final MBase newNodeModel = newNodeModelCallback(position, name);
+      final MBase newNodeModel = newNodeModelCallback(_fragmentPoolController.freeBoxController.screenToBoxTransform(screenPosition), name);
 
       // 插入 new node
       final MBase? insertReuslt = await RSqliteCurd<MBase>.byModel(newNodeModel).toInsertRow(connectTransaction: null);
@@ -122,7 +131,7 @@ class NodeJustCreatedCommon extends ToastRoute {
       // 让 state 变化
       if (insertReuslt != null) {
         // 不能把 newNodeModel 插入，而是把 insertReuslt 插入，因为前者没有 id
-        fatherContext.read<HomePageController>().getCurrentFragmentPoolController().poolNodes.add(MMPoolNode(model: insertReuslt));
+        _fragmentPoolController.poolNodes.add(MMPoolNode(model: insertReuslt));
         return true;
       }
 

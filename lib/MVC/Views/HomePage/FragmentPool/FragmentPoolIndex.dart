@@ -16,22 +16,23 @@ class _FragmentPoolIndexState extends State<FragmentPoolIndex> {
   void initState() {
     super.initState();
     context.read<HomePageController>().fragmentPoolIndexSetState = setState;
+    WidgetsBinding.instance!.addPostFrameCallback(
+      (Duration timeStamp) async {
+        await context.read<HomePageController>().toPool(toPoolType: PoolType.pendingPool);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 因为每个碎片池的 freeBox 都不一样，因此要分开
-    switch (context.select<HomePageController, PoolType>((HomePageController value) => value.getCurrentPoolType)) {
-      case PoolType.pendingPool:
-        return PendingPoolFreeBox();
-      case PoolType.memoryPool:
-        return MemoryPoolFreeBox();
-      case PoolType.completePool:
-        return CompletePoolFreeBox();
-      case PoolType.rulePool:
-        return RulePoolFreeBox();
-      default:
-        return Center(child: Text('unknown pool type: ${context.select<HomePageController, PoolType>((HomePageController value) => value.getCurrentPoolType)}'));
-    }
+    return IndexedStack(
+      index: context.read<HomePageController>().getCurrentPoolType.index,
+      children: <Widget>[
+        PendingPoolFreeBox(),
+        MemoryPoolFreeBox(),
+        CompletePoolFreeBox(),
+        RulePoolFreeBox(),
+      ],
+    );
   }
 }

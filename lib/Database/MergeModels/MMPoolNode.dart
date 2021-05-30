@@ -83,9 +83,9 @@ class MMPoolNode implements MMBase{
           ]);      String get name => setValue<String>(
         <String Function()>[
           () => MPnPendingPoolNode.name,() => MPnMemoryPoolNode.name,() => MPnCompletePoolNode.name,() => MPnRulePoolNode.name,
-          ]);      String get position => setValue<String>(
+          ]);      String get box_position => setValue<String>(
         <String Function()>[
-          () => MPnPendingPoolNode.position,() => MPnMemoryPoolNode.position,() => MPnCompletePoolNode.position,() => MPnRulePoolNode.position,
+          () => MPnPendingPoolNode.box_position,() => MPnMemoryPoolNode.box_position,() => MPnCompletePoolNode.box_position,() => MPnRulePoolNode.box_position,
           ]);      String get created_at => setValue<String>(
         <String Function()>[
           () => MPnPendingPoolNode.created_at,() => MPnMemoryPoolNode.created_at,() => MPnCompletePoolNode.created_at,() => MPnRulePoolNode.created_at,
@@ -142,9 +142,9 @@ class MMPoolNode implements MMBase{
         ]);      String? get get_name => setValue<String?>(
         <String? Function()>[
           () => mPnPendingPoolNode!.get_name,() => mPnMemoryPoolNode!.get_name,() => mPnCompletePoolNode!.get_name,() => mPnRulePoolNode!.get_name,
-        ]);      String? get get_position => setValue<String?>(
+        ]);      String? get get_box_position => setValue<String?>(
         <String? Function()>[
-          () => mPnPendingPoolNode!.get_position,() => mPnMemoryPoolNode!.get_position,() => mPnCompletePoolNode!.get_position,() => mPnRulePoolNode!.get_position,
+          () => mPnPendingPoolNode!.get_box_position,() => mPnMemoryPoolNode!.get_box_position,() => mPnCompletePoolNode!.get_box_position,() => mPnRulePoolNode!.get_box_position,
         ]);      int? get get_created_at => setValue<int?>(
         <int? Function()>[
           () => mPnPendingPoolNode!.get_created_at,() => mPnMemoryPoolNode!.get_created_at,() => mPnCompletePoolNode!.get_created_at,() => mPnRulePoolNode!.get_created_at,

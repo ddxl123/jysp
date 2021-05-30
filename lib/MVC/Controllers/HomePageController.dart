@@ -6,6 +6,7 @@ import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 /// 1. 当 [PoolType.index] 时，获取的是 [int]。
@@ -54,7 +55,6 @@ class HomePageController extends ChangeNotifier {
   PoolType get getCurrentPoolType => _currentPoolType;
   void setCurrentPoolType(PoolType value) {
     _currentPoolType = value;
-    notifyListeners();
   }
 
   /// 碎片池控制器
@@ -64,8 +64,8 @@ class HomePageController extends ChangeNotifier {
   FragmentPoolController ruleFragmentPoolController = FragmentPoolController(poolNodesTableName: MPnRulePoolNode.tableName);
 
   /// 获取当前碎片池控制器
-  FragmentPoolController getCurrentFragmentPoolController() {
-    switch (_currentPoolType) {
+  FragmentPoolController getFragmentPoolController(PoolType poolType) {
+    switch (poolType) {
       case PoolType.pendingPool:
         return pendingFragmentPoolController;
       case PoolType.memoryPool:
@@ -75,12 +75,12 @@ class HomePageController extends ChangeNotifier {
       case PoolType.rulePool:
         return ruleFragmentPoolController;
       default:
-        throw 'unknown _currentPoolType: $_currentPoolType';
+        throw 'unknown poolType: $poolType';
     }
   }
 
   /// [FragmentPoolIndex] 的 setState
-  void Function(Function()) fragmentPoolIndexSetState = (_) {};
+  SetState fragmentPoolIndexSetState = (_) {};
 
   /// 是否处于 toPooling
   bool _isToPooling = false;
@@ -92,11 +92,7 @@ class HomePageController extends ChangeNotifier {
   ///
   /// - [toPoolType]：将要进入池的类型。
   ///
-  /// 先获取数据后，才会调用 [toPoolTypeResult] 回调，最后才刷新碎片池
-  ///
-  Future<ToPoolResult> toPool({
-    required PoolType toPoolType,
-  }) async {
+  Future<ToPoolResult> toPool({required PoolType toPoolType}) async {
     if (_isToPooling) {
       dLog(() => 'toPool 并发');
       return ToPoolResult.invalid;
@@ -106,7 +102,7 @@ class HomePageController extends ChangeNotifier {
     dLog(() => '正在获取 fragmentPoolNodes 数据，并进入${toPoolType.text}中...');
 
     // 获取数据：[toPoolType] 的数据
-    final bool result = await retrievePoolNodes();
+    final bool result = await retrievePoolNodes(toPoolType: toPoolType);
 
     if (result == true) {
       dLog(() => '获取 fragmentPoolNodes 数据成功。');
@@ -124,16 +120,16 @@ class HomePageController extends ChangeNotifier {
   }
 
   /// 读取当前池的全部节点
-  Future<bool> retrievePoolNodes() async {
+  Future<bool> retrievePoolNodes({required PoolType toPoolType}) async {
     try {
-      getCurrentFragmentPoolController().poolNodes.clear();
+      getFragmentPoolController(toPoolType).poolNodes.clear();
       final List<MMPoolNode> mmodels = await MBase.queryRowsAsModels<MBase, MMPoolNode, MMPoolNode>(
-        tableName: getCurrentFragmentPoolController().poolNodesTableName,
+        tableName: getFragmentPoolController(toPoolType).poolNodesTableName,
         returnMWhere: null,
         returnMMWhere: (MBase model) => MMPoolNode(model: model),
         connectTransaction: null,
       );
-      getCurrentFragmentPoolController().poolNodes.addAll(mmodels);
+      getFragmentPoolController(toPoolType).poolNodes.addAll(mmodels);
       return true;
     } catch (e) {
       dLog(() => 'retrievePoolNodes err: ', () => e);

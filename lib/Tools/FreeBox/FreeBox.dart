@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
+/// [boxWidth]：不能为 [double.infinity] 或 [double.maxFinite]
 class FreeBox extends StatefulWidget {
   const FreeBox({
     required this.freeBoxController,
     required this.backgroundColor,
-    required this.viewableWidth,
-    required this.viewableHeight,
+    required this.boxWidth,
+    required this.boxHeight,
     required this.freeMoveScaleLayerBuilder,
     required this.fixedLayerBuilder,
     this.onLongPressStart,
-  });
+  }) : assert(boxWidth != double.maxFinite && boxHeight != double.maxFinite);
 
   /// 控制器
   final FreeBoxController freeBoxController;
@@ -20,18 +22,18 @@ class FreeBox extends StatefulWidget {
   final Color backgroundColor;
 
   /// 视口宽度
-  final double? viewableWidth;
+  final double boxWidth;
 
   /// 视口高度
-  final double? viewableHeight;
+  final double boxHeight;
 
-  /// 自由缩放层。必须使用 Stack + Postion。但要注意 Postion 的 top/left 为 0 时，本非按照父容器的顶部/左部，而是按照屏幕的顶部/左部。原因是【内容物】的大小是无限大的。
-  final Widget Function(BuildContext freeBoxProxyContext) freeMoveScaleLayerBuilder;
+  /// 自由缩放层。必须使用 Stack + freeBoxPositioned()。
+  final FreeBoxStack freeMoveScaleLayerBuilder;
 
   /// 固定层。必须使用 Stack + Postion。
-  final Widget Function(BuildContext freeBoxProxyContext) fixedLayerBuilder;
+  final Stack Function(SetState setState) fixedLayerBuilder;
 
-  final Function(ScaleStartDetails)? onLongPressStart;
+  final void Function(ScaleStartDetails details)? onLongPressStart;
 
   @override
   State<StatefulWidget> createState() {
@@ -53,74 +55,78 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
     widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
-    widget.freeBoxController.addListener(() {
-      setState(() {});
-      dLog(() => 'aaaa');
-    });
-  }
-
-  @override
-  void dispose() {
-    widget.freeBoxController.inertialSlideAnimationController.dispose();
-    widget.freeBoxController.targetSlideAnimationController.dispose();
-    super.dispose();
+    widget.freeBoxController.freeBoxSetState = setState;
   }
 
   @override
   Widget build(BuildContext context) {
-    // dLog(() => "FreeBox build");
     return _box();
   }
 
   Widget _box() {
     return Container(
-      alignment: Alignment.center,
-      width: widget.viewableWidth,
-      height: widget.viewableHeight,
-      child: Container(
-        alignment: Alignment.center,
-        color: widget.backgroundColor, //可视区域背景颜色
-        /// [FreeBox可视区域] 宽高
-        child: Stack(
-          children: <Widget>[
-            /// 自由移动缩放层
-            _freeMoveScaleLayer(),
-            _fixedLayer(),
-          ],
-        ),
+      alignment: Alignment.topLeft,
+      // 整个 box 的大小
+      width: widget.boxWidth,
+      height: widget.boxHeight,
+      color: widget.backgroundColor, //整个 box 的背景颜色
+      child: Stack(
+        children: <Positioned>[
+          /// 自由移动缩放层
+          _freeMoveScaleLayer(),
+          _fixedLayer(),
+        ],
       ),
     );
   }
 
-  Widget _freeMoveScaleLayer() {
+  Positioned _freeMoveScaleLayer() {
     return Positioned(
       // [内容物区] 的左上角是依据该 Positioned 的左上角，因此需设它偏移
       // top: - context.read<FragmentPoolController>().freeBoxController.leftTopOffsetFilling.dx,
       // left: - context.read<FragmentPoolController>().freeBoxController.leftTopOffsetFilling.dy,
-
-      width: double.maxFinite,
-      height: double.maxFinite,
-
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent, // 让透明部分也能触发事件
-        onScaleStart: widget.freeBoxController.onScaleStart,
-        onScaleUpdate: widget.freeBoxController.onScaleUpdate,
-        onScaleEnd: widget.freeBoxController.onScaleEnd,
-        child: Transform.translate(
-          offset: widget.freeBoxController.offset,
-          child: Transform.scale(
-            alignment: Alignment.topLeft,
-            scale: widget.freeBoxController.scale,
-
-            // [内容物区]。要比 [FreeBox可视区域] 宽高大，必须无限大，因为若可视区域很大，但可触发区域却很小，会把溢出部分切除，虽然仍可视，但不可触发Transform。
-            child: widget.freeMoveScaleLayerBuilder(context),
+      top: 0,
+      child: Container(
+        // 自由缩放触发区从 box 的左上角开始
+        alignment: Alignment.topLeft,
+        // 可触发自由缩放的区域的大小。若比 box 小，则内容物会溢出显示但无法触发；若比 box 大，则会收容内容物。
+        // 若内容物位置处于该大小区域外，则该内容物会消失。
+        width: widget.boxWidth + 1000000,
+        height: widget.boxHeight + 1000000,
+        color: widget.backgroundColor,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent, // 让透明部分也能触发事件
+          onScaleStart: widget.freeBoxController.onScaleStart,
+          onScaleUpdate: widget.freeBoxController.onScaleUpdate,
+          onScaleEnd: widget.freeBoxController.onScaleEnd,
+          child: Transform.translate(
+            offset: widget.freeBoxController.offset,
+            child: Transform.scale(
+              alignment: Alignment.topLeft,
+              scale: widget.freeBoxController.scale,
+              // [内容物s]
+              child: StatefulBuilder(
+                builder: (BuildContext context, SetState setState) {
+                  return widget.freeMoveScaleLayerBuilder(widget.freeBoxController.freeBoxPosition, setState);
+                },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _fixedLayer() {
-    return Positioned(child: widget.fixedLayerBuilder(context));
+  Positioned _fixedLayer() {
+    return Positioned(
+      top: 0,
+      width: widget.boxWidth,
+      height: widget.boxHeight,
+      child: StatefulBuilder(
+        builder: (BuildContext context, void Function(void Function()) setState) {
+          return widget.fixedLayerBuilder(setState);
+        },
+      ),
+    );
   }
 }

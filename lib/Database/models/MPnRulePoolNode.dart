@@ -10,8 +10,8 @@ class MPnRulePoolNode implements MBase{
 
   /// 1. insert 时，无需传入 id ，id 是自增的。
   /// 2. 若只创建 model 而并非 inset，id 的值为 null。
-  MPnRulePoolNode.createModel({required int? aiid_v,required String? uuid_v,required RulePoolNodeType? type_v,required String? name_v,required String? position_v,required int? created_at_v,required int? updated_at_v,}) {
-    getRowJson.addAll(<String, Object?>{aiid:aiid_v,uuid:uuid_v,type:type_v?.index,name:name_v,position:position_v,created_at:created_at_v,updated_at:updated_at_v,});
+  MPnRulePoolNode.createModel({required int? aiid_v,required String? uuid_v,required RulePoolNodeType? type_v,required String? name_v,required String? box_position_v,required int? created_at_v,required int? updated_at_v,}) {
+    getRowJson.addAll(<String, Object?>{aiid:aiid_v,uuid:uuid_v,type:type_v?.index,name:name_v,box_position:box_position_v,created_at:created_at_v,updated_at:updated_at_v,});
   }
 
   static String get tableName => 'pn_rule_pool_nodes';
@@ -21,18 +21,18 @@ class MPnRulePoolNode implements MBase{
   static String get uuid => 'uuid';
   static String get type => 'type';
   static String get name => 'name';
-  static String get position => 'position';
+  static String get box_position => 'box_position';
   static String get created_at => 'created_at';
   static String get updated_at => 'updated_at';
 
 
-  static Map<String, Object?> asJsonNoId({required int? aiid_v,required String? uuid_v,required RulePoolNodeType? type_v,required String? name_v,required String? position_v,required int? created_at_v,required int? updated_at_v,}
+  static Map<String, Object?> asJsonNoId({required int? aiid_v,required String? uuid_v,required RulePoolNodeType? type_v,required String? name_v,required String? box_position_v,required int? created_at_v,required int? updated_at_v,}
   ) {
-    return <String, Object?>{aiid:aiid_v,uuid:uuid_v,type:type_v?.index,name:name_v,position:position_v,created_at:created_at_v,updated_at:updated_at_v,};
+    return <String, Object?>{aiid:aiid_v,uuid:uuid_v,type:type_v?.index,name:name_v,box_position:box_position_v,created_at:created_at_v,updated_at:updated_at_v,};
   }
 
   static Map<String, Object?> asModelNoId(Map<String, Object?> json) {
-    return <String, Object?>{aiid:json[aiid],uuid:json[uuid],type:json[type] == null ? null : RulePoolNodeType.values[json[type]! as int],name:json[name],position:json[position],created_at:json[created_at],updated_at:json[updated_at],};
+    return <String, Object?>{aiid:json[aiid],uuid:json[uuid],type:json[type] == null ? null : RulePoolNodeType.values[json[type]! as int],name:json[name],box_position:json[box_position],created_at:json[created_at],updated_at:json[updated_at],};
   }
 
   // ====================================================================
@@ -67,5 +67,5 @@ class MPnRulePoolNode implements MBase{
   @override
   String get getTableName => tableName;
 
-@override int? get get_id => getRowJson[id] as int?;@override int? get get_aiid => getRowJson[aiid] as int?;@override String? get get_uuid => getRowJson[uuid] as String?; RulePoolNodeType? get get_type => getRowJson[type] == null ? null : RulePoolNodeType.values[getRowJson[type]! as int]; String? get get_name => getRowJson[name] as String?; String? get get_position => getRowJson[position] as String?;@override int? get get_created_at => getRowJson[created_at] as int?;@override int? get get_updated_at => getRowJson[updated_at] as int?;
+@override int? get get_id => getRowJson[id] as int?;@override int? get get_aiid => getRowJson[aiid] as int?;@override String? get get_uuid => getRowJson[uuid] as String?; RulePoolNodeType? get get_type => getRowJson[type] == null ? null : RulePoolNodeType.values[getRowJson[type]! as int]; String? get get_name => getRowJson[name] as String?; String? get get_box_position => getRowJson[box_position] as String?;@override int? get get_created_at => getRowJson[created_at] as int?;@override int? get get_updated_at => getRowJson[updated_at] as int?;
 }

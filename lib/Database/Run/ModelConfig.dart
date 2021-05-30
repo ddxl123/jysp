@@ -156,7 +156,7 @@ class _pn_pending_pool_nodes extends CreateModelBase {
   String recommend_rule_uuid = 'recommend_rule_uuid';
   String type = 'type';
   String name = 'name';
-  String position = 'position';
+  String box_position = 'box_position';
 
   @override
   List<String>? get createExtraEnums => <String>[
@@ -179,7 +179,7 @@ class _pn_pending_pool_nodes extends CreateModelBase {
         ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'PendingPoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
-        setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
+        setField_normal(fieldName: box_position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
@@ -194,7 +194,7 @@ class _pn_memory_pool_nodes extends CreateModelBase {
   String using_rule_uuid = 'using_rule_uuid';
   String type = 'type';
   String name = 'name';
-  String position = 'position';
+  String box_position = 'box_position';
 
   @override
   List<String>? get createExtraEnums => <String>[
@@ -217,7 +217,7 @@ class _pn_memory_pool_nodes extends CreateModelBase {
         ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'MemoryPoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
-        setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
+        setField_normal(fieldName: box_position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
@@ -232,7 +232,7 @@ class _pn_complete_pool_nodes extends CreateModelBase {
   String used_rule_uuid = 'used_rule_uuid';
   String type = 'type';
   String name = 'name';
-  String position = 'position';
+  String box_position = 'box_position';
 
   @override
   List<String>? get createExtraEnums => <String>[
@@ -255,7 +255,7 @@ class _pn_complete_pool_nodes extends CreateModelBase {
         ),
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'CompletePoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
-        setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
+        setField_normal(fieldName: box_position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 
@@ -268,7 +268,7 @@ class _pn_rule_pool_nodes extends CreateModelBase {
 
   String type = 'type';
   String name = 'name';
-  String position = 'position';
+  String box_position = 'box_position';
 
   @override
   List<String>? get createExtraEnums => <String>[
@@ -279,7 +279,7 @@ class _pn_rule_pool_nodes extends CreateModelBase {
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_normal(fieldName: type, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'RulePoolNodeType'),
         setField_normal(fieldName: name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
-        setField_normal(fieldName: position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
+        setField_normal(fieldName: box_position, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
       ];
 }
 

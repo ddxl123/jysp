@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 
 class PoolNodeCommon extends StatefulWidget {
   /// [baseModel] 当前 model，供调用 base 方法。其他参数 base 可能没有对应方法
-  const PoolNodeCommon({required this.poolNodeMModel});
+  const PoolNodeCommon({required this.poolType, required this.poolNodeMModel});
+  final PoolType poolType;
   final MMPoolNode poolNodeMModel;
 
   @override
@@ -19,90 +20,71 @@ class PoolNodeCommon extends StatefulWidget {
 class PoolNodeCommonState extends State<PoolNodeCommon> {
   ///
 
-  final Offset _onLongPressMoveUpdateOffset = Offset.zero;
-
-  double _left = 0;
-  double _top = 0;
   Timer? _longPressTimer;
   bool _isLongPress = false;
 
   @override
   Widget build(BuildContext context) {
-    _parsePosition();
     return _buildWidget();
   }
 
-  void _parsePosition() {
-    try {
-      final List<String> sp = widget.poolNodeMModel.get_position!.split(',');
-      _left = double.parse(sp[0]);
-      _top = double.parse(sp[1]);
-    } catch (e) {
-      dLog(() => 'parse position err: ', () => e);
-    }
-  }
-
   Widget _buildWidget() {
-    return Positioned(
-      left: _left + _onLongPressMoveUpdateOffset.dx,
-      top: _top + _onLongPressMoveUpdateOffset.dy,
-      child: Listener(
-        onPointerDown: (_) {
-          if (_.device > 0) {
-            return;
-          }
+    return Listener(
+      onPointerDown: (_) {
+        if (_.device > 0) {
+          return;
+        }
 
-          _longPressTimer = Timer(const Duration(milliseconds: 1000), () {
-            _isLongPress = true;
-            _longPressStart();
-          });
-        },
-        onPointerMove: (_) {
-          if (_.device > 0) {
-            return;
-          }
+        _longPressTimer = Timer(const Duration(milliseconds: 1000), () {
+          _isLongPress = true;
+          _longPressStart();
+        });
+      },
+      onPointerMove: (_) {
+        if (_.device > 0) {
+          return;
+        }
 
-          _longPressTimer?.cancel();
-          if (_isLongPress) {
-            _longPressMove();
-          }
-        },
-        onPointerUp: (_) {
-          dLog(() => 'up');
-          if (_.device > 0) {
-            return;
-          }
+        _longPressTimer?.cancel();
+        if (_isLongPress) {
+          _longPressMove();
+        }
+      },
+      onPointerUp: (_) {
+        dLog(() => 'up');
+        if (_.device > 0) {
+          return;
+        }
 
-          _longPressTimer?.cancel();
+        _longPressTimer?.cancel();
 
-          if (_isLongPress) {
-            _isLongPress = false;
-            _longPressUp();
-          }
-          context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(false);
-        },
-        onPointerCancel: (_) {
-          dLog(() => 'cancel');
-          if (_.device > 0) {
-            return;
-          }
+        if (_isLongPress) {
+          _isLongPress = false;
+          _longPressUp();
+        }
+        context.read<HomePageController>().getFragmentPoolController(widget.poolType).freeBoxController.disableTouch(false);
+      },
+      onPointerCancel: (_) {
+        dLog(() => 'cancel');
+        if (_.device > 0) {
+          return;
+        }
 
-          _longPressTimer?.cancel();
+        _longPressTimer?.cancel();
 
-          if (_isLongPress) {
-            _isLongPress = false;
-            _longPressCancel();
-          }
-          context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(false);
-        },
-        child: _body(),
-      ),
+        if (_isLongPress) {
+          _isLongPress = false;
+          _longPressCancel();
+        }
+        context.read<HomePageController>().getFragmentPoolController(widget.poolType).freeBoxController.disableTouch(false);
+      },
+      child: _body(),
     );
   }
 
   void _longPressStart() {
     dLog(() => '_longPressStart');
-    context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.disableTouch(true);
+    context.read<HomePageController>().getFragmentPoolController(widget.poolType).freeBoxController.disableTouch(true);
     // showToastRoute(context, NodeLongPressMenuRoute(context, poolNodeMModel: widget.poolNodeMModel));
   }
 

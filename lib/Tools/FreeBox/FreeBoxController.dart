@@ -1,7 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
+
+typedef FreeBoxStack = Stack Function(
+  FreeBoxPositioned freeBoxPositioned,
+  SetState setState,
+);
+typedef FreeBoxPositioned = Positioned Function({required Offset boxPosition, required Widget child});
 
 class _Init extends ChangeNotifier {}
 
@@ -12,9 +19,11 @@ mixin _Root on _Init {
   double scale = 1;
 
   /// 偏移值,默认必须(0,0)
-  Offset offset = const Offset(0, 0) - const Offset(100, 100);
+  Offset offset = const Offset(0, 0);
 
-  bool doRebuild = false;
+  Offset freeBoxBodyOffset = const Offset(10000, 10000);
+
+  SetState freeBoxSetState = (_) {};
 
   ///
 }
@@ -48,11 +57,8 @@ mixin _TouchEvent on _Root {
       return;
     }
     _onLongPressStartTimer = Timer(const Duration(milliseconds: 1000), () {
-      dLog(() => '123');
       if (onLongPressStart != null) {
-        dLog(() => '345');
         onLongPressStart!(details);
-        dLog(() => '456');
       }
     });
 
@@ -63,7 +69,7 @@ mixin _TouchEvent on _Root {
     /// 重置上一次 [临时缩放] 和 [临时触摸位置]
     _lastTempScale = 1;
     _lastTempTouchPosition = details.localFocalPoint;
-    notifyListeners();
+    freeBoxSetState(() {});
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
@@ -89,7 +95,7 @@ mixin _TouchEvent on _Root {
     _lastTempTouchPosition = details.localFocalPoint;
 
     // dLog(() => "onScaleUpdate:" + offset.toString());
-    notifyListeners();
+    freeBoxSetState(() {});
   }
 
   void onScaleEnd(ScaleEndDetails details) {
@@ -122,7 +128,7 @@ mixin _TouchEvent on _Root {
       inertialSlideAnimationController.removeListener(_inertialSlideListener);
     }
     // dLog(() => "_inertialSlideListener:" + offset.toString());
-    notifyListeners();
+    freeBoxSetState(() {});
   }
 
   ///
@@ -143,16 +149,40 @@ mixin _CommonTool on _TouchEvent {
   }
 
   /// 屏幕坐标转盒子坐标
+  ///
+  /// 减去 [freeBoxBodyOffset] 目的之一是为了不让 多位数 的结果存储，而只存储非偏移的数据，例如，只存 Offset(123,456)，而不存 Offset(10123,10456)。
+  ///
+  /// 注意，是基于 [screenPosition]\ [offset]\[scale] 属性定位。
   Offset screenToBoxTransform(Offset screenPosition) {
-    return (screenPosition - offset) / scale;
+    return (screenPosition - offset) / scale - freeBoxBodyOffset;
+  }
+
+  /// 元素在盒子中的定位
+  ///
+  /// 加上 [freeBoxBodyOffset] 目的之一是为了复原存储前被减去的偏移。
+  Positioned freeBoxPosition({required Offset boxPosition, required Widget child}) {
+    return Positioned(
+      top: boxPosition.dy + freeBoxBodyOffset.dy,
+      left: boxPosition.dx + freeBoxBodyOffset.dy,
+      child: child,
+    );
   }
 
   /// 滑动至目标位置
-  void targetSlide({required Offset targetOffset, required double targetScale}) {
+  ///
+  /// 初始化时要滑动到 负 [freeBoxBodyOffset] 的位置，原因是左上位置是界限，元素会被切除渲染。
+  void targetSlide({required Offset targetOffset, required double targetScale, required bool rightnow}) {
+    if (rightnow) {
+      offset = targetOffset - freeBoxBodyOffset;
+      targetScale = 1.0;
+      freeBoxSetState(() {});
+      targetSlideAnimationController.removeListener(_targetSlideListener);
+      return;
+    }
     targetSlideAnimationController.duration = const Duration(seconds: 1);
     _offsetAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween<Offset>(
           begin: offset,
-          end: targetOffset,
+          end: targetOffset - freeBoxBodyOffset,
         ));
     _scaleAnimation = targetSlideAnimationController.drive(CurveTween(curve: Curves.easeInOutBack)).drive(Tween<double>(
           begin: scale,
@@ -171,7 +201,7 @@ mixin _CommonTool on _TouchEvent {
     if (targetSlideAnimationController.isDismissed || targetSlideAnimationController.isCompleted) {
       targetSlideAnimationController.removeListener(_targetSlideListener);
     }
-    notifyListeners();
+    freeBoxSetState(() {});
   }
 
   ///

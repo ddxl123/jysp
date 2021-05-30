@@ -21,6 +21,7 @@ class FragmentPoolChoiceRoute extends ToastRoute {
   Positioned _toButtonArea() {
     return Positioned(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _toButton(toPoolType: PoolType.pendingPool),
           _toButton(toPoolType: PoolType.memoryPool),
@@ -50,6 +51,7 @@ class FragmentPoolChoiceRoute extends ToastRoute {
   @override
   Future<Toast<bool>> Function(PopResult? result) get whenPop {
     return (PopResult? result) async {
+      dLog(() => result);
       try {
         if (result == null || result.popResultSelect == PopResultSelect.clickBackground) {
           return showToast<bool>(text: '未选择', returnValue: true);

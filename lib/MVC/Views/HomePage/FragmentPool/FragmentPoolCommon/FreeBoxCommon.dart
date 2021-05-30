@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
+import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:provider/provider.dart';
 
 class FreeBoxCommon extends StatefulWidget {
-  const FreeBoxCommon({required this.poolNodesCommon, required this.onLongPressStart});
-  final Widget poolNodesCommon;
+  const FreeBoxCommon({required this.poolType, required this.poolNodesCommon, required this.onLongPressStart});
+  final PoolType poolType;
+  final FreeBoxStack poolNodesCommon;
   final void Function(ScaleStartDetails) onLongPressStart;
 
   @override
@@ -13,33 +16,43 @@ class FreeBoxCommon extends StatefulWidget {
 }
 
 class _FreeBoxCommonState extends State<FreeBoxCommon> {
+  late FragmentPoolController _fragmentPoolController;
+
+  @override
+  void initState() {
+    super.initState();
+    _fragmentPoolController = context.read<HomePageController>().getFragmentPoolController(widget.poolType);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FreeBox(
-      freeBoxController: context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController,
+      freeBoxController: _fragmentPoolController.freeBoxController,
       backgroundColor: Colors.green,
-      viewableWidth: double.maxFinite,
-      viewableHeight: double.maxFinite,
-      freeMoveScaleLayerBuilder: (_) => widget.poolNodesCommon,
-      fixedLayerBuilder: (_) => Stack(
-        children: <Widget>[
-          _toZeroButton(),
-        ],
-      ),
+      boxWidth: MediaQuery.of(context).size.width,
+      boxHeight: MediaQuery.of(context).size.height,
       onLongPressStart: (ScaleStartDetails details) {
         widget.onLongPressStart(details);
+      },
+      freeMoveScaleLayerBuilder: widget.poolNodesCommon,
+      fixedLayerBuilder: (void Function(void Function()) setState) {
+        return Stack(
+          children: <Positioned>[
+            _toZeroButton(),
+          ],
+        );
       },
     );
   }
 
   /// 将镜头移至Zero的按钮
-  Widget _toZeroButton() {
+  Positioned _toZeroButton() {
     return Positioned(
       bottom: 50,
       left: 0,
       child: TextButton(
         onPressed: () {
-          context.read<HomePageController>().getCurrentFragmentPoolController().freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0);
+          _fragmentPoolController.freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0, rightnow: false);
         },
         child: const Icon(Icons.adjust),
       ),
