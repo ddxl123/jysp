@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/SheetPage/SheetLoadArea.dart';
 import 'package:jysp/Tools/SheetPage/SheetLoadAreaController.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -26,16 +27,16 @@ class SheetPageController<T, M> extends ChangeNotifier {
   late final BuildContext sheetContext;
 
   /// 整个 [sheet] 中的 [setState]。
-  late final Function(void Function() fn) sheetSetState;
+  late final SetState sheetSetState;
 
   /// [header] 中的 [setState]。直接调用 headerSetState() 即可。
-  Function(void Function() fn) headerSetState = (_) {};
+  SetState headerSetState = (_) {};
 
   /// [body] 中的 [setState]。直接调用 bodySetState() 即可。
-  Function(void Function() fn) bodySetState = (_) {};
+  SetState bodySetState = (_) {};
 
   /// [loadArea] 中的 [setState]。直接调用 loadAreaSetState() 即可。
-  Function(void Function() fn) loadAreaSetState = (_) {};
+  SetState loadAreaSetState = (_) {};
 
   late final Animation<double> animation;
 

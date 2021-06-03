@@ -3,6 +3,7 @@ import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolControll
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/Tools/FreeBox/FreeBox.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:provider/provider.dart';
 
 class FreeBoxCommon extends StatefulWidget {
@@ -28,14 +29,13 @@ class _FreeBoxCommonState extends State<FreeBoxCommon> {
   Widget build(BuildContext context) {
     return FreeBox(
       freeBoxController: _fragmentPoolController.freeBoxController,
-      backgroundColor: Colors.green,
       boxWidth: MediaQuery.of(context).size.width,
       boxHeight: MediaQuery.of(context).size.height,
       onLongPressStart: (ScaleStartDetails details) {
         widget.onLongPressStart(details);
       },
       freeMoveScaleLayerBuilder: widget.poolNodesCommon,
-      fixedLayerBuilder: (void Function(void Function()) setState) {
+      fixedLayerBuilder: (SetState setState) {
         return Stack(
           children: <Positioned>[
             _toZeroButton(),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
+import 'package:jysp/Test/FlutterTest.dart';
+import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/WillToHomePage.dart';
 
 void main() {
@@ -16,11 +18,20 @@ class MyApp extends StatefulWidget {
 class _MyApp extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Material(
-        key: globalKey,
-        child: WillToHomePage(),
+    return Listener(
+      child: MaterialApp(
+        home: Material(
+          key: globalKey,
+          child: WillToHomePage(),
+        ),
       ),
+      onPointerUp: (PointerUpEvent upEvent) {
+        touchPosition = upEvent.localPosition;
+        for (final Function item in touchPositionUpEvent) {
+          item();
+        }
+        touchPositionUpEvent.clear();
+      },
     );
   }
 }

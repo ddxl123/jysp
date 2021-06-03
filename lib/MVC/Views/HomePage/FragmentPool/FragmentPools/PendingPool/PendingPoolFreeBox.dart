@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
@@ -35,23 +36,25 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
     final FragmentPoolController thisFragmentPoolController = context.read<HomePageController>().getFragmentPoolController(thisPoolType);
     return FreeBoxCommon(
       poolType: thisPoolType,
-      poolNodesCommon: (FreeBoxPositioned freeBoxPositioned, SetState setState) {
-        if (thisFragmentPoolController.poolNodesSetState != setState) {
-          thisFragmentPoolController.poolNodesSetState = setState;
-        }
-        return Stack(
-          children: <Positioned>[
+      poolNodesCommon: FreeBoxStack(
+        builder: (BuildContext context, SetState setState) {
+          if (thisFragmentPoolController.poolNodesSetState != setState) {
+            thisFragmentPoolController.poolNodesSetState = setState;
+          }
+          return <FreeBoxPositioned>[
             for (int i = 0; i < thisFragmentPoolController.poolNodes.length; i++)
-              freeBoxPositioned(
+              FreeBoxPositioned(
                 boxPosition: stringToOffset(thisFragmentPoolController.poolNodes[i].get_box_position),
                 child: PoolNodeCommon(
                   poolType: thisPoolType,
                   poolNodeMModel: thisFragmentPoolController.poolNodes[i],
+                  fragmentsTableName: MFragmentsAboutPendingPoolNode.tableName,
+                  columns: <String>[MFragmentsAboutPendingPoolNode.title],
                 ),
               ),
-          ],
-        );
-      },
+          ];
+        },
+      ),
       onLongPressStart: (ScaleStartDetails details) {
         Navigator.push(
           context,

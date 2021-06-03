@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/Helper.dart';
-import 'package:jysp/Tools/TDebug.dart';
 
 /// [boxWidth]：不能为 [double.infinity] 或 [double.maxFinite]
 class FreeBox extends StatefulWidget {
   const FreeBox({
     required this.freeBoxController,
-    required this.backgroundColor,
+    this.boxBodyBackgroundColor = Colors.green,
+    this.boxOutsideBackgroundColor = Colors.red,
     required this.boxWidth,
     required this.boxHeight,
     required this.freeMoveScaleLayerBuilder,
@@ -18,8 +18,11 @@ class FreeBox extends StatefulWidget {
   /// 控制器
   final FreeBoxController freeBoxController;
 
-  /// 背景颜色
-  final Color backgroundColor;
+  /// 整体内容物的背景颜色
+  final Color boxBodyBackgroundColor;
+
+  /// 内容物外的背景颜色
+  final Color boxOutsideBackgroundColor;
 
   /// 视口宽度
   final double boxWidth;
@@ -56,6 +59,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
     widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
     widget.freeBoxController.freeBoxSetState = setState;
+    widget.freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0, rightnow: true);
   }
 
   @override
@@ -69,7 +73,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
       // 整个 box 的大小
       width: widget.boxWidth,
       height: widget.boxHeight,
-      color: widget.backgroundColor, //整个 box 的背景颜色
+      color: widget.boxOutsideBackgroundColor, //整个 box 的背景颜色
       child: Stack(
         children: <Positioned>[
           /// 自由移动缩放层
@@ -93,7 +97,8 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
         // 若内容物位置处于该大小区域外，则该内容物会消失。
         width: widget.boxWidth + 1000000,
         height: widget.boxHeight + 1000000,
-        color: widget.backgroundColor,
+        // 因为触发区始终比整个 box 大，因此颜色会覆盖掉 box 的背景颜色
+        color: widget.boxOutsideBackgroundColor,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent, // 让透明部分也能触发事件
           onScaleStart: widget.freeBoxController.onScaleStart,
@@ -107,7 +112,10 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
               // [内容物s]
               child: StatefulBuilder(
                 builder: (BuildContext context, SetState setState) {
-                  return widget.freeMoveScaleLayerBuilder(widget.freeBoxController.freeBoxPosition, setState);
+                  return Container(
+                    color: widget.boxBodyBackgroundColor,
+                    child: widget.freeMoveScaleLayerBuilder,
+                  );
                 },
               ),
             ),

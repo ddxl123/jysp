@@ -3,6 +3,7 @@ import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/DownloadModule.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
+import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:provider/provider.dart';
 
 class InitDownloadPage extends StatefulWidget {
@@ -52,27 +53,21 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
   }
 
   Widget _body(bool isGetList) {
-    return Positioned(
-      child: Center(
-        child: Container(
-          width: 300,
-          decoration: BoxDecoration(
-            color: Colors.yellow,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(offset: Offset(10, 10), blurRadius: 10, spreadRadius: -10),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              // 这里的占比是根据父容器大小的占比
-              Flexible(child: _title(isGetList ? '获取中...' : '正在下载中...')),
-              Flexible(child: isGetList ? Container() : DownloadList()),
-            ],
-          ),
-        ),
+    return Center(
+      child: RoundedBox(
+        width: MediaQuery.of(context).size.width * 2 / 3,
+        height: MediaQuery.of(context).size.height * 2 / 3,
+        children: <Widget>[
+          // 这里的占比是根据父容器大小的占比
+          _title(isGetList ? '获取中...' : '正在下载中...'),
+          if (isGetList)
+            Container()
+          else
+            Container(
+              height: double.maxFinite,
+              child: DownloadList(),
+            ),
+        ],
       ),
     );
   }
@@ -143,6 +138,7 @@ class _DownloadListState extends State<DownloadList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      primary: false,
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: context.read<InitDownloadController>().baseDownloadModuleGroupUse.length,

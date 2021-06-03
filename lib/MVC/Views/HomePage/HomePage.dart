@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Views/HomePage/HomePageToastRoutes/FragmentPoolChoice.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolIndex.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:provider/provider.dart';
 
@@ -39,11 +40,15 @@ class HomePageState extends State<HomePage> {
           children: <Widget>[
             Expanded(child: TextButton(onPressed: () {}, child: const Text('发现'))),
             Expanded(
-              child: TextButton(
-                onPressed: () {
-                  showToastRoute(context, FragmentPoolChoiceRoute(context));
+              child: StatefulBuilder(
+                builder: (BuildContext btCtx, SetState setState) {
+                  return TextButton(
+                    onPressed: () {
+                      showToastRoute(context, FragmentPoolChoiceRoute(btCtx));
+                    },
+                    child: Text(context.read<HomePageController>().getCurrentPoolType.text),
+                  );
                 },
-                child: Text(context.read<HomePageController>().getCurrentPoolType.text),
               ),
             ),
             Expanded(child: TextButton(onPressed: () {}, child: const Text('我'))),

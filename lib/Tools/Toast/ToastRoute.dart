@@ -2,6 +2,9 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/G/G.dart';
+import 'package:jysp/Tools/Helper.dart';
+import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 
 class PopResult {
@@ -28,17 +31,16 @@ enum PopResultSelect {
 ///
 ///
 ///
-/// [ToastRoute] 具有触发返回功能
+/// [ToastRoute] 具有触发返回功能的 toast
 abstract class ToastRoute extends OverlayRoute<PopResult> {
   ///
 
   ToastRoute(this.fatherContext);
   final BuildContext fatherContext;
 
-  //
+  // ==============================================================================
   //
   // 需实现的部分
-  //
   //
 
   /// [whenPop]：
@@ -47,13 +49,11 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   /// - 若返回 false，则异步完后 route 不进行 pop，只有等待页面被 pop。
   ///
   /// 参数值 [result]：
-  /// - 若参数值为 null，则代表(或充当)'物理返回'。
+  /// - 若参数值的 [PopResultSelect] 为 null，则代表(或充当)'物理返回'。
+  /// - 若参数值的 [PopResultSelect] 为 [PopResultSelect.clickBackground]，则代表点击了背景。
   ///
   /// 已经被设定多次触发时只会执行第一次
   Future<Toast<bool>> Function(PopResult? result)? get whenPop;
-
-  /// 默认定位
-  AlignmentDirectional get stackAlignment;
 
   ///初始化
   void init();
@@ -65,20 +65,28 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
 
   /// body
   ///
-  /// [Positioned] 定位为 null 时，会根据 [isBodyCenter] 来定位
-  List<Positioned> body();
+  /// Widget 为 [Positioned] 或 [AutoPositioned]
+  List<Widget> body();
 
-  ///
-  ///
-  /// 非实现部分
-  ///
-  ///
+  /// 背景不透明度
+  double get backgroundOpacity;
+
+  /// 背景颜色
+  Color get backgroundColor;
+
+  // ==============================================================================
+  //
+  // 非实现部分
+  //
 
   /// 当前 route 的根 Widget 的 context
   late BuildContext context;
 
   /// 当前 route 的根 Widget 的 setState
-  late Function(Function()) setState;
+  late SetState setState;
+
+  /// 父 widget 的 Rect
+  late Rect fatherWidgetRect;
 
   /// 是否显示 popWaiting
   bool _isPopWaiting = false;
@@ -118,6 +126,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   /// 物理返回 的 [result] 为 null
   @override
   bool didPop(PopResult? result) {
+    dLog(() => 'aa');
     if (_isPop == true) {
       super.didPop(null);
       return true;
@@ -131,6 +140,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   Iterable<OverlayEntry> createOverlayEntries() {
     return <OverlayEntry>[
       OverlayEntry(
+        maintainState: true,
         builder: (_) {
           return ToastRouteWidget(this);
         },
@@ -156,6 +166,11 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
     widget.toastRoute.init();
     widget.toastRoute.context = context;
     widget.toastRoute.setState = setState;
+
+    final RenderBox fatherRenderBox = widget.toastRoute.fatherContext.findRenderObject()! as RenderBox;
+    final Size size = fatherRenderBox.size;
+    final Offset offset = fatherRenderBox.localToGlobal(Offset.zero);
+    widget.toastRoute.fatherWidgetRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   }
 
   @override
@@ -167,7 +182,7 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
         width: MediaQueryData.fromWindow(window).size.width,
         height: MediaQueryData.fromWindow(window).size.height,
         child: Stack(
-          alignment: widget.toastRoute.stackAlignment,
+          alignment: Alignment.topLeft,
           children: <Widget>[
             background(),
             ...widget.toastRoute.body(),
@@ -187,11 +202,11 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
           widget.toastRoute._toPop(PopResult(value: null, popResultSelect: PopResultSelect.clickBackground));
         },
         child: Opacity(
-          opacity: 0.5,
+          opacity: widget.toastRoute.backgroundOpacity,
           child: Container(
             width: MediaQueryData.fromWindow(window).size.width,
             height: MediaQueryData.fromWindow(window).size.height,
-            color: Colors.black,
+            color: widget.toastRoute.backgroundColor,
           ),
         ),
       ),
@@ -263,4 +278,63 @@ class _ToastWidgetState extends State<ToastWidget> {
 class Toast<T> {
   Toast(this.returnValue);
   T returnValue;
+}
+
+///
+///
+///
+///
+///
+/// 自动设置 child 在屏幕中的位置
+///
+/// 要注意 child 高度不能大于屏幕高度的一半，否则溢出部分无法显示
+class AutoPositioned extends StatefulWidget {
+  const AutoPositioned({required this.child});
+  final Widget child;
+
+  @override
+  _AutoPositionedState createState() => _AutoPositionedState();
+}
+
+class _AutoPositionedState extends State<AutoPositioned> {
+  final Size screenSize = MediaQueryData.fromWindow(window).size;
+  final Size halfScreenSize = MediaQueryData.fromWindow(window).size / 2;
+  double? left;
+  double? right;
+  double? top;
+  double? buttom;
+
+  @override
+  void initState() {
+    super.initState();
+    // 必须放在 init 中，因为 OverlayRoute pop 或 push 前后会 触发 setState
+    // 当 maintainState == true 时，不会触发 init ，而只会触发 setState
+    if (touchPosition.dx < halfScreenSize.width && touchPosition.dy < halfScreenSize.height) {
+      left = touchPosition.dx;
+      top = touchPosition.dy;
+    } else if (touchPosition.dx < halfScreenSize.width && touchPosition.dy > halfScreenSize.height) {
+      left = touchPosition.dx;
+      buttom = screenSize.height - touchPosition.dy;
+    } else if (touchPosition.dx > halfScreenSize.width && touchPosition.dy < halfScreenSize.height) {
+      right = screenSize.width - touchPosition.dx;
+      top = touchPosition.dy;
+    } else if (touchPosition.dx > halfScreenSize.width && touchPosition.dy > halfScreenSize.height) {
+      right = screenSize.width - touchPosition.dx;
+      buttom = screenSize.height - touchPosition.dy;
+    } else {
+      left = touchPosition.dx;
+      top = touchPosition.dy;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      right: right,
+      top: top,
+      bottom: buttom,
+      child: widget.child,
+    );
+  }
 }

@@ -8,7 +8,7 @@ import 'package:jysp/Tools/TDebug.dart';
 class SheetPage<T, M> extends OverlayRoute<void> {
   ///
 
-  /// [T]：[bodyData] 的类型
+  /// [T]：[bodyData] 的元素类型
   ///
   /// [M]：标记类型
   ///
@@ -38,6 +38,7 @@ class SheetPage<T, M> extends OverlayRoute<void> {
   Iterable<OverlayEntry> createOverlayEntries() {
     return <OverlayEntry>[
       OverlayEntry(
+        maintainState: true,
         builder: (_) {
           return Stack(
             children: <Widget>[

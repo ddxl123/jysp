@@ -6,7 +6,7 @@ import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Request/Sqlite/RSqliteCurd.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
-import 'package:jysp/Tools/Toast/Toast.dart';
+import 'package:jysp/Tools/Toast/ToastRoute.dart';
 import 'package:provider/provider.dart';
 
 class NodeJustCreatedCommon extends ToastRoute {
@@ -17,6 +17,12 @@ class NodeJustCreatedCommon extends ToastRoute {
     required this.newNodeModelCallback,
   }) : super(fatherContext);
 
+  @override
+  Color get backgroundColor => Colors.black;
+
+  @override
+  double get backgroundOpacity => 0.5;
+
   final PoolType poolType;
 
   /// 将要把输入框放在屏幕 left 多远的地方
@@ -24,9 +30,6 @@ class NodeJustCreatedCommon extends ToastRoute {
 
   /// 新节点模型
   MBase Function(Offset boxPosition, String name) newNodeModelCallback;
-
-  @override
-  AlignmentDirectional get stackAlignment => AlignmentDirectional.topStart;
 
   /// 输入控制器
   final TextEditingController _txtEditingController = TextEditingController();

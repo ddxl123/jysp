@@ -213,19 +213,18 @@ class _TableContentState extends State<TableContent> {
       alignment: Alignment.center,
       child: FreeBox(
         freeBoxController: FreeBoxController(),
-        backgroundColor: Colors.green,
         boxWidth: 1000,
         boxHeight: 1000,
-        freeMoveScaleLayerBuilder: (FreeBoxPositioned freeBoxPositioned, SetState setState) {
-          return Stack(
-            children: <Widget>[
-              freeBoxPositioned(
+        freeMoveScaleLayerBuilder: FreeBoxStack(
+          builder: (BuildContext context, SetState setState) {
+            return <FreeBoxPositioned>[
+              FreeBoxPositioned(
                 child: TableForTableData(tableName: widget.tableName),
                 boxPosition: Offset.zero,
               ),
-            ],
-          );
-        },
+            ];
+          },
+        ),
         fixedLayerBuilder: (SetState setState) {
           return Stack(
             children: <Widget>[

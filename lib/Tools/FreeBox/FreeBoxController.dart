@@ -2,15 +2,51 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/Tools/Helper.dart';
-import 'package:jysp/Tools/TDebug.dart';
 
-typedef FreeBoxStack = Stack Function(
-  FreeBoxPositioned freeBoxPositioned,
-  SetState setState,
-);
-typedef FreeBoxPositioned = Positioned Function({required Offset boxPosition, required Widget child});
+mixin FreeBoxBodyOffset {
+  /// 防左上角溢出被切除渲染的整体偏移量
+  final Offset freeBoxBodyOffset = const Offset(10000, 10000);
+}
 
-class _Init extends ChangeNotifier {}
+class FreeBoxStack extends StatefulWidget {
+  const FreeBoxStack({required this.builder});
+  final List<FreeBoxPositioned> Function(BuildContext context, SetState setState) builder;
+
+  @override
+  _FreeBoxStackState createState() => _FreeBoxStackState();
+}
+
+class _FreeBoxStackState extends State<FreeBoxStack> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: widget.builder(context, setState),
+    );
+  }
+}
+
+/// 元素在盒子中的定位
+///
+/// 加上 [freeBoxBodyOffset] 目的之一是为了复原存储前被减去的偏移。
+class FreeBoxPositioned extends StatelessWidget with FreeBoxBodyOffset {
+  FreeBoxPositioned({required this.boxPosition, required this.child});
+  final Offset? boxPosition;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (boxPosition == null) {
+      return Positioned(child: child);
+    }
+    return Positioned(
+      top: boxPosition!.dy + freeBoxBodyOffset.dy,
+      left: boxPosition!.dx + freeBoxBodyOffset.dy,
+      child: child,
+    );
+  }
+}
+
+class _Init extends ChangeNotifier with FreeBoxBodyOffset {}
 
 mixin _Root on _Init {
   ///
@@ -20,8 +56,6 @@ mixin _Root on _Init {
 
   /// 偏移值,默认必须(0,0)
   Offset offset = const Offset(0, 0);
-
-  Offset freeBoxBodyOffset = const Offset(10000, 10000);
 
   SetState freeBoxSetState = (_) {};
 
@@ -155,17 +189,6 @@ mixin _CommonTool on _TouchEvent {
   /// 注意，是基于 [screenPosition]\ [offset]\[scale] 属性定位。
   Offset screenToBoxTransform(Offset screenPosition) {
     return (screenPosition - offset) / scale - freeBoxBodyOffset;
-  }
-
-  /// 元素在盒子中的定位
-  ///
-  /// 加上 [freeBoxBodyOffset] 目的之一是为了复原存储前被减去的偏移。
-  Positioned freeBoxPosition({required Offset boxPosition, required Widget child}) {
-    return Positioned(
-      top: boxPosition.dy + freeBoxBodyOffset.dy,
-      left: boxPosition.dx + freeBoxBodyOffset.dy,
-      child: child,
-    );
   }
 
   /// 滑动至目标位置

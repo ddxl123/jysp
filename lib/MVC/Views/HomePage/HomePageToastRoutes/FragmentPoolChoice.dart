@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
-import 'package:jysp/Tools/Toast/Toast.dart';
+import 'package:jysp/Tools/Toast/ToastRoute.dart';
 import 'package:provider/provider.dart';
 
 class FragmentPoolChoiceRoute extends ToastRoute {
   FragmentPoolChoiceRoute(BuildContext fatherContext) : super(fatherContext);
 
   @override
-  AlignmentDirectional get stackAlignment => AlignmentDirectional.bottomCenter;
+  Color get backgroundColor => Colors.white;
+
+  @override
+  double get backgroundOpacity => 0.0;
 
   @override
   List<Positioned> body() {
@@ -20,8 +24,10 @@ class FragmentPoolChoiceRoute extends ToastRoute {
 
   Positioned _toButtonArea() {
     return Positioned(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      bottom: MediaQuery.of(context).size.height - fatherWidgetRect.top,
+      left: 0,
+      right: 0,
+      child: RoundedBox(
         children: <Widget>[
           _toButton(toPoolType: PoolType.pendingPool),
           _toButton(toPoolType: PoolType.memoryPool),
@@ -34,9 +40,9 @@ class FragmentPoolChoiceRoute extends ToastRoute {
 
   Widget _toButton({required PoolType toPoolType}) {
     return TextButton(
-      style: TextButton.styleFrom(primary: Colors.white),
+      style: TextButton.styleFrom(primary: Colors.red, padding: const EdgeInsets.fromLTRB(20, 0, 20, 0)),
       child: Text(toPoolType.text),
-      onPressed: () async {
+      onPressed: () {
         Navigator.pop<PopResult>(context, PopResult(popResultSelect: PopResultSelect.one, value: toPoolType));
       },
     );

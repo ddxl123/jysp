@@ -21,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
         color: Colors.green,
         child: RoundedBox(
           width: MediaQuery.of(context).size.width * 4 / 5,
-          height: null,
           pidding: const EdgeInsets.fromLTRB(20, 20, 20, 5),
           children: <Widget>[
             const Flexible(
