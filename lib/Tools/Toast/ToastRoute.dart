@@ -83,7 +83,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   late BuildContext context;
 
   /// 当前 route 的根 Widget 的 setState
-  late SetState setState;
+  SetState? setState;
 
   /// 父 widget 的 Rect
   late Rect fatherWidgetRect;
@@ -105,7 +105,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
     }
     _isToPoping = true;
     _isPopWaiting = true;
-    setState(() {});
+    setState!(() {});
 
     if (whenPop != null) {
       final bool isPop = (await whenPop!(result)).returnValue;
@@ -115,7 +115,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
       } else {
         _isToPoping = false;
         _isPopWaiting = false;
-        setState(() {});
+        setState!(() {});
       }
     } else {
       _isPop = true;
@@ -165,7 +165,7 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
     super.initState();
     widget.toastRoute.init();
     widget.toastRoute.context = context;
-    widget.toastRoute.setState = setState;
+    widget.toastRoute.setState ??= putSetState(setState);
 
     final RenderBox fatherRenderBox = widget.toastRoute.fatherContext.findRenderObject()! as RenderBox;
     final Size size = fatherRenderBox.size;

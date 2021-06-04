@@ -88,9 +88,12 @@ class Token {
           },
         );
       }
-    } catch (e) {
+    } catch (e, r) {
       await fail(2);
-      dLog(() => 'token sqlite 存储失败', () => e);
+      dLog(() => 'token sqlite 存储失败e：', () => e);
+      dLog(
+        () => 'token sqlite 存储失败r：$r',
+      );
     }
   }
 

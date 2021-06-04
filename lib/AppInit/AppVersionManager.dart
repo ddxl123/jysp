@@ -31,9 +31,9 @@ class AppVersionManager {
     final List<String> currentAppVersionString = currentAppVersion.split('.');
     final List<String> saveAppVersionString = saveAppVersion.split('.');
 
-    final Compare zeroCompare = Helper.compare(int.parse(currentAppVersionString[0]), int.parse(saveAppVersionString[0]));
-    final Compare oneCompare = Helper.compare(int.parse(currentAppVersionString[1]), int.parse(saveAppVersionString[1]));
-    final Compare twoCompare = Helper.compare(int.parse(currentAppVersionString[2]), int.parse(saveAppVersionString[2]));
+    final Compare zeroCompare = compare(int.parse(currentAppVersionString[0]), int.parse(saveAppVersionString[0]));
+    final Compare oneCompare = compare(int.parse(currentAppVersionString[1]), int.parse(saveAppVersionString[1]));
+    final Compare twoCompare = compare(int.parse(currentAppVersionString[2]), int.parse(saveAppVersionString[2]));
 
     if (zeroCompare == Compare.frontBig) {
       return VersionStatus.changeDbAfterUpload;

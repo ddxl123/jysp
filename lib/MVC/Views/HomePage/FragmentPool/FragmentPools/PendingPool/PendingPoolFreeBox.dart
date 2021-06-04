@@ -3,9 +3,10 @@ import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FragmentPoolToastRouteCommons/NodeJustCreatedCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FreeBoxCommon.dart';
-import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/NodeJustCreatedCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeCommon.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeSheetCommon.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -38,9 +39,7 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
       poolType: thisPoolType,
       poolNodesCommon: FreeBoxStack(
         builder: (BuildContext context, SetState setState) {
-          if (thisFragmentPoolController.poolNodesSetState != setState) {
-            thisFragmentPoolController.poolNodesSetState = setState;
-          }
+          thisFragmentPoolController.poolNodesSetState ??= putSetState(setState);
           return <FreeBoxPositioned>[
             for (int i = 0; i < thisFragmentPoolController.poolNodes.length; i++)
               FreeBoxPositioned(
@@ -48,8 +47,11 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
                 child: PoolNodeCommon(
                   poolType: thisPoolType,
                   poolNodeMModel: thisFragmentPoolController.poolNodes[i],
-                  fragmentsTableName: MFragmentsAboutPendingPoolNode.tableName,
-                  columns: <String>[MFragmentsAboutPendingPoolNode.title],
+                  sheetPageBuilder: () => PoolNodeSheetCommon(
+                    poolNodeMModel: thisFragmentPoolController.poolNodes[i],
+                    fragmentsTableName: MFragmentsAboutPendingPoolNode.tableName,
+                    columns: <String>[MFragmentsAboutPendingPoolNode.title],
+                  ),
                 ),
               ),
           ];

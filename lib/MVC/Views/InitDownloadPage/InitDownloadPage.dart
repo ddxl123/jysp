@@ -103,7 +103,11 @@ class _DownloadListState extends State<DownloadList> {
   @override
   void initState() {
     super.initState();
-    getData();
+    WidgetsBinding.instance!.addPostFrameCallback(
+      (Duration timeStamp) {
+        getData();
+      },
+    );
   }
 
   Future<void> getData() async {

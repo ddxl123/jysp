@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/G/G.dart';
-import 'package:jysp/Test/FlutterTest.dart';
-import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/WillToHomePage.dart';
 
 void main() {

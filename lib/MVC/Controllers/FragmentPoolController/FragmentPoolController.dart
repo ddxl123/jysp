@@ -21,7 +21,7 @@ class FragmentPoolController extends ChangeNotifier {
   double defaultViewScale = 1.0;
 
   /// [FragmentPool] 的 setState 函数
-  SetState poolNodesSetState = (_) {};
+  SetState? poolNodesSetState;
 
   final List<MMPoolNode> poolNodes = <MMPoolNode>[];
 

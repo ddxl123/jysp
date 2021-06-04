@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/Helper.dart';
 
 enum SendEmailButtonHandlerEnum {
   /// 倒计时状态
@@ -28,7 +29,7 @@ class RebuildHandler<T> {
   T? _handleCode;
   T? get handleCode => _handleCode;
 
-  Function() _rebuild = () {};
+  SetState? _rebuild;
   Map<dynamic, dynamic> state = <dynamic, dynamic>{};
 
   void rebuildHandle(T handleCode, [bool isClearState = false]) {
@@ -36,7 +37,7 @@ class RebuildHandler<T> {
       state.clear();
     }
     _handleCode = handleCode;
-    _rebuild();
+    _rebuild!(() {});
   }
 }
 
@@ -52,9 +53,7 @@ class _RebuildHandleWidgetState<T> extends State<RebuildHandleWidget<T>> {
   @override
   void initState() {
     super.initState();
-    widget.rebuildHandler._rebuild = () {
-      setState(() {});
-    };
+    widget.rebuildHandler._rebuild ??= putSetState(setState);
   }
 
   @override

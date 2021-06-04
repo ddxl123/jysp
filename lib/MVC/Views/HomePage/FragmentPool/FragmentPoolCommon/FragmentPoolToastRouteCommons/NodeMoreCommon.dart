@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/G/G.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -7,7 +7,8 @@ import 'package:jysp/Tools/Toast/ShowToast.dart';
 import 'package:jysp/Tools/Toast/ToastRoute.dart';
 
 class NodeMoreCommon extends ToastRoute {
-  NodeMoreCommon(BuildContext fatherContext) : super(fatherContext);
+  NodeMoreCommon(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
+  final MMPoolNode mmodel;
 
   @override
   Color get backgroundColor => Colors.white;
@@ -24,7 +25,7 @@ class NodeMoreCommon extends ToastRoute {
             TextButton(
               child: const Text('创建新碎片'),
               onPressed: () {
-                GNavigatorPush.pushCreateFragmentPage(context);
+                GNavigatorPush.pushCreateFragmentPage(context, mmodel);
               },
             ),
           ],

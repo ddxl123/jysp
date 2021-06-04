@@ -4,6 +4,7 @@ import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPools/CompletePool/
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPools/MemoryPool/MemoryPoolFreeBox.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPools/PendingPool/PendingPoolFreeBox.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPools/RulePool/RulePoolFreeBox.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:provider/provider.dart';
 
 class FragmentPoolIndex extends StatefulWidget {
@@ -15,7 +16,7 @@ class _FragmentPoolIndexState extends State<FragmentPoolIndex> {
   @override
   void initState() {
     super.initState();
-    context.read<HomePageController>().fragmentPoolIndexSetState = setState;
+    context.read<HomePageController>().fragmentPoolIndexSetState = putSetState(setState);
     WidgetsBinding.instance!.addPostFrameCallback(
       (Duration timeStamp) async {
         await context.read<HomePageController>().toPool(toPoolType: PoolType.pendingPool);

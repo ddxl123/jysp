@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:jysp/Tools/Helper.dart';
-import 'package:jysp/Tools/SheetPage/SheetLoadArea.dart';
 import 'package:jysp/Tools/SheetPage/SheetLoadAreaController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
@@ -27,16 +26,16 @@ class SheetPageController<T, M> extends ChangeNotifier {
   late final BuildContext sheetContext;
 
   /// 整个 [sheet] 中的 [setState]。
-  late final SetState sheetSetState;
+  SetState? sheetSetState;
 
   /// [header] 中的 [setState]。直接调用 headerSetState() 即可。
-  SetState headerSetState = (_) {};
+  SetState? headerSetState;
 
   /// [body] 中的 [setState]。直接调用 bodySetState() 即可。
-  SetState bodySetState = (_) {};
+  SetState? bodySetState;
 
   /// [loadArea] 中的 [setState]。直接调用 loadAreaSetState() 即可。
-  SetState loadAreaSetState = (_) {};
+  SetState? loadAreaSetState;
 
   late final Animation<double> animation;
 
@@ -47,9 +46,6 @@ class SheetPageController<T, M> extends ChangeNotifier {
 
   /// 加载区控制器
   final SheetLoadAreaController sheetLoadAreaController = SheetLoadAreaController();
-
-  /// 内部滑动的数据数组回调
-  late final Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture;
 
   /// 内部滑动的数据数组
   final List<T> bodyData = <T>[];
@@ -83,48 +79,6 @@ class SheetPageController<T, M> extends ChangeNotifier {
 
   /// 是否正处于获取数据状态，防止 [dataLoad] 被同时触发多次
   bool _isDataLoading = false;
-
-  /// header
-  late Widget Function(SheetPageController<T, M> sheetPageController) header;
-
-  /// body
-  late Widget Function(SheetPageController<T, M> sheetPageController) body;
-
-  /// [header] 位置的 widget
-  Widget headerStateful() {
-    return StatefulBuilder(
-      builder: (_, void Function(void Function()) rebuild) {
-        if (headerSetState != rebuild) {
-          headerSetState = rebuild;
-        }
-        return header(this);
-      },
-    );
-  }
-
-  /// [body] 位置的 widget
-  Widget bodyStateful() {
-    return StatefulBuilder(
-      builder: (_, void Function(void Function()) rebuild) {
-        if (bodySetState != rebuild) {
-          bodySetState = rebuild;
-        }
-        return body(this);
-      },
-    );
-  }
-
-  /// [loadArea] 位置的 widget
-  Widget loadArea() {
-    return StatefulBuilder(
-      builder: (_, void Function(void Function()) rebuild) {
-        if (loadAreaSetState != rebuild) {
-          loadAreaSetState = rebuild;
-        }
-        return SheetLoadArea<T, M>(sheetPageController: this);
-      },
-    );
-  }
 
   /// 移除当前 route, 同时附带 animation
   void removeRouteWithAnimation() {
@@ -201,7 +155,7 @@ class SheetPageController<T, M> extends ChangeNotifier {
     }
   }
 
-  void animationControllerAddListener() {
+  void animationControllerAddListener(Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture) {
     // 上一次 animationController.value。范围：0 ~ 1。
     double lastAnimationControllerValue = 0.0;
 
@@ -226,14 +180,14 @@ class SheetPageController<T, M> extends ChangeNotifier {
       //
       // 处在 [LoadingArea] 且向上滚动时，会触发 loading 操作
       if (animation.value >= scrollController.position.maxScrollExtent && scrollDirection == Direction.up) {
-        dataLoad();
+        dataLoad(bodyDataFuture);
       }
 
-      sheetSetState(() {});
+      sheetSetState!(() {});
     });
   }
 
-  void scrollControllerAddListener() {
+  void scrollControllerAddListener(Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture) {
     scrollController.addListener(() {
       //
       // 当前滚动方向。非手势滑动方向。
@@ -248,7 +202,7 @@ class SheetPageController<T, M> extends ChangeNotifier {
       //
       // 处在 [LoadingArea] 且向上滚动时，会触发 loading 操作
       if (maxHeight + scrollController.position.pixels >= scrollController.position.maxScrollExtent && scrollDirection == Direction.up) {
-        dataLoad();
+        dataLoad(bodyDataFuture);
       }
     });
   }
@@ -256,7 +210,7 @@ class SheetPageController<T, M> extends ChangeNotifier {
   /// 异步加载数据
   ///
   /// [T]：元素类型
-  Future<void> dataLoad() async {
+  Future<void> dataLoad(Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture) async {
     if (_isDataLoading) {
       return;
     }
@@ -265,20 +219,20 @@ class SheetPageController<T, M> extends ChangeNotifier {
     dLog(() => 'loading...');
 
     // 处于正在加载中
-    loadAreaSetState(() {
+    loadAreaSetState!(() {
       sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
     });
     final BodyDataFutureResult bodyDataFutureResult = await bodyDataFuture(bodyData, mark);
 
     switch (bodyDataFutureResult) {
       case BodyDataFutureResult.success:
-        bodySetState(() {});
-        loadAreaSetState(() {
+        bodySetState!(() {});
+        loadAreaSetState!(() {
           sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
         });
         break;
       case BodyDataFutureResult.fail:
-        loadAreaSetState(() {
+        loadAreaSetState!(() {
           sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.fail;
         });
         break;
@@ -293,6 +247,7 @@ class SheetPageController<T, M> extends ChangeNotifier {
   void dispose() {
     animationController.dispose();
     scrollController.dispose();
+    dLog(() => 'dddispose');
     super.dispose();
   }
 

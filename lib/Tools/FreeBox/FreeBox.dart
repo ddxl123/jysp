@@ -58,7 +58,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
     widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
-    widget.freeBoxController.freeBoxSetState = setState;
+    widget.freeBoxController.freeBoxSetState ??= putSetState(setState);
     widget.freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0, rightnow: true);
   }
 
@@ -131,8 +131,8 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
       width: widget.boxWidth,
       height: widget.boxHeight,
       child: StatefulBuilder(
-        builder: (BuildContext context, void Function(void Function()) setState) {
-          return widget.fixedLayerBuilder(setState);
+        builder: (BuildContext context, SetState setState) {
+          return widget.fixedLayerBuilder(putSetState(setState));
         },
       ),
     );

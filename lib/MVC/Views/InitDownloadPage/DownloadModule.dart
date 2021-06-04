@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/Models/MDownloadModule.dart';
 import 'package:jysp/MVC/Views/InitDownloadPage/Extension.dart';
+import 'package:jysp/Tools/Helper.dart';
 
 enum DownloadStatus { waiting, downloading, success, fail, repeat }
 
@@ -22,13 +23,13 @@ class DownloadModule {
   /// 其它部分
   ///
   int downloadProgress = 0;
-  Function(Function()) setState = (_) {};
+  SetState? setState;
   Future<GetDataResultType> Function() getData;
 
   DownloadStatus downloadStatus = DownloadStatus.waiting;
   void setDownloadStatus(DownloadStatus ds) {
     downloadStatus = ds;
-    setState(() {});
+    setState!(() {});
   }
 
   /// 必须是一个对象，不能是一个函数调用
@@ -38,10 +39,8 @@ class DownloadModule {
 
   Widget _setWidget() {
     return StatefulBuilder(
-      builder: (BuildContext context, void Function(void Function()) rebuild) {
-        if (!(setState == rebuild)) {
-          setState = rebuild;
-        }
+      builder: (BuildContext context, SetState rebuild) {
+        setState ??= putSetState(rebuild);
         switch (downloadStatus) {
           case DownloadStatus.waiting:
             return _row(moduleName, const Text('等待中...'));

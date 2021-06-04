@@ -2,37 +2,32 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:jysp/Tools/Helper.dart';
+import 'package:jysp/Tools/SheetPage/SheetLoadArea.dart';
 import 'package:jysp/Tools/SheetPage/SheetPageController.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
-class SheetPage<T, M> extends OverlayRoute<void> {
+/// [T]：[bodyData] 的元素类型
+///
+/// [M]：标记类型
+abstract class SheetPage<T, M> extends OverlayRoute<void> {
   ///
 
-  /// [T]：[bodyData] 的元素类型
-  ///
-  /// [M]：标记类型
-  ///
-  /// [sheetPageController]：若为 null，则自动创建一个 sheetPageController()
-  ///
-  /// [bodyDataFuture]：内部滑动的数据数组。每次触发加载区都会触发该异步，并自动 setState。
-  ///   - [bodyData]：可改变该数组元素（不能改变地址）来改变 bodyData。
-  ///
-  /// [header]：返回值必须是一个 sliver
-  ///
-  /// [body]：返回值必须是一个 sliver
-  SheetPage({
-    required this.sheetPageController,
-    required Future<BodyDataFutureResult> Function(List<T> bodyData, Mark<M> mark) bodyDataFuture,
-    required Widget Function(SheetPageController<T, M> sheetPageController) header,
-    required Widget Function(SheetPageController<T, M> sheetPageController) body,
-  }) {
-    sheetPageController.bodyDataFuture = bodyDataFuture;
-    sheetPageController.header = header;
-    sheetPageController.body = body;
+  SheetPage() {
     sheetPageController.sheetRoute = this;
   }
 
-  final SheetPageController<T, M> sheetPageController;
+  final SheetPageController<T, M> sheetPageController = SheetPageController<T, M>();
+
+  /// [bodyDataFuture]：内部滑动的数据数组。每次触发加载区都会触发该异步，并自动 setState。
+  ///   - [bodyData]：可改变该数组元素（不能改变地址）来改变 bodyData。
+  Future<BodyDataFutureResult> bodyDataFuture(List<T> bodyData, Mark<M> mark);
+
+  /// [header]：返回值必须是一个 sliver
+  Widget header();
+
+  /// [body]：返回值必须是一个 sliver
+  Widget body();
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
@@ -69,7 +64,7 @@ class SheetPage<T, M> extends OverlayRoute<void> {
   }
 
   Widget _sheet() {
-    return Sheet<T, M>(sheetPageController: sheetPageController);
+    return Sheet<T, M>(sheetPage: this);
   }
 
   /// 返回监听:
@@ -87,6 +82,7 @@ class SheetPage<T, M> extends OverlayRoute<void> {
   @override
   void dispose() {
     sheetPageController.dispose();
+    dLog(() => 'dispose');
     super.dispose();
   }
 
@@ -99,9 +95,9 @@ class SheetPage<T, M> extends OverlayRoute<void> {
 ///
 ///
 class Sheet<T, M> extends StatefulWidget {
-  const Sheet({required this.sheetPageController});
+  const Sheet({required this.sheetPage});
 
-  final SheetPageController<T, M> sheetPageController;
+  final SheetPage<T, M> sheetPage;
 
   @override
   _SheetState<T, M> createState() => _SheetState<T, M>();
@@ -112,56 +108,88 @@ class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStat
   void initState() {
     super.initState();
 
+    dLog(() => 'init');
     // 为了绑定返回键
-    widget.sheetPageController.sheetContext = context;
+    widget.sheetPage.sheetPageController.sheetContext = context;
 
     // 绑定该 [Sheet] Widget 的 [setState]
-    widget.sheetPageController.sheetSetState = setState;
+    widget.sheetPage.sheetPageController.sheetSetState ??= putSetState(setState);
 
-    widget.sheetPageController.animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    widget.sheetPage.sheetPageController.animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
 
     // 设置整个 sheet 的高度，并关联控制器
-    widget.sheetPageController.animation =
-        Tween<double>(begin: 0.0, end: widget.sheetPageController.maxHeight).animate(CurvedAnimation(parent: widget.sheetPageController.animationController, curve: Curves.linear));
+    widget.sheetPage.sheetPageController.animation = Tween<double>(begin: 0.0, end: widget.sheetPage.sheetPageController.maxHeight).animate(
+      CurvedAnimation(parent: widget.sheetPage.sheetPageController.animationController, curve: Curves.linear),
+    );
 
     // 初始化上升
-    widget.sheetPageController.animationController.animateTo(widget.sheetPageController.initHeightRatio);
+    widget.sheetPage.sheetPageController.animationController.animateTo(widget.sheetPage.sheetPageController.initHeightRatio);
 
-    widget.sheetPageController.animationControllerAddListener();
-    widget.sheetPageController.scrollControllerAddListener();
+    widget.sheetPage.sheetPageController.animationControllerAddListener(widget.sheetPage.bodyDataFuture);
+    widget.sheetPage.sheetPageController.scrollControllerAddListener(widget.sheetPage.bodyDataFuture);
   }
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
       bottom: 0,
-      height: widget.sheetPageController.animation.value,
+      height: widget.sheetPage.sheetPageController.animation.value,
       width: MediaQueryData.fromWindow(window).size.width,
       child: Listener(
-        onPointerDown: widget.sheetPageController.onPointerDown,
-        onPointerMove: widget.sheetPageController.onPointerMove,
-        onPointerUp: widget.sheetPageController.onPointerUp,
+        onPointerDown: widget.sheetPage.sheetPageController.onPointerDown,
+        onPointerMove: widget.sheetPage.sheetPageController.onPointerMove,
+        onPointerUp: widget.sheetPage.sheetPageController.onPointerUp,
 
         //
         child: Material(
           type: MaterialType.transparency, // 使得圆角处透明显示
           child: Opacity(
-            opacity: widget.sheetPageController.sheetOpacity,
+            opacity: widget.sheetPage.sheetPageController.sheetOpacity,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(widget.sheetPageController.circular), // 圆角
+              borderRadius: BorderRadius.circular(widget.sheetPage.sheetPageController.circular), // 圆角
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
-                controller: widget.sheetPageController.scrollController,
+                controller: widget.sheetPage.sheetPageController.scrollController,
                 slivers: <Widget>[
-                  widget.sheetPageController.headerStateful(),
-                  widget.sheetPageController.bodyStateful(),
-                  widget.sheetPageController.loadArea(),
+                  headerStateful(),
+                  bodyStateful(),
+                  loadArea(),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  /// [header] 位置的 widget
+  Widget headerStateful() {
+    return StatefulBuilder(
+      builder: (_, SetState rebuild) {
+        widget.sheetPage.sheetPageController.headerSetState ??= putSetState(rebuild);
+        return widget.sheetPage.header();
+      },
+    );
+  }
+
+  /// [body] 位置的 widget
+  Widget bodyStateful() {
+    return StatefulBuilder(
+      builder: (_, SetState rebuild) {
+        widget.sheetPage.sheetPageController.bodySetState ??= putSetState(rebuild);
+        return widget.sheetPage.body();
+      },
+    );
+  }
+
+  /// [loadArea] 位置的 widget
+  Widget loadArea() {
+    return StatefulBuilder(
+      builder: (_, SetState rebuild) {
+        widget.sheetPage.sheetPageController.loadAreaSetState ??= putSetState(rebuild);
+        return SheetLoadArea<T, M>(sheetPageController: widget.sheetPage.sheetPageController);
+      },
     );
   }
 }

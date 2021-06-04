@@ -4,6 +4,7 @@ import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolControll
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FreeBoxCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeCommon.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeSheetCommon.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/Helper.dart';
 import 'package:provider/provider.dart';
@@ -20,12 +21,9 @@ class _MemoryPoolFreeBoxState extends State<MemoryPoolFreeBox> {
     final FragmentPoolController thisFragmentPoolController = context.read<HomePageController>().getFragmentPoolController(thisPoolType);
     return FreeBoxCommon(
       poolType: thisPoolType,
-      onLongPressStart: (ScaleStartDetails details) {},
       poolNodesCommon: FreeBoxStack(
         builder: (BuildContext context, SetState setState) {
-          if (thisFragmentPoolController.poolNodesSetState != setState) {
-            thisFragmentPoolController.poolNodesSetState = setState;
-          }
+          thisFragmentPoolController.poolNodesSetState ??= putSetState(setState);
           return <FreeBoxPositioned>[
             for (int i = 0; i < thisFragmentPoolController.poolNodes.length; i++)
               FreeBoxPositioned(
@@ -33,13 +31,17 @@ class _MemoryPoolFreeBoxState extends State<MemoryPoolFreeBox> {
                 child: PoolNodeCommon(
                   poolType: thisPoolType,
                   poolNodeMModel: thisFragmentPoolController.poolNodes[i],
-                  fragmentsTableName: MFragmentsAboutMemoryPoolNode.tableName,
-                  columns: <String>[MFragmentsAboutMemoryPoolNode.title],
+                  sheetPageBuilder: () => PoolNodeSheetCommon(
+                    poolNodeMModel: thisFragmentPoolController.poolNodes[i],
+                    fragmentsTableName: MFragmentsAboutMemoryPoolNode.tableName,
+                    columns: <String>[MFragmentsAboutMemoryPoolNode.title],
+                  ),
                 ),
               ),
           ];
         },
       ),
+      onLongPressStart: (ScaleStartDetails details) {},
     );
   }
 }

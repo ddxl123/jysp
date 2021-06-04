@@ -20,7 +20,7 @@ class _FreeBoxStackState extends State<FreeBoxStack> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: widget.builder(context, setState),
+      children: widget.builder(context, putSetState(setState)),
     );
   }
 }
@@ -57,7 +57,7 @@ mixin _Root on _Init {
   /// 偏移值,默认必须(0,0)
   Offset offset = const Offset(0, 0);
 
-  SetState freeBoxSetState = (_) {};
+  SetState? freeBoxSetState;
 
   ///
 }
@@ -103,7 +103,7 @@ mixin _TouchEvent on _Root {
     /// 重置上一次 [临时缩放] 和 [临时触摸位置]
     _lastTempScale = 1;
     _lastTempTouchPosition = details.localFocalPoint;
-    freeBoxSetState(() {});
+    freeBoxSetState!(() {});
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
@@ -129,7 +129,7 @@ mixin _TouchEvent on _Root {
     _lastTempTouchPosition = details.localFocalPoint;
 
     // dLog(() => "onScaleUpdate:" + offset.toString());
-    freeBoxSetState(() {});
+    freeBoxSetState!(() {});
   }
 
   void onScaleEnd(ScaleEndDetails details) {
@@ -162,7 +162,7 @@ mixin _TouchEvent on _Root {
       inertialSlideAnimationController.removeListener(_inertialSlideListener);
     }
     // dLog(() => "_inertialSlideListener:" + offset.toString());
-    freeBoxSetState(() {});
+    freeBoxSetState!(() {});
   }
 
   ///
@@ -198,7 +198,7 @@ mixin _CommonTool on _TouchEvent {
     if (rightnow) {
       offset = targetOffset - freeBoxBodyOffset;
       targetScale = 1.0;
-      freeBoxSetState(() {});
+      freeBoxSetState!(() {});
       targetSlideAnimationController.removeListener(_targetSlideListener);
       return;
     }
@@ -224,7 +224,7 @@ mixin _CommonTool on _TouchEvent {
     if (targetSlideAnimationController.isDismissed || targetSlideAnimationController.isCompleted) {
       targetSlideAnimationController.removeListener(_targetSlideListener);
     }
-    freeBoxSetState(() {});
+    freeBoxSetState!(() {});
   }
 
   ///

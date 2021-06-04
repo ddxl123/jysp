@@ -118,7 +118,7 @@ class NodeJustCreatedCommon extends ToastRoute {
 
     // 插入成功。插入失败不进行任何操作
     if (result) {
-      _fragmentPoolController.poolNodesSetState(() {});
+      _fragmentPoolController.poolNodesSetState!(() {});
     }
   }
 

@@ -24,17 +24,23 @@ class RSqliteCurd<T extends MBase> {
   /// 需要被 CURD 的 [model] 对应的 [uploadModel]。
   late MUpload uploadModel;
 
-  ///
-  ///
-  ///
-  ///
-  ///
-  /// 事务中可以进行 txn.query，可以查询未提交的事务。
-  ///
-  /// 事务失败的原因是事务内部 throw 异常，因此不能在事务内部进行 try 异常，否则会导致事务被提交而被 try 的事务未提交。
-  ///
-  /// 事务中每条 sql 语句都必须 await
+  //
+  //
+  //
+  // 注意事项：
+  //
+  // 事务中可以进行 txn.query，可以查询未提交的事务。
+  //
+  // 事务失败的原因是事务内部 throw 异常，因此不能在事务内部进行 try 异常，否则会导致事务被提交而被 try 的事务未提交。
+  //
+  // 事务中每条 sql 语句都必须 await
+  //
 
+  /// 返回被插入的 model，且该模型的 id 被赋值
+  ///
+  /// 返回 null 时，代表捕获到异常，即插入失败
+  ///
+  /// [connectTransaction] 不为空时，需在外部进行异常捕获
   Future<T?> toInsertRow({required Transaction? connectTransaction}) async {
     if (connectTransaction == null) {
       try {

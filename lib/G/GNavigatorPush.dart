@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
 import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
 import 'package:jysp/MVC/Controllers/LoginPageController.dart';
@@ -25,7 +26,7 @@ class GNavigatorPush {
   }
 
   GNavigatorPush.pushInitDownloadPage(BuildContext context) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute<void>(
         builder: (_) => ChangeNotifierProvider<InitDownloadController>(
@@ -37,7 +38,7 @@ class GNavigatorPush {
   }
 
   GNavigatorPush.pushHomePage(BuildContext context) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute<void>(
         builder: (_) => MultiProvider(
@@ -50,11 +51,11 @@ class GNavigatorPush {
     );
   }
 
-  GNavigatorPush.pushCreateFragmentPage(BuildContext context) {
+  GNavigatorPush.pushCreateFragmentPage(BuildContext context, MMPoolNode mmodel) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => CreateFragmentPage(),
+        builder: (BuildContext context) => CreateFragmentPage(mmodel: mmodel),
       ),
     );
   }
