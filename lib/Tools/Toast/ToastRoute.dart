@@ -53,7 +53,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   /// - 若参数值的 [PopResultSelect] 为 [PopResultSelect.clickBackground]，则代表点击了背景。
   ///
   /// 已经被设定多次触发时只会执行第一次
-  Future<Toast<bool>> Function(PopResult? result)? get whenPop;
+  Future<Toast<bool>> whenPop(PopResult? popResult);
 
   ///初始化
   void init();
@@ -107,19 +107,14 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
     _isPopWaiting = true;
     setState!(() {});
 
-    if (whenPop != null) {
-      final bool isPop = (await whenPop!(result)).returnValue;
-      if (isPop) {
-        _isPop = true;
-        didPop(null);
-      } else {
-        _isToPoping = false;
-        _isPopWaiting = false;
-        setState!(() {});
-      }
-    } else {
+    final bool isPop = (await whenPop(result)).returnValue;
+    if (isPop) {
       _isPop = true;
       didPop(null);
+    } else {
+      _isToPoping = false;
+      _isPopWaiting = false;
+      setState!(() {});
     }
   }
 

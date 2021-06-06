@@ -10,7 +10,7 @@ class FreeBoxCommon extends StatefulWidget {
   const FreeBoxCommon({required this.poolType, required this.poolNodesCommon, required this.onLongPressStart});
   final PoolType poolType;
   final FreeBoxStack poolNodesCommon;
-  final void Function(ScaleStartDetails) onLongPressStart;
+  final void Function(PointerDownEvent event) onLongPressStart;
 
   @override
   _FreeBoxCommonState createState() => _FreeBoxCommonState();
@@ -31,8 +31,8 @@ class _FreeBoxCommonState extends State<FreeBoxCommon> {
       freeBoxController: _fragmentPoolController.freeBoxController,
       boxWidth: MediaQuery.of(context).size.width,
       boxHeight: MediaQuery.of(context).size.height,
-      onLongPressStart: (ScaleStartDetails details) {
-        widget.onLongPressStart(details);
+      onLongPressStart: (PointerDownEvent event) {
+        widget.onLongPressStart(event);
       },
       freeMoveScaleLayerBuilder: widget.poolNodesCommon,
       fixedLayerBuilder: (SetState setState) {

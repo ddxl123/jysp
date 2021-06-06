@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
-import 'package:jysp/G/G.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/SheetPage/SheetPage.dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:provider/provider.dart';
@@ -44,62 +44,62 @@ class PoolNodeCommonState extends State<PoolNodeCommon> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildWidget();
+    return _body();
   }
 
-  Widget _buildWidget() {
-    return Listener(
-      onPointerDown: (_) {
-        if (_.device > 0) {
-          return;
-        }
+  // Widget _buildWidget() {
+  //   return Listener(
+  //     onPointerDown: (_) {
+  //       if (_.device > 0) {
+  //         return;
+  //       }
 
-        _longPressTimer = Timer(const Duration(milliseconds: 1000), () {
-          _isLongPress = true;
-          _longPressStart();
-        });
-      },
-      onPointerMove: (_) {
-        if (_.device > 0) {
-          return;
-        }
+  //       _longPressTimer = Timer(const Duration(milliseconds: 1000), () {
+  //         _isLongPress = true;
+  //         _longPressStart();
+  //       });
+  //     },
+  //     onPointerMove: (_) {
+  //       if (_.device > 0) {
+  //         return;
+  //       }
 
-        _longPressTimer?.cancel();
-        if (_isLongPress) {
-          _longPressMove();
-        }
-      },
-      onPointerUp: (_) {
-        dLog(() => 'up');
-        if (_.device > 0) {
-          return;
-        }
+  //       _longPressTimer?.cancel();
+  //       if (_isLongPress) {
+  //         _longPressMove();
+  //       }
+  //     },
+  //     onPointerUp: (_) {
+  //       dLog(() => 'up');
+  //       if (_.device > 0) {
+  //         return;
+  //       }
 
-        _longPressTimer?.cancel();
+  //       _longPressTimer?.cancel();
 
-        if (_isLongPress) {
-          _isLongPress = false;
-          _longPressUp();
-        }
-        _thisFragmentPoolController.freeBoxController.disableTouch(false);
-      },
-      onPointerCancel: (_) {
-        dLog(() => 'cancel');
-        if (_.device > 0) {
-          return;
-        }
+  //       if (_isLongPress) {
+  //         _isLongPress = false;
+  //         _longPressUp();
+  //       }
+  //       _thisFragmentPoolController.freeBoxController.disableTouch(false);
+  //     },
+  //     onPointerCancel: (_) {
+  //       dLog(() => 'cancel');
+  //       if (_.device > 0) {
+  //         return;
+  //       }
 
-        _longPressTimer?.cancel();
+  //       _longPressTimer?.cancel();
 
-        if (_isLongPress) {
-          _isLongPress = false;
-          _longPressCancel();
-        }
-        _thisFragmentPoolController.freeBoxController.disableTouch(false);
-      },
-      child: _body(),
-    );
-  }
+  //       if (_isLongPress) {
+  //         _isLongPress = false;
+  //         _longPressCancel();
+  //       }
+  //       _thisFragmentPoolController.freeBoxController.disableTouch(false);
+  //     },
+  //     child: _body(),
+  //   );
+  // }
 
   void _longPressStart() {
     dLog(() => '_longPressStart');
@@ -120,16 +120,22 @@ class PoolNodeCommonState extends State<PoolNodeCommon> {
   }
 
   Widget _body() {
-    return TextButton(
-      child: Text(widget.poolNodeMModel.get_name ?? unknown),
-      onPressed: () {
+    return CustomButton(
+      child: Text(widget.poolNodeMModel.get_name ?? 'unknown'),
+      onUp: (PointerUpEvent event) {
         Navigator.push(context, widget.sheetPageBuilder());
       },
-      style: TextButton.styleFrom(
-        primary: Colors.black,
-        onSurface: Colors.orange,
-        shadowColor: Colors.purple,
-      ),
+      onDown: (PointerDownEvent downEvent) {
+        dLog(() => 'onDown:$downEvent');
+      },
+      onLongPressed: (PointerDownEvent downEvent) {
+        dLog(() => 'onLongPressed:$downEvent');
+      },
+      // style: TextButton.styleFrom(
+      //   primary: Colors.black,
+      //   onSurface: Colors.orange,
+      //   shadowColor: Colors.purple,
+      // ),
     );
   }
 }

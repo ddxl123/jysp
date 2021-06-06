@@ -85,22 +85,20 @@ class NodeJustCreatedCommon extends ToastRoute {
   }
 
   @override
-  Future<Toast<bool>> Function(PopResult? popResult) get whenPop {
-    return (PopResult? result) async {
-      try {
-        if (result == null) {
-          await _toInsert();
-          return showToast(text: '创建成功', returnValue: true);
-        } else if (result.popResultSelect == PopResultSelect.clickBackground) {
-          return showToast(text: '已取消', returnValue: true);
-        } else {
-          throw 'result err: $result';
-        }
-      } catch (e, r) {
-        dLog(() => '$e\n$r');
-        return showToast(text: '创建失败', returnValue: false);
+  Future<Toast<bool>> whenPop(PopResult? popResult) async {
+    try {
+      if (popResult == null) {
+        await _toInsert();
+        return showToast(text: '创建成功', returnValue: true);
+      } else if (popResult.popResultSelect == PopResultSelect.clickBackground) {
+        return showToast(text: '已取消', returnValue: true);
+      } else {
+        throw 'result err: $popResult';
       }
-    };
+    } catch (e, r) {
+      dLog(() => '$e\n$r');
+      return showToast(text: '创建失败', returnValue: false);
+    }
   }
 
   Future<void> _toInsert() async {

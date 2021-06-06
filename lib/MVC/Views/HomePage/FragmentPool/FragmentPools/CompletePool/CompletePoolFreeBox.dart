@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentsAboutPoolNode.dart';
 import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FragmentButtonCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FreeBoxCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeSheetCommon.dart';
@@ -34,14 +36,17 @@ class _CompletePoolFreeBoxState extends State<CompletePoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutCompletePoolNode.tableName,
-                    columns: <String>[MFragmentsAboutCompletePoolNode.title],
+                    columns: <String>[MFragmentsAboutCompletePoolNode.id, MFragmentsAboutCompletePoolNode.title],
+                    buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
+                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                    },
                   ),
                 ),
               ),
           ];
         },
       ),
-      onLongPressStart: (ScaleStartDetails details) {},
+      onLongPressStart: (PointerDownEvent event) {},
     );
   }
 }

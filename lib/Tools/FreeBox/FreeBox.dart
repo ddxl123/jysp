@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/FreeBox/FreeBoxController.dart';
 import 'package:jysp/Tools/Helper.dart';
+import 'package:jysp/Tools/TDebug.dart';
 
 /// [boxWidth]：不能为 [double.infinity] 或 [double.maxFinite]
 class FreeBox extends StatefulWidget {
@@ -36,7 +38,7 @@ class FreeBox extends StatefulWidget {
   /// 固定层。必须使用 Stack + Postion。
   final Stack Function(SetState setState) fixedLayerBuilder;
 
-  final void Function(ScaleStartDetails details)? onLongPressStart;
+  final void Function(PointerDownEvent event)? onLongPressStart;
 
   @override
   State<StatefulWidget> createState() {
@@ -57,7 +59,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   void initSliding() {
     widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
-    widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
+    // widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
     widget.freeBoxController.freeBoxSetState ??= putSetState(setState);
     widget.freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0, rightnow: true);
   }
@@ -68,18 +70,27 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   }
 
   Widget _box() {
-    return Container(
-      alignment: Alignment.topLeft,
-      // 整个 box 的大小
-      width: widget.boxWidth,
-      height: widget.boxHeight,
-      color: widget.boxOutsideBackgroundColor, //整个 box 的背景颜色
-      child: Stack(
-        children: <Positioned>[
-          /// 自由移动缩放层
-          _freeMoveScaleLayer(),
-          _fixedLayer(),
-        ],
+    return CustomButton(
+      isAlwaysOnDown: false,
+      isAlwaysOnUp: true,
+      isAlwaysOnLongPressed: false,
+      onDown: (PointerDownEvent downEvent) {
+        dLog(() => 'box downEvent:$downEvent');
+      },
+      onLongPressed: widget.onLongPressStart,
+      child: Container(
+        alignment: Alignment.topLeft,
+        // 整个 box 的大小
+        width: widget.boxWidth,
+        height: widget.boxHeight,
+        color: widget.boxOutsideBackgroundColor, //整个 box 的背景颜色
+        child: Stack(
+          children: <Positioned>[
+            /// 自由移动缩放层
+            _freeMoveScaleLayer(),
+            _fixedLayer(),
+          ],
+        ),
       ),
     );
   }

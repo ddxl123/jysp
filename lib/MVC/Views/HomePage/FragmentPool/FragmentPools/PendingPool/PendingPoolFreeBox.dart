@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Database/MergeModels/MMFragmentsAboutPoolNode.dart';
 import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
 import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FragmentButtonCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FragmentPoolToastRouteCommons/NodeJustCreatedCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FreeBoxCommon.dart';
 import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/PoolNodeCommon.dart';
@@ -50,20 +52,23 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutPendingPoolNode.tableName,
-                    columns: <String>[MFragmentsAboutPendingPoolNode.title],
+                    columns: <String>[MFragmentsAboutPendingPoolNode.id, MFragmentsAboutPendingPoolNode.title],
+                    buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
+                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                    },
                   ),
                 ),
               ),
           ];
         },
       ),
-      onLongPressStart: (ScaleStartDetails details) {
+      onLongPressStart: (PointerDownEvent event) {
         Navigator.push(
           context,
           NodeJustCreatedCommon(
             context,
             poolType: thisPoolType,
-            screenPosition: details.focalPoint,
+            screenPosition: event.localPosition,
             newNodeModelCallback: (Offset boxPosition, String name) {
               return MPnPendingPoolNode.createModel(
                 aiid_v: null,

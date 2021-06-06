@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/Tools/CustomButton.dart';
+import 'package:jysp/Tools/Helper.dart';
 import 'package:jysp/Tools/TDebug.dart';
 
 class FlutterTest extends StatefulWidget {
@@ -8,23 +10,28 @@ class FlutterTest extends StatefulWidget {
 
 class _FlutterTestState extends State<FlutterTest> {
   @override
-  void initState() {
-    super.initState();
-    print('one init');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('one build');
     return Center(
-      child: TextButton(
-        child: const Text('to two'),
-        onPressed: () {
-          Navigator.of(context).push(Two());
-        },
+      child: CustomButton(
+        child: StatefulBuilder(
+          builder: (BuildContext context, SetState setState) {
+            dLog(() => 'ccccccccc');
+            return const Text('data');
+          },
+        ),
+        onDown: (PointerDownEvent event) {},
+        onUp: (PointerUpEvent event) {},
+        onLongPressed: (PointerDownEvent event) {},
       ),
     );
   }
+
+  Widget w = StatefulBuilder(
+    builder: (BuildContext context, SetState setState) {
+      dLog(() => 'ssssss');
+      return const Text('data');
+    },
+  );
 }
 
 class Two extends OverlayRoute<void> {

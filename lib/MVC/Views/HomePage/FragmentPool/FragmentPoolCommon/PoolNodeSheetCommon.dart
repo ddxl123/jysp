@@ -12,12 +12,13 @@ import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
 
 /// TODO: 暂时 <String,int>，可以将前面的 String 新创建的 XXX 类对象，即替换成 <XXX,int>
-class PoolNodeSheetCommon extends SheetPage<String, int> {
+class PoolNodeSheetCommon extends SheetPage<MMFragmentsAboutPoolNode, int> {
   ///
   PoolNodeSheetCommon({
     required this.poolNodeMModel,
     required this.fragmentsTableName,
     required this.columns,
+    required this.buttonsBuilder,
   });
 
   /// poolNode 的 mmodel
@@ -28,6 +29,11 @@ class PoolNodeSheetCommon extends SheetPage<String, int> {
 
   /// 需要用到的 column 名
   final List<String> columns;
+
+  /// 当前 sheet 的每个元素
+  ///
+  /// 任意 Widget
+  final Widget Function(MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) buttonsBuilder;
 
   @override
   Widget header() {
@@ -60,7 +66,7 @@ class PoolNodeSheetCommon extends SheetPage<String, int> {
   }
 
   @override
-  Future<BodyDataFutureResult> bodyDataFuture(List<String> bodyData, Mark<int> mark) async {
+  Future<BodyDataFutureResult> bodyDataFuture(List<MMFragmentsAboutPoolNode> bodyData, Mark<int> mark) async {
     try {
       await Future<void>.delayed(const Duration(seconds: 2));
       const int readCount = 10;
@@ -75,7 +81,7 @@ class PoolNodeSheetCommon extends SheetPage<String, int> {
         returnMWhere: null,
         returnMMWhere: (MBase model) {
           final MMFragmentsAboutPoolNode mmFragmentsAboutPoolNode = MMFragmentsAboutPoolNode(model: model);
-          bodyData.add(mmFragmentsAboutPoolNode.get_title ?? 'unknown');
+          bodyData.add(mmFragmentsAboutPoolNode);
           return mmFragmentsAboutPoolNode;
         }, // 会从 mark.value + 1 的 index 开始
       );
@@ -95,32 +101,10 @@ class PoolNodeSheetCommon extends SheetPage<String, int> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, int index) {
-          bool isCheck = false;
-          return Row(
-            children: <Widget>[
-              Expanded(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    backgroundColor: Colors.purple,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(sheetPageController.bodyData[index].toString()),
-                  onPressed: () {},
-                ),
-              ),
-              StatefulBuilder(
-                builder: (BuildContext context, SetState rebuild) {
-                  return Checkbox(
-                    value: isCheck,
-                    onChanged: (bool? check) {
-                      isCheck = !isCheck;
-                      rebuild(() {});
-                    },
-                  );
-                },
-              ),
-            ],
+          return StatefulBuilder(
+            builder: (BuildContext context, SetState btnSetState) {
+              return buttonsBuilder(sheetPageController.bodyData[index], context, putSetState(btnSetState));
+            },
           );
         },
         childCount: sheetPageController.bodyData.length,

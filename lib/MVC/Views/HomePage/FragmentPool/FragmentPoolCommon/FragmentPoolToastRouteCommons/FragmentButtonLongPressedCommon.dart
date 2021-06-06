@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
-import 'package:jysp/G/GNavigatorPush.dart';
 import 'package:jysp/Tools/RoundedBox..dart';
 import 'package:jysp/Tools/TDebug.dart';
 import 'package:jysp/Tools/Toast/ShowToast.dart';
+
 import 'package:jysp/Tools/Toast/ToastRoute.dart';
 
-class NodeMoreCommon extends ToastRoute {
-  NodeMoreCommon(BuildContext fatherContext, {required this.mmodel}) : super(fatherContext);
-  final MMPoolNode mmodel;
+class FragmentButtonLongPressedCommon extends ToastRoute {
+  FragmentButtonLongPressedCommon(BuildContext fatherContext) : super(fatherContext);
 
   @override
-  Color get backgroundColor => Colors.white;
+  Color get backgroundColor => Colors.transparent;
 
   @override
   double get backgroundOpacity => 0.0;
@@ -22,12 +20,7 @@ class NodeMoreCommon extends ToastRoute {
       AutoPositioned(
         child: RoundedBox(
           children: <Widget>[
-            TextButton(
-              child: const Text('创建新碎片'),
-              onPressed: () {
-                GNavigatorPush.pushCreateFragmentPage(context, mmodel);
-              },
-            ),
+            TextButton(onPressed: () {}, child: const Text('data')),
           ],
         ),
       ),
@@ -46,11 +39,11 @@ class NodeMoreCommon extends ToastRoute {
       if (popResult == null || popResult.popResultSelect == PopResultSelect.clickBackground) {
         return showToast<bool>(text: '未选择', returnValue: true);
       } else {
-        throw 'unknown result.popResultSelect: ${popResult.popResultSelect}';
+        throw 'unknown result: $popResult';
       }
-    } catch (e) {
-      dLog(() => e);
-      return showToast<bool>(text: 'err', returnValue: false);
+    } catch (e, r) {
+      dLog(() => '$e---$r');
+      return showToast(text: 'err', returnValue: false);
     }
   }
 }

@@ -55,35 +55,32 @@ class FragmentPoolChoiceRoute extends ToastRoute {
   void rebuild() {}
 
   @override
-  Future<Toast<bool>> Function(PopResult? result) get whenPop {
-    return (PopResult? result) async {
-      dLog(() => result);
-      try {
-        if (result == null || result.popResultSelect == PopResultSelect.clickBackground) {
-          return showToast<bool>(text: '未选择', returnValue: true);
-        }
-        //
-        else if (result.popResultSelect == PopResultSelect.one) {
-          if (result.value == null) {
-            throw 'result value is null';
-          }
-          final ToPoolResult toPoolResult = await fatherContext.read<HomePageController>().toPool(toPoolType: result.value! as PoolType);
-          if (toPoolResult == ToPoolResult.success) {
-            return showToast<bool>(text: 'to pool success', returnValue: true);
-          } else if (toPoolResult == ToPoolResult.fail) {
-            return showToast<bool>(text: 'to pool fail', returnValue: false);
-          } else {
-            throw 'unknown toPoolResult: $toPoolResult';
-          }
-        }
-        //
-        else {
-          throw 'result err: ${result.popResultSelect}';
-        }
-      } catch (e, r) {
-        dLog(() => e.toString() + '---' + r.toString());
-        return showToast(text: 'result err', returnValue: false);
+  Future<Toast<bool>> whenPop(PopResult? popResult) async {
+    try {
+      if (popResult == null || popResult.popResultSelect == PopResultSelect.clickBackground) {
+        return showToast<bool>(text: '未选择', returnValue: true);
       }
-    };
+      //
+      else if (popResult.popResultSelect == PopResultSelect.one) {
+        if (popResult.value == null) {
+          throw 'result value is null';
+        }
+        final ToPoolResult toPoolResult = await fatherContext.read<HomePageController>().toPool(toPoolType: popResult.value! as PoolType);
+        if (toPoolResult == ToPoolResult.success) {
+          return showToast<bool>(text: 'to pool success', returnValue: true);
+        } else if (toPoolResult == ToPoolResult.fail) {
+          return showToast<bool>(text: 'to pool fail', returnValue: false);
+        } else {
+          throw 'unknown toPoolResult: $toPoolResult';
+        }
+      }
+      //
+      else {
+        throw 'result err: ${popResult.popResultSelect}';
+      }
+    } catch (e, r) {
+      dLog(() => e.toString() + '---' + r.toString());
+      return showToast(text: 'result err', returnValue: false);
+    }
   }
 }

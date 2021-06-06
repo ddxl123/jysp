@@ -80,7 +80,7 @@ mixin _TouchEvent on _Root {
   bool _isDisableEndTouch = false;
 
   /// 长按开始的回调
-  Function(ScaleStartDetails)? onLongPressStart;
+  // Function(ScaleStartDetails)? onLongPressStart;
 
   /// 触发长按的时长的 Timer
   Timer? _onLongPressStartTimer;
@@ -90,11 +90,11 @@ mixin _TouchEvent on _Root {
     if (_isDisableTouch) {
       return;
     }
-    _onLongPressStartTimer = Timer(const Duration(milliseconds: 1000), () {
-      if (onLongPressStart != null) {
-        onLongPressStart!(details);
-      }
-    });
+    // _onLongPressStartTimer = Timer(const Duration(milliseconds: 1000), () {
+    //   if (onLongPressStart != null) {
+    //     onLongPressStart!(details);
+    //   }
+    // });
 
     /// 停止所有滑动动画
     inertialSlideAnimationController.stop();

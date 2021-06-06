@@ -49,16 +49,10 @@ abstract class SheetPage<T, M> extends OverlayRoute<void> {
   Widget _backgroundHitTest() {
     return Positioned(
       top: 0,
-      child: Listener(
-        behavior: HitTestBehavior.deferToChild,
-        onPointerMove: (PointerMoveEvent event) {
-          dLog(() => event);
-        },
-        child: Container(
-          color: null,
-          height: double.maxFinite,
-          width: double.maxFinite,
-        ),
+      child: Container(
+        color: null,
+        height: double.maxFinite,
+        width: double.maxFinite,
       ),
     );
   }
