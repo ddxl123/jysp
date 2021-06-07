@@ -44,12 +44,11 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   //
 
   /// [whenPop]：
-  /// - 若 [whenPop] 为 null，则代表点击背景会直接 pop；
   /// - 若返回 true，则异步完后整个 route 被 pop,；
   /// - 若返回 false，则异步完后 route 不进行 pop，只有等待页面被 pop。
   ///
-  /// 参数值 [result]：
-  /// - 若参数值的 [PopResultSelect] 为 null，则代表(或充当)'物理返回'。
+  /// 参数值 [popResult]：
+  /// - 若参数值的 [PopResult] 为 null，则代表(或充当)'物理返回'。
   /// - 若参数值的 [PopResultSelect] 为 [PopResultSelect.clickBackground]，则代表点击了背景。
   ///
   /// 已经被设定多次触发时只会执行第一次

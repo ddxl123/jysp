@@ -36,9 +36,11 @@ class _MemoryPoolFreeBoxState extends State<MemoryPoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutMemoryPoolNode.tableName,
+                    fragmentsForeignKeyNameAIIDForNode: MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_aiid,
+                    fragmentsForeignKeyNameUUIDForNode: MFragmentsAboutMemoryPoolNode.pn_memory_pool_node_uuid,
                     columns: <String>[MFragmentsAboutMemoryPoolNode.id, MFragmentsAboutMemoryPoolNode.title],
                     buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
-                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                      return FragmentButtonCommon(mmFragmentsAboutPoolNode: bodyDataElement);
                     },
                   ),
                 ),

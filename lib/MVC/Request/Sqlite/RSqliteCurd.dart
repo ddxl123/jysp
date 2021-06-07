@@ -24,7 +24,7 @@ class RSqliteCurd<T extends MBase> {
   /// 需要被 CURD 的 [model] 对应的 [uploadModel]。
   late MUpload uploadModel;
 
-  //
+  // ============================================================================
   //
   //
   // 注意事项：
@@ -35,6 +35,8 @@ class RSqliteCurd<T extends MBase> {
   //
   // 事务中每条 sql 语句都必须 await
   //
+  //
+  // ============================================================================
 
   /// 返回被插入的 model，且该模型的 id 被赋值
   ///
@@ -77,6 +79,7 @@ class RSqliteCurd<T extends MBase> {
     }
   }
 
+  /// 返回是否删除成功，捕获到异常返回 false
   Future<bool> toDeleteRow({required Transaction? connectTransaction}) async {
     if (connectTransaction == null) {
       try {

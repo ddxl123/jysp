@@ -36,9 +36,11 @@ class _CompletePoolFreeBoxState extends State<CompletePoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutCompletePoolNode.tableName,
+                    fragmentsForeignKeyNameAIIDForNode: MFragmentsAboutCompletePoolNode.pn_complete_pool_node_aiid,
+                    fragmentsForeignKeyNameUUIDForNode: MFragmentsAboutCompletePoolNode.pn_complete_pool_node_uuid,
                     columns: <String>[MFragmentsAboutCompletePoolNode.id, MFragmentsAboutCompletePoolNode.title],
                     buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
-                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                      return FragmentButtonCommon(mmFragmentsAboutPoolNode: bodyDataElement);
                     },
                   ),
                 ),

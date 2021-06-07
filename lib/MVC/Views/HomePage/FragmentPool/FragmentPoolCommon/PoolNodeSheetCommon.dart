@@ -16,15 +16,23 @@ class PoolNodeSheetCommon extends SheetPage<MMFragmentsAboutPoolNode, int> {
   ///
   PoolNodeSheetCommon({
     required this.poolNodeMModel,
+    required this.fragmentsForeignKeyNameAIIDForNode,
+    required this.fragmentsForeignKeyNameUUIDForNode,
     required this.fragmentsTableName,
     required this.columns,
     required this.buttonsBuilder,
   });
 
-  /// poolNode 的 mmodel
+  /// poolNode 节点的 mmodel
   final MMPoolNode poolNodeMModel;
 
-  /// 当前碎片池的碎片对应的表名
+  /// 当前碎片池的碎片表对应的节点外键名
+  final String fragmentsForeignKeyNameAIIDForNode;
+
+  /// 当前碎片池的碎片表对应的节点外键名
+  final String fragmentsForeignKeyNameUUIDForNode;
+
+  /// 当前碎片池的碎片表名
   final String fragmentsTableName;
 
   /// 需要用到的 column 名
@@ -72,9 +80,26 @@ class PoolNodeSheetCommon extends SheetPage<MMFragmentsAboutPoolNode, int> {
       const int readCount = 10;
       mark.value ??= 0;
 
+      late String where;
+      late List<Object?> whereArgs;
+      if ((poolNodeMModel.get_aiid == null && poolNodeMModel.get_uuid == null) || (poolNodeMModel.get_aiid != null && poolNodeMModel.get_uuid != null)) {
+        throw 'poolNodeMModel.get_aiid == ${poolNodeMModel.get_aiid} and poolNodeMModel.get_uuid == ${poolNodeMModel.get_uuid}';
+      } else {
+        if (poolNodeMModel.get_aiid != null) {
+          where = '$fragmentsForeignKeyNameAIIDForNode = ?';
+          whereArgs = <int>[poolNodeMModel.get_aiid!];
+        } else {
+          where = '$fragmentsForeignKeyNameUUIDForNode = ?';
+          whereArgs = <String>[poolNodeMModel.get_uuid!];
+        }
+      }
+
+      /// 这里因为 sheet 元素只需获取标题等字段，无需获取元素全部的字段，因此若之后想要获取全部字段，需要再次查询。
       await MBase.queryRowsAsModels<MBase, MMFragmentsAboutPoolNode, MMFragmentsAboutPoolNode>(
         connectTransaction: null,
         tableName: fragmentsTableName,
+        where: where,
+        whereArgs: whereArgs,
         columns: columns,
         limit: readCount,
         offset: mark.value,

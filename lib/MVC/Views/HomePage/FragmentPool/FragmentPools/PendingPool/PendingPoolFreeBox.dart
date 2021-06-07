@@ -52,9 +52,11 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutPendingPoolNode.tableName,
+                    fragmentsForeignKeyNameAIIDForNode: MFragmentsAboutPendingPoolNode.pn_pending_pool_node_aiid,
+                    fragmentsForeignKeyNameUUIDForNode: MFragmentsAboutPendingPoolNode.pn_pending_pool_node_uuid,
                     columns: <String>[MFragmentsAboutPendingPoolNode.id, MFragmentsAboutPendingPoolNode.title],
                     buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
-                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                      return FragmentButtonCommon(mmFragmentsAboutPoolNode: bodyDataElement);
                     },
                   ),
                 ),

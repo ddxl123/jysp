@@ -247,7 +247,6 @@ class SheetPageController<T, M> extends ChangeNotifier {
   void dispose() {
     animationController.dispose();
     scrollController.dispose();
-    dLog(() => 'dddispose');
     super.dispose();
   }
 

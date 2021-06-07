@@ -36,9 +36,11 @@ class _RulePoolFreeBoxState extends State<RulePoolFreeBox> {
                   sheetPageBuilder: () => PoolNodeSheetCommon(
                     poolNodeMModel: thisFragmentPoolController.poolNodes[i],
                     fragmentsTableName: MFragmentsAboutRulePoolNode.tableName,
+                    fragmentsForeignKeyNameAIIDForNode: MFragmentsAboutRulePoolNode.pn_rule_pool_node_aiid,
+                    fragmentsForeignKeyNameUUIDForNode: MFragmentsAboutRulePoolNode.pn_rule_pool_node_uuid,
                     columns: <String>[MFragmentsAboutRulePoolNode.id, MFragmentsAboutRulePoolNode.title],
                     buttonsBuilder: (MMFragmentsAboutPoolNode bodyDataElement, BuildContext btnContext, SetState btnSetState) {
-                      return FragmentButtonCommon(fragmentMModel: bodyDataElement);
+                      return FragmentButtonCommon(mmFragmentsAboutPoolNode: bodyDataElement);
                     },
                   ),
                 ),

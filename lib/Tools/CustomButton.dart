@@ -91,7 +91,6 @@ class _CustomButton extends State<CustomButton> {
 
         // 处在 [moving 区] 外时，
         final Offset delta = event.position - _onDownPosition;
-        dLog(() => delta);
         if (delta.dx > _moveRange || delta.dy > _moveRange || delta.dx < -_moveRange || delta.dy < -_moveRange) {
           _onStatus = OnStatus.none;
           _timer?.cancel();
@@ -110,27 +109,23 @@ class _CustomButton extends State<CustomButton> {
 
   void setNoneStatus() {
     _currentColor = widget.backgroundColor;
-    dLog(() => 'none');
     setState(() {});
   }
 
   void setMovingStatus() {
     _currentColor = widget.backgroundColor;
-    dLog(() => 'moving');
     setState(() {});
   }
 
   void setDownStatus(PointerDownEvent details) {
     final Function event = () {
       _currentColor = widget.downBackgroundColor;
-      dLog(() => 'down');
       widget.onDown?.call(details);
       setState(() {});
     };
     if (widget.isAlwaysOnDown) {
       event();
     } else {
-      dLog(() => 'add');
       onDownEvents.add(event);
     }
   }
@@ -138,7 +133,6 @@ class _CustomButton extends State<CustomButton> {
   void setUpStatus(PointerUpEvent details) {
     final Function event = () {
       _currentColor = widget.backgroundColor;
-      dLog(() => 'up');
       widget.onUp?.call(details);
       setState(() {});
     };
@@ -152,7 +146,6 @@ class _CustomButton extends State<CustomButton> {
   void setLongPressedStatus(PointerDownEvent details) {
     final Function event = () {
       _currentColor = widget.backgroundColor;
-      dLog(() => 'longPressed');
       widget.onLongPressed?.call(details);
       setState(() {});
     };

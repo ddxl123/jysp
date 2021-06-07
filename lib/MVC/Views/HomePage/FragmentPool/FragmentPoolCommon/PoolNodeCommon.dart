@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
 import 'package:jysp/MVC/Controllers/FragmentPoolController/FragmentPoolController.dart';
 import 'package:jysp/MVC/Controllers/HomePageController.dart';
+import 'package:jysp/MVC/Views/HomePage/FragmentPool/FragmentPoolCommon/FragmentPoolToastRouteCommons/NodeLongPressedCommon.dart';
 import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/Tools/SheetPage/SheetPage.dart';
 import 'package:jysp/Tools/TDebug.dart';
@@ -125,11 +126,9 @@ class PoolNodeCommonState extends State<PoolNodeCommon> {
       onUp: (PointerUpEvent event) {
         Navigator.push(context, widget.sheetPageBuilder());
       },
-      onDown: (PointerDownEvent downEvent) {
-        dLog(() => 'onDown:$downEvent');
-      },
+      onDown: (PointerDownEvent downEvent) {},
       onLongPressed: (PointerDownEvent downEvent) {
-        dLog(() => 'onLongPressed:$downEvent');
+        Navigator.push(context, NodeLongPressedCommon(context, mmPoolNode: widget.poolNodeMModel));
       },
       // style: TextButton.styleFrom(
       //   primary: Colors.black,
