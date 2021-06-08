@@ -2,8 +2,8 @@
 
 import 'dart:io';
 
-import 'package:jysp/Database/Run/Content.dart';
-import 'package:jysp/Database/Run/ModelConfig.dart';
+import 'package:jysp/database/run/Content.dart';
+import 'package:jysp/database/run/ModelConfig.dart';
 
 enum ModelCategory {
   onlySqlite,
@@ -83,8 +83,29 @@ Map<String, String> extraEnumContents = <String, String>{};
 /// 模型是否需要全局枚举内容。eg. {"table_name":true}
 Map<String, bool> extraGlobalEnumContents = <String, bool>{};
 
-String modelsPath = 'lib/Database/Models';
-String mmodelsPath = 'lib/Database/MergeModels';
+///项目名
+String projectName = 'jysp';
+
+/// 必须放在 lib 目录下
+String modelsPath = 'database/models';
+
+/// 必须放在 lib 目录下
+String mmodelsPath = 'database/merge_models';
+
+/// models 的包路径。例如：jysp/database/models
+String get packageModelsPath => '$projectName/$modelsPath';
+
+/// mmodels 的包路径。例如：jysp/database/mmodels
+String get packageMModelsPath => '$projectName/$mmodelsPath';
+
+/// models 的 lib 路径。例如：lib/database/models
+String get libModelsPath => 'lib/$modelsPath';
+
+/// mmodels 的 lib 路径。例如：lib/database/mmodels
+String get libMModelsPath => 'lib/$mmodelsPath';
+
+/// 数据库对象所在 dart 文件的包路径。
+String get packageDatabaseObj => '$projectName/database/g_sqlite/GSqlite.dart';
 
 // ===============================================================================
 // ===============================================================================
@@ -184,26 +205,27 @@ void afterRunCreateModels() {
   }
 }
 
+/// [Directory.current] 为项目路径
 Future<void> setPath() async {
   // ignore: avoid_slow_async_io
-  if (await Directory(modelsPath).exists()) {
-    await Directory(modelsPath).list().forEach((FileSystemEntity element) {
+  if (await Directory(libModelsPath).exists()) {
+    await Directory(libModelsPath).list().forEach((FileSystemEntity element) {
       if (element.uri.pathSegments.last[0] != 'M') {
         throw 'Unknown file in Models folder: ${element.uri.pathSegments.last}';
       }
     });
   } else {
-    await Directory(modelsPath).create();
+    await Directory(libModelsPath).create();
   }
   // ignore: avoid_slow_async_io
-  if (await Directory(mmodelsPath).exists()) {
-    await Directory(mmodelsPath).list().forEach((FileSystemEntity element) {
+  if (await Directory(libMModelsPath).exists()) {
+    await Directory(libMModelsPath).list().forEach((FileSystemEntity element) {
       if (element.uri.pathSegments.last[0] != 'M' && element.uri.pathSegments.last[1] != 'M') {
         throw 'Unknown file in MModels folder: ${element.uri.pathSegments.last}';
       }
     });
   } else {
-    await Directory(mmodelsPath).create();
+    await Directory(libMModelsPath).create();
   }
 }
 
@@ -212,25 +234,25 @@ Future<void> runWriteModels() async {
     final String tableNameWithS = modelFields.keys.elementAt(i);
     final Map<String, List<Object>> fields = modelFields[tableNameWithS]!;
 
-    await File('$modelsPath/M${toCamelCaseWillRemoveS(tableNameWithS)}.dart').writeAsString(modelContent(tableNameWithS, fields));
+    await File('$libModelsPath/M${toCamelCaseWillRemoveS(tableNameWithS)}.dart').writeAsString(modelContent(tableNameWithS, fields));
     print("Named '$tableNameWithS''s table model file is created successfully!");
   }
 }
 
 Future<void> runWriteMBase() async {
-  await File('$modelsPath/MBase.dart').writeAsString(modelBaseContent());
+  await File('$libModelsPath/MBase.dart').writeAsString(modelBaseContent());
   print("'MBase' file is created successfully!");
 }
 
 Future<void> runWriteMModels() async {
   for (int i = 0; i < mmodels.length; i++) {
-    await File('$mmodelsPath/${mmodels.keys.elementAt(i)}.dart').writeAsString(mmodelContent(mmodels.keys.elementAt(i), mmodels.values.elementAt(i)));
+    await File('$libMModelsPath/${mmodels.keys.elementAt(i)}.dart').writeAsString(mmodelContent(mmodels.keys.elementAt(i), mmodels.values.elementAt(i)));
     print("Named '${mmodels.keys.elementAt(i)}''s table model file is created successfully!");
   }
 }
 
 Future<void> runWriteMMBase() async {
-  await File('$mmodelsPath/MMBase.dart').writeAsString(mmodelBaseContent());
+  await File('$libMModelsPath/MMBase.dart').writeAsString(mmodelBaseContent());
   print("'MMBase' file is created successfully!");
 }
 
@@ -254,7 +276,7 @@ Future<void> runParseIntoSqls() async {
     },
   );
 
-  await File('$modelsPath/MParseIntoSqls.dart').writeAsString(parseIntoSqlsContent(rawSqls));
+  await File('$libModelsPath/MParseIntoSqls.dart').writeAsString(parseIntoSqlsContent(rawSqls));
   print("'MParseIntoSqls' file is created successfully!");
 }
 
@@ -263,6 +285,6 @@ Future<void> runWriteGlobalEnum() async {
   for (final String gEnum in globalEnum) {
     globalEnumString += gEnum;
   }
-  await File('$modelsPath/MGlobalEnum.dart').writeAsString(globalEnumString);
+  await File('$libModelsPath/MGlobalEnum.dart').writeAsString(globalEnumString);
   print("'MGlobalEnum' file is created successfully!");
 }

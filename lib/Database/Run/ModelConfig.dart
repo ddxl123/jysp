@@ -4,9 +4,9 @@
 // ignore_for_file: unused_element
 // ignore_for_file: unused_field
 
-import 'package:jysp/Database/Run/Create.dart';
-import 'package:jysp/Database/Run/CreateModelBase.dart';
-import 'package:jysp/Database/Run/main.dart';
+import 'package:jysp/database/run/Create.dart';
+import 'package:jysp/database/run/CreateModelBase.dart';
+import 'package:jysp/database/run/main.dart';
 
 void runCreateModels() {
   _version_infos().createModel();
@@ -102,6 +102,7 @@ class _uploads extends CreateModelBase {
   String updated_columns = 'updated_columns';
   String curd_status = 'curd_status';
   String upload_status = 'upload_status';
+  String mark = 'mark';
 
   @override
   bool? get extraGlobalEnum => true;
@@ -120,6 +121,7 @@ class _uploads extends CreateModelBase {
         setField_normal(fieldName: updated_columns, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: curd_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'CurdStatus'),
         setField_normal(fieldName: upload_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'UploadStatus'),
+        setField_normal(fieldName: mark, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'int'),
       ];
 }
 

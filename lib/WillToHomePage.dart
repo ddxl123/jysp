@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/AppInit/AppInit.dart';
-import 'package:jysp/AppInit/AppInitEnum.dart';
-import 'package:jysp/G/GNavigatorPush.dart';
-import 'package:jysp/G/GSqlite/SqliteTools.dart';
 import 'package:jysp/GlobalFloatingBall.dart';
-import 'package:jysp/MVC/Controllers/LoginPageController.dart';
+import 'package:jysp/app_init/AppInit.dart';
+import 'package:jysp/app_init/AppInitEnum.dart';
+import 'package:jysp/database/g_sqlite/SqliteTools.dart';
+import 'package:jysp/g/GNavigatorPush.dart';
+import 'package:jysp/mvc/controllers/LoginPageController.dart';
 
 class WillToHomePage extends StatefulWidget {
   @override

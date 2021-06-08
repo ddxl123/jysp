@@ -1,26 +1,10 @@
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/MergeModels/MMBase.dart';
-import 'package:jysp/Database/Models/MVersionInfo.dart';
-import 'package:jysp/Database/Models/MToken.dart';
-import 'package:jysp/Database/Models/MUser.dart';
-import 'package:jysp/Database/Models/MUpload.dart';
-import 'package:jysp/Database/Models/MDownloadModule.dart';
-import 'package:jysp/Database/Models/MPnPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MPnMemoryPoolNode.dart';
-import 'package:jysp/Database/Models/MPnCompletePoolNode.dart';
-import 'package:jysp/Database/Models/MPnRulePoolNode.dart';
-import 'package:jysp/Database/Models/MFragmentsAboutPendingPoolNode.dart';
-import 'package:jysp/Database/Models/MFragmentsAboutMemoryPoolNode.dart';
-import 'package:jysp/Database/Models/MFragmentsAboutCompletePoolNode.dart';
-import 'package:jysp/Database/Models/MFragmentsAboutRulePoolNode.dart';
-import 'package:jysp/G/GSqlite/GSqlite.dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/database/merge_models/MMBase.dart';
+import 'package:jysp/database/models/MVersionInfo.dart';import 'package:jysp/database/models/MToken.dart';import 'package:jysp/database/models/MUser.dart';import 'package:jysp/database/models/MUpload.dart';import 'package:jysp/database/models/MDownloadModule.dart';import 'package:jysp/database/models/MPnPendingPoolNode.dart';import 'package:jysp/database/models/MPnMemoryPoolNode.dart';import 'package:jysp/database/models/MPnCompletePoolNode.dart';import 'package:jysp/database/models/MPnRulePoolNode.dart';import 'package:jysp/database/models/MFragmentsAboutPendingPoolNode.dart';import 'package:jysp/database/models/MFragmentsAboutMemoryPoolNode.dart';import 'package:jysp/database/models/MFragmentsAboutCompletePoolNode.dart';import 'package:jysp/database/models/MFragmentsAboutRulePoolNode.dart';
+import 'package:jysp/database/g_sqlite/GSqlite.dart';
 import 'package:sqflite/sqflite.dart';
 
-enum ModelCategory {
-  onlySqlite,
-  SqliteAndMysql,
-}
+enum ModelCategory {onlySqlite,SqliteAndMysql,}
 
 abstract class MBase {
   ///
@@ -81,36 +65,10 @@ abstract class MBase {
   int? get get_created_at;
 
   /// 使用 tableName 创建模型
-  static T createEmptyModelByTableName<T extends MBase>(String tableName) {
-    switch (tableName) {
-      case 'version_infos':
-        return MVersionInfo() as T;
-      case 'tokens':
-        return MToken() as T;
-      case 'users':
-        return MUser() as T;
-      case 'uploads':
-        return MUpload() as T;
-      case 'download_modules':
-        return MDownloadModule() as T;
-      case 'pn_pending_pool_nodes':
-        return MPnPendingPoolNode() as T;
-      case 'pn_memory_pool_nodes':
-        return MPnMemoryPoolNode() as T;
-      case 'pn_complete_pool_nodes':
-        return MPnCompletePoolNode() as T;
-      case 'pn_rule_pool_nodes':
-        return MPnRulePoolNode() as T;
-      case 'fragments_about_pending_pool_nodes':
-        return MFragmentsAboutPendingPoolNode() as T;
-      case 'fragments_about_memory_pool_nodes':
-        return MFragmentsAboutMemoryPoolNode() as T;
-      case 'fragments_about_complete_pool_nodes':
-        return MFragmentsAboutCompletePoolNode() as T;
-      case 'fragments_about_rule_pool_nodes':
-        return MFragmentsAboutRulePoolNode() as T;
-      default:
-        throw 'unknown tableName: $tableName';
+  static T createEmptyModelByTableName<T extends MBase>(String tableName){
+    switch(tableName){
+      case 'version_infos': return MVersionInfo() as T;case 'tokens': return MToken() as T;case 'users': return MUser() as T;case 'uploads': return MUpload() as T;case 'download_modules': return MDownloadModule() as T;case 'pn_pending_pool_nodes': return MPnPendingPoolNode() as T;case 'pn_memory_pool_nodes': return MPnMemoryPoolNode() as T;case 'pn_complete_pool_nodes': return MPnCompletePoolNode() as T;case 'pn_rule_pool_nodes': return MPnRulePoolNode() as T;case 'fragments_about_pending_pool_nodes': return MFragmentsAboutPendingPoolNode() as T;case 'fragments_about_memory_pool_nodes': return MFragmentsAboutMemoryPoolNode() as T;case 'fragments_about_complete_pool_nodes': return MFragmentsAboutCompletePoolNode() as T;case 'fragments_about_rule_pool_nodes': return MFragmentsAboutRulePoolNode() as T;
+      default: throw 'unknown tableName: $tableName';
     }
   }
 
@@ -182,10 +140,11 @@ abstract class MBase {
     int? limit,
     int? offset,
   }) async {
-    if (R.runtimeType != M.runtimeType && R.runtimeType != MM.runtimeType) {
+    if (R.runtimeType != M.runtimeType && R.runtimeType != MM.runtimeType){
       throw 'R type is not M or MM';
     }
-    if (returnMWhere == null && returnMMWhere == null || returnMWhere != null && returnMMWhere != null) {
+    if (returnMWhere == null && returnMMWhere == null || returnMWhere != null && returnMMWhere != null)
+    {
       throw 'returnMWhere and returnMMWhere err';
     }
 
@@ -229,21 +188,8 @@ abstract class MBase {
   }
 
   /// 当前 Model 的类型
-  static ModelCategory? modelCategory({required String tableName}) {
-    return <String, ModelCategory>{
-      'version_infos': ModelCategory.onlySqlite,
-      'tokens': ModelCategory.onlySqlite,
-      'users': ModelCategory.SqliteAndMysql,
-      'uploads': ModelCategory.onlySqlite,
-      'download_modules': ModelCategory.onlySqlite,
-      'pn_pending_pool_nodes': ModelCategory.SqliteAndMysql,
-      'pn_memory_pool_nodes': ModelCategory.SqliteAndMysql,
-      'pn_complete_pool_nodes': ModelCategory.SqliteAndMysql,
-      'pn_rule_pool_nodes': ModelCategory.SqliteAndMysql,
-      'fragments_about_pending_pool_nodes': ModelCategory.SqliteAndMysql,
-      'fragments_about_memory_pool_nodes': ModelCategory.SqliteAndMysql,
-      'fragments_about_complete_pool_nodes': ModelCategory.SqliteAndMysql,
-      'fragments_about_rule_pool_nodes': ModelCategory.SqliteAndMysql,
-    }[tableName];
+  static ModelCategory? modelCategory({required String tableName}){
+    return <String, ModelCategory>{ 'version_infos':ModelCategory.onlySqlite,'tokens':ModelCategory.onlySqlite,'users':ModelCategory.SqliteAndMysql,'uploads':ModelCategory.onlySqlite,'download_modules':ModelCategory.onlySqlite,'pn_pending_pool_nodes':ModelCategory.SqliteAndMysql,'pn_memory_pool_nodes':ModelCategory.SqliteAndMysql,'pn_complete_pool_nodes':ModelCategory.SqliteAndMysql,'pn_rule_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_pending_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_memory_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_complete_pool_nodes':ModelCategory.SqliteAndMysql,'fragments_about_rule_pool_nodes':ModelCategory.SqliteAndMysql, }[tableName];
   }
 }
+

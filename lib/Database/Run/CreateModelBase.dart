@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Database/Run/Create.dart';
-import 'package:jysp/Database/Run/main.dart';
+import 'package:jysp/database/run/Create.dart';
+import 'package:jysp/database/run/main.dart';
 
 abstract class CreateModelBase {
   void createModel() {

@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:flutter/material.dart';
+import 'package:jysp/tools/TDebug.dart';
 import 'package:uuid/uuid.dart';
 
 enum Compare { frontBig, backBig, equal }

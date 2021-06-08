@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:jysp/Database/Run/main.dart';
+import 'package:jysp/database/run/main.dart';
 
 /// 将 demo_texts 形式转化成 DemoText 形式;
 String toCamelCaseWillRemoveS(String demo_texts) {
@@ -100,8 +100,8 @@ String asModelNoId(Map<String, List<Object>> fields) {
 String modelContent(String tableNameWithS, Map<String, List<Object>> fields) {
   return """
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/Models/MBase.dart';
-${extraGlobalEnumContents[tableNameWithS] == true ? "import 'package:jysp/Database/Models/MGlobalEnum.dart';" : ""}
+import 'package:$packageModelsPath/MBase.dart';
+${extraGlobalEnumContents[tableNameWithS] == true ? "import 'package:$packageModelsPath/MGlobalEnum.dart';" : ""}
 
 ${extraEnumContents[tableNameWithS] ?? ""}
 
@@ -197,7 +197,7 @@ String modelBaseContent() {
   String importContent = '';
   String createEmptyModelByTableNameContent = '';
   for (int i = 0; i < modelFields.keys.length; i++) {
-    importContent += """import 'package:jysp/Database/Models/M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.dart';""";
+    importContent += """import 'package:$packageModelsPath/M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}.dart';""";
     createEmptyModelByTableNameContent += 'case \'${modelFields.keys.elementAt(i)}\': return M${toCamelCaseWillRemoveS(modelFields.keys.elementAt(i))}() as T;';
   }
 
@@ -215,13 +215,13 @@ String modelBaseContent() {
     final ModelCategory modelCategory = modelCategorys[tableName]!;
     modelCategorysContentBase += '\'${modelCategorys.keys.elementAt(i)}\':${modelCategory.toString()},';
   }
-  modelCategorysContent = '<String,ModelCategory>{$modelCategorysContentBase}';
+  modelCategorysContent = '<String, ModelCategory>{ $modelCategorysContentBase }';
 
   return """
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/MergeModels/MMBase.dart';
+import 'package:$packageMModelsPath/MMBase.dart';
 $importContent
-import 'package:jysp/G/GSqlite/GSqlite.dart';
+import 'package:$packageDatabaseObj';
 import 'package:sqflite/sqflite.dart';
 
 $modelCategoryEnumContent
@@ -427,7 +427,7 @@ String mmodelContent(String mmodelName, List<String> tableNames) {
   String getTableNameCallbackContent = '';
   String getRowJsonCallbackContent = '';
   for (int i = 0; i < tableNames.length; i++) {
-    importContent += '''import 'package:jysp/Database/Models/M${toCamelCaseWillRemoveS(tableNames[i])}.dart';''';
+    importContent += '''import 'package:$packageModelsPath/M${toCamelCaseWillRemoveS(tableNames[i])}.dart';''';
     switchTypeContent += '''
       case M${toCamelCaseWillRemoveS(tableNames[i])}:
         m${toCamelCaseWillRemoveS(tableNames[i])} = model as M${toCamelCaseWillRemoveS(tableNames[i])};
@@ -596,12 +596,12 @@ String mmodelContent(String mmodelName, List<String> tableNames) {
       isGlobalEnum = true;
     }
   }
-  isGlobalEnumContent += isGlobalEnum == true ? 'import \'package:jysp/Database/Models/MGlobalEnum.dart\';' : '';
+  isGlobalEnumContent += isGlobalEnum == true ? 'import \'package:$packageModelsPath/MGlobalEnum.dart\';' : '';
 
   return """
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/Models/MBase.dart';
-import 'package:jysp/Database/MergeModels/MMBase.dart';
+import 'package:$packageModelsPath/MBase.dart';
+import 'package:$packageMModelsPath/MMBase.dart';
 
 $isGlobalEnumContent
 

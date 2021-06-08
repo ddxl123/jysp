@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/MVC/Controllers/LoginPageController.dart';
-import 'package:jysp/Tools/RebuildHandler.dart';
-import 'package:jysp/Tools/RoundedBox..dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/mvc/controllers/LoginPageController.dart';
+import 'package:jysp/tools/RebuildHandler.dart';
+import 'package:jysp/tools/RoundedBox..dart';
+import 'package:jysp/tools/TDebug.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {

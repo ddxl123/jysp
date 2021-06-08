@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/G/G.dart';
-import 'package:jysp/Tools/CustomButton.dart';
 import 'package:jysp/WillToHomePage.dart';
+import 'package:jysp/g/G.dart';
+import 'package:jysp/tools/CustomButton.dart';
 
 void main() {
   runApp(MyApp());

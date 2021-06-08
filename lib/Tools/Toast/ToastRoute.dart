@@ -2,10 +2,9 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/G/G.dart';
-import 'package:jysp/Tools/Helper.dart';
-import 'package:jysp/Tools/TDebug.dart';
-import 'package:jysp/Tools/Toast/ShowToast.dart';
+import 'package:jysp/g/G.dart';
+import 'package:jysp/tools/Helper.dart';
+import 'package:jysp/tools/TDebug.dart';
 
 class PopResult {
   PopResult({required this.popResultSelect, required this.value});

@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/G/G.dart';
-import 'package:jysp/Tools/TDebug.dart';
+import 'package:jysp/g/G.dart';
 
 enum OnStatus { none, up, down, moving }
 

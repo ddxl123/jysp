@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:jysp/Database/Run/CreateModelBase.dart';
-import 'package:jysp/Database/Run/main.dart';
+import 'package:jysp/database/run/CreateModelBase.dart';
+import 'package:jysp/database/run/main.dart';
 
 /// 创建模型
 class CreateModel {

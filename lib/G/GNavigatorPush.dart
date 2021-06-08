@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/Database/MergeModels/MMPoolNode.dart';
-import 'package:jysp/MVC/Controllers/HomePageController.dart';
-import 'package:jysp/MVC/Controllers/InitDownloadController/InitDownloadController.dart';
-import 'package:jysp/MVC/Controllers/LoginPageController.dart';
-import 'package:jysp/MVC/Views/CreateFragmentPage/CreateFragmentPage.dart';
-import 'package:jysp/MVC/Views/HomePage/HomePage.dart';
-import 'package:jysp/MVC/Views/InitDownloadPage/InitDownloadPage.dart';
-import 'package:jysp/MVC/Views/LoginPage.dart';
+import 'package:jysp/database/merge_models/MMPoolNode.dart';
+import 'package:jysp/mvc/controllers/HomePageController.dart';
+import 'package:jysp/mvc/controllers/LoginPageController.dart';
+import 'package:jysp/mvc/controllers/init_download_controller/InitDownloadController.dart';
+import 'package:jysp/mvc/views/LoginPage.dart';
+import 'package:jysp/mvc/views/create_fragment_page/CreateFragmentPage.dart';
+import 'package:jysp/mvc/views/home_page/HomePage.dart';
+import 'package:jysp/mvc/views/init_download_page/InitDownloadPage.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 

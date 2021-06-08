@@ -1,5 +1,5 @@
 // ignore_for_file: non_constant_identifier_names
-import 'package:jysp/Database/Models/MBase.dart';
+import 'package:jysp/database/models/MBase.dart';
 
 
 enum MemoryPoolNodeType {ordinary,}
