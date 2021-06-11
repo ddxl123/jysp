@@ -14,7 +14,7 @@ class _FlutterTestState extends State<FlutterTest> {
     return Center(
       child: CustomButton(
         child: StatefulBuilder(
-          builder: (BuildContext context, SetState setState) {
+          builder: (BuildContext context, SetState sfbSetState) {
             dLog(() => 'ccccccccc');
             return const Text('data');
           },
@@ -27,7 +27,7 @@ class _FlutterTestState extends State<FlutterTest> {
   }
 
   Widget w = StatefulBuilder(
-    builder: (BuildContext context, SetState setState) {
+    builder: (BuildContext context, SetState wSetState) {
       dLog(() => 'ssssss');
       return const Text('data');
     },

@@ -40,8 +40,8 @@ class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
     return FreeBoxCommon(
       poolType: thisPoolType,
       poolNodesCommon: FreeBoxStack(
-        builder: (BuildContext context, SetState setState) {
-          thisFragmentPoolController.poolNodesSetState ??= putSetState(setState);
+        builder: (BuildContext context, SetState fbsSetState) {
+          thisFragmentPoolController.poolNodesSetState ??= fbsSetState;
           return <FreeBoxPositioned>[
             for (int i = 0; i < thisFragmentPoolController.poolNodes.length; i++)
               FreeBoxPositioned(

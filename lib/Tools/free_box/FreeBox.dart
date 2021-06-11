@@ -36,7 +36,7 @@ class FreeBox extends StatefulWidget {
   final FreeBoxStack freeMoveScaleLayerBuilder;
 
   /// 固定层。必须使用 Stack + Postion。
-  final Stack Function(SetState setState) fixedLayerBuilder;
+  final Stack Function(SetState flbSetState) fixedLayerBuilder;
 
   final void Function(PointerDownEvent event)? onLongPressStart;
 
@@ -57,10 +57,11 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
   }
 
   void initSliding() {
+    dLog(() => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);
     widget.freeBoxController.targetSlideAnimationController = AnimationController(vsync: this);
     // widget.freeBoxController.onLongPressStart = widget.onLongPressStart;
-    widget.freeBoxController.freeBoxSetState ??= putSetState(setState);
+    widget.freeBoxController.freeBoxSetState ??= setState;
     widget.freeBoxController.targetSlide(targetOffset: Offset.zero, targetScale: 1.0, rightnow: true);
   }
 
@@ -122,7 +123,7 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
               scale: widget.freeBoxController.scale,
               // [内容物s]
               child: StatefulBuilder(
-                builder: (BuildContext context, SetState setState) {
+                builder: (BuildContext context, SetState nrwSetState) {
                   return Container(
                     color: widget.boxBodyBackgroundColor,
                     child: widget.freeMoveScaleLayerBuilder,
@@ -142,8 +143,8 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
       width: widget.boxWidth,
       height: widget.boxHeight,
       child: StatefulBuilder(
-        builder: (BuildContext context, SetState setState) {
-          return widget.fixedLayerBuilder(putSetState(setState));
+        builder: (BuildContext context, SetState flSetState) {
+          return widget.fixedLayerBuilder(flSetState);
         },
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/g/GNavigatorPush.dart';
-import 'package:jysp/mvc/controllers/init_download_controller/InitDownloadController.dart';
-import 'package:jysp/mvc/views/init_download_page/DownloadModule.dart';
-import 'package:jysp/mvc/views/init_download_page/Extension.dart';
+import 'package:jysp/mvc/request/download/init_download/DownloadModule.dart';
+import 'package:jysp/mvc/request/download/init_download/Extension.dart';
+import 'package:jysp/mvc/request/download/init_download/InitDownloadController.dart';
 import 'package:jysp/tools/RoundedBox..dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +17,7 @@ class _InitDownloadPageState extends State<InitDownloadPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: context.read<InitDownloadController>().getListFuture(),
+      future: context.read<InitDownloadController>().getListFuture,
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:

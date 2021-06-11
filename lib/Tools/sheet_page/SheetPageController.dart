@@ -183,7 +183,7 @@ class SheetPageController<T, M> extends ChangeNotifier {
         dataLoad(bodyDataFuture);
       }
 
-      sheetSetState!(() {});
+      runSetState(sheetSetState!);
     });
   }
 
@@ -219,22 +219,19 @@ class SheetPageController<T, M> extends ChangeNotifier {
     dLog(() => 'loading...');
 
     // 处于正在加载中
-    loadAreaSetState!(() {
-      sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
-    });
+    sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.loading;
+    runSetState(loadAreaSetState!);
     final BodyDataFutureResult bodyDataFutureResult = await bodyDataFuture(bodyData, mark);
 
     switch (bodyDataFutureResult) {
       case BodyDataFutureResult.success:
-        bodySetState!(() {});
-        loadAreaSetState!(() {
-          sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
-        });
+        sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.noMore;
+        runSetState(bodySetState!);
+        runSetState(loadAreaSetState!);
         break;
       case BodyDataFutureResult.fail:
-        loadAreaSetState!(() {
-          sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.fail;
-        });
+        sheetLoadAreaController.sheetLoadAreaStatus = SheetLoadAreaStatus.fail;
+        runSetState(loadAreaSetState!);
         break;
       default:
         throw 'BodyDataFutureResult err';

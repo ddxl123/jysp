@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jysp/g/G.dart';
+import 'package:jysp/tools/Helper.dart';
 
 enum OnStatus { none, up, down, moving }
 
@@ -67,7 +68,7 @@ class _CustomButton extends State<CustomButton> {
       onPointerUp: (PointerUpEvent details) {
         // 若长按被触发后触发了 up
         if (!(_timer?.isActive ?? true)) {
-          setState(() {});
+          runSetState(setState);
           return;
         }
 
@@ -108,19 +109,19 @@ class _CustomButton extends State<CustomButton> {
 
   void setNoneStatus() {
     _currentColor = widget.backgroundColor;
-    setState(() {});
+    runSetState(setState);
   }
 
   void setMovingStatus() {
     _currentColor = widget.backgroundColor;
-    setState(() {});
+    runSetState(setState);
   }
 
   void setDownStatus(PointerDownEvent details) {
     final Function event = () {
       _currentColor = widget.downBackgroundColor;
       widget.onDown?.call(details);
-      setState(() {});
+      runSetState(setState);
     };
     if (widget.isAlwaysOnDown) {
       event();
@@ -133,7 +134,7 @@ class _CustomButton extends State<CustomButton> {
     final Function event = () {
       _currentColor = widget.backgroundColor;
       widget.onUp?.call(details);
-      setState(() {});
+      runSetState(setState);
     };
     if (widget.isAlwaysOnUp) {
       event();
@@ -146,7 +147,7 @@ class _CustomButton extends State<CustomButton> {
     final Function event = () {
       _currentColor = widget.backgroundColor;
       widget.onLongPressed?.call(details);
-      setState(() {});
+      runSetState(setState);
     };
     if (widget.isAlwaysOnLongPressed) {
       event();

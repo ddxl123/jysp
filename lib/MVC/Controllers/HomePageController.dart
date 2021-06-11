@@ -107,7 +107,8 @@ class HomePageController extends ChangeNotifier {
     if (result == true) {
       dLog(() => '获取 fragmentPoolNodes 数据成功。');
       setCurrentPoolType(toPoolType);
-      fragmentPoolIndexSetState(() {});
+
+      runSetState(fragmentPoolIndexSetState);
       _isToPooling = false;
       return ToPoolResult.success;
     }

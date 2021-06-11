@@ -25,22 +25,17 @@ Compare compare(int front, int back) {
 /// setState 类型
 typedef SetState = void Function(void Function());
 
-/// setState 赋值
-SetState putSetState(SetState setState) {
-  return (void Function() cb) {
-    try {
-      // ignore: invalid_use_of_protected_member
-      setState(() {
-        cb();
-      });
-    } catch (e) {
-      if (e.runtimeType == FlutterError) {
-        dLog(() => e);
-      } else {
-        rethrow;
-      }
+/// 调用 setState 时必须使用这个函数进行调用，以便捕获错误
+void runSetState(SetState setState) {
+  try {
+    setState(() {});
+  } catch (e) {
+    if (e.runtimeType == FlutterError) {
+      dLog(() => e);
+    } else {
+      rethrow;
     }
-  };
+  }
 }
 
 /// 将 '111,222' 字符串转化成 Offset(111,222)

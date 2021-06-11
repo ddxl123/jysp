@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jysp/mvc/request/online/RegisterAndLogin/RByEmail.dart';
+import 'package:jysp/mvc/request/online/register_and_login/RByEmail.dart';
 import 'package:jysp/tools/RebuildHandler.dart';
 
 class _Init extends ChangeNotifier {}

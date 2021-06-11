@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jysp/GlobalFloatingBall.dart';
 import 'package:jysp/app_init/AppInit.dart';
 import 'package:jysp/app_init/AppInitEnum.dart';
 import 'package:jysp/database/g_sqlite/SqliteTools.dart';
 import 'package:jysp/g/GNavigatorPush.dart';
+import 'package:jysp/global_floating_ball/EnableFloatingBall.dart';
 import 'package:jysp/mvc/controllers/LoginPageController.dart';
+import 'package:jysp/tools/Helper.dart';
 
 class WillToHomePage extends StatefulWidget {
   @override
@@ -28,14 +29,16 @@ class _WillToHomePageState extends State<WillToHomePage> {
   Widget build(BuildContext context) {
     return FutureBuilder<Object>(
       initialData: AppInitStatus.readyInit,
-      future: _future(),
+      future: _future,
       builder: _builder,
     );
   }
 
-  Future<Object> _future() async {
-    return await AppInit().appInit();
-  }
+  late final Future<Object> _future = Future<Object>(
+    () async {
+      return await AppInit().appInit();
+    },
+  );
 
   Widget _builder(BuildContext context, AsyncSnapshot<Object> snapshot) {
     /// 因为 FutureBuilder 里的 future 调用了 then，异常被直接捕获了
@@ -95,7 +98,7 @@ class _WillToHomePageState extends State<WillToHomePage> {
         child: const Text('数据丢失, 点击清空数据并初始化应用!'),
         onPressed: () {
           SqliteTools().clearSqlite();
-          setState(() {});
+          runSetState(setState);
         },
       ),
     );

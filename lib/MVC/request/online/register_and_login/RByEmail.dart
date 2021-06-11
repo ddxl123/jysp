@@ -10,6 +10,9 @@ import 'package:jysp/tools/TDebug.dart';
 mixin RByEmail {
   ///
 
+  String sendEmail = 'api/register_and_login/by_email/send_email';
+  String verifyEmail = 'api/register_and_login/by_email/verify_email';
+
   Future<void> sendEmailRequest({
     required RebuildHandler<SendEmailButtonHandlerEnum> handler,
     required TextEditingController emailTextEditingController,
@@ -26,7 +29,7 @@ mixin RByEmail {
       // TODO: POST api/register_and_login/by_email/send_email
       await GHttp.sendRequest<void>(
         method: 'POST',
-        route: 'api/register_and_login/by_email/send_email',
+        route: sendEmail,
         data: <String, String>{
           'email': emailTextEditingController.text,
         },
@@ -80,7 +83,7 @@ mixin RByEmail {
       // 服务器验证
       // TODO: POST api/register_and_login/by_email/verify_email
       await GHttp.sendCreateTokenRequest(
-        route: 'api/register_and_login/by_email/verify_email',
+        route: verifyEmail,
         willVerifyData: <String, String>{
           'email': qqEmailTextEditingController.text,
           'code': codeTextEditingController.text,

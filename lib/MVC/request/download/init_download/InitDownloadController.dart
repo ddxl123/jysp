@@ -3,8 +3,8 @@ import 'package:jysp/database/g_sqlite/GSqlite.dart';
 import 'package:jysp/database/merge_models/MMBase.dart';
 import 'package:jysp/database/models/MBase.dart';
 import 'package:jysp/database/models/MDownloadModule.dart';
-import 'package:jysp/mvc/request/download/RInitDownload.dart';
-import 'package:jysp/mvc/views/init_download_page/DownloadModule.dart';
+import 'package:jysp/mvc/request/download/init_download/DownloadModule.dart';
+import 'package:jysp/mvc/request/download/init_download/RInitDownload.dart';
 import 'package:sqflite/sqflite.dart';
 
 class InitDownloadController extends ChangeNotifier {
@@ -71,24 +71,26 @@ class InitDownloadController extends ChangeNotifier {
     ),
   ];
 
-  Future<void> getListFuture() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-    downloadModuleModels.clear();
-    downloadModuleModelModuleNames.clear();
-    downloadModuleModels = await MBase.queryRowsAsModels<MDownloadModule, MMBase, MDownloadModule>(
-      tableName: MDownloadModule.tableName,
-      where: null,
-      whereArgs: null,
-      connectTransaction: null,
-      returnMWhere: (MDownloadModule model) => model,
-      returnMMWhere: null,
-    );
-    for (final MDownloadModule model in downloadModuleModels) {
-      downloadModuleModelModuleNames.add(model.get_module_name!);
-    }
+  late final Future<void> getListFuture = Future<void>(
+    () async {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      downloadModuleModels.clear();
+      downloadModuleModelModuleNames.clear();
+      downloadModuleModels = await MBase.queryRowsAsModels<MDownloadModule, MMBase, MDownloadModule>(
+        tableName: MDownloadModule.tableName,
+        where: null,
+        whereArgs: null,
+        connectTransaction: null,
+        returnMWhere: (MDownloadModule model) => model,
+        returnMMWhere: null,
+      );
+      for (final MDownloadModule model in downloadModuleModels) {
+        downloadModuleModelModuleNames.add(model.get_module_name!);
+      }
 
-    await _check();
-  }
+      await _check();
+    },
+  );
 
   /// 检查【基础模型组】与 MDownloadQueueModule 数据表 数据是否一一对应
   Future<void> _check() async {

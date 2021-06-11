@@ -24,8 +24,8 @@ class _CompletePoolFreeBoxState extends State<CompletePoolFreeBox> {
     return FreeBoxCommon(
       poolType: thisPoolType,
       poolNodesCommon: FreeBoxStack(
-        builder: (BuildContext context, SetState setState) {
-          thisFragmentPoolController.poolNodesSetState ??= putSetState(setState);
+        builder: (BuildContext context, SetState pncSetState) {
+          thisFragmentPoolController.poolNodesSetState ??= pncSetState;
           return <FreeBoxPositioned>[
             for (int i = 0; i < thisFragmentPoolController.poolNodes.length; i++)
               FreeBoxPositioned(

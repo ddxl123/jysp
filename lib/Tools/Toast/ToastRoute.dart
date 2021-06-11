@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:jysp/g/G.dart';
 import 'package:jysp/tools/Helper.dart';
-import 'package:jysp/tools/TDebug.dart';
 
 class PopResult {
   PopResult({required this.popResultSelect, required this.value});
@@ -56,6 +55,9 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   ///初始化
   void init();
 
+  /// 初始化结束
+  void initDone() {}
+
   /// rebuild
   ///
   /// 会先执行 [rebuild] 函数，后对 widget 执行 rebuild
@@ -81,7 +83,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   late BuildContext context;
 
   /// 当前 route 的根 Widget 的 setState
-  SetState? setState;
+  SetState? toastRouteSetState;
 
   /// 父 widget 的 Rect
   late Rect fatherWidgetRect;
@@ -103,7 +105,7 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
     }
     _isToPoping = true;
     _isPopWaiting = true;
-    setState!(() {});
+    runSetState(toastRouteSetState!);
 
     final bool isPop = (await whenPop(result)).returnValue;
     if (isPop) {
@@ -112,14 +114,13 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
     } else {
       _isToPoping = false;
       _isPopWaiting = false;
-      setState!(() {});
+      runSetState(toastRouteSetState!);
     }
   }
 
   /// 物理返回 的 [result] 为 null
   @override
   bool didPop(PopResult? result) {
-    dLog(() => 'aa');
     if (_isPop == true) {
       super.didPop(null);
       return true;
@@ -158,12 +159,17 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
     super.initState();
     widget.toastRoute.init();
     widget.toastRoute.context = context;
-    widget.toastRoute.setState ??= putSetState(setState);
+    widget.toastRoute.toastRouteSetState ??= setState;
 
     final RenderBox fatherRenderBox = widget.toastRoute.fatherContext.findRenderObject()! as RenderBox;
     final Size size = fatherRenderBox.size;
     final Offset offset = fatherRenderBox.localToGlobal(Offset.zero);
     widget.toastRoute.fatherWidgetRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    WidgetsBinding.instance!.addPostFrameCallback(
+      (Duration timeStamp) {
+        widget.toastRoute.initDone();
+      },
+    );
   }
 
   @override

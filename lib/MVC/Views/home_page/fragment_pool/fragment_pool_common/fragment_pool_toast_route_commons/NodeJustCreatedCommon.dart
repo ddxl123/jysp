@@ -4,6 +4,7 @@ import 'package:jysp/database/models/MBase.dart';
 import 'package:jysp/mvc/controllers/HomePageController.dart';
 import 'package:jysp/mvc/controllers/fragment_pool_controller/FragmentPoolController.dart';
 import 'package:jysp/mvc/request/offline/RSqliteCurd.dart';
+import 'package:jysp/tools/Helper.dart';
 import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/toast/ShowToast.dart';
 import 'package:jysp/tools/toast/ToastRoute.dart';
@@ -116,7 +117,7 @@ class NodeJustCreatedCommon extends ToastRoute {
 
     // 插入成功。插入失败不进行任何操作
     if (result) {
-      _fragmentPoolController.poolNodesSetState!(() {});
+      runSetState(_fragmentPoolController.poolNodesSetState!);
     }
   }
 

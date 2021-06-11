@@ -53,7 +53,7 @@ class _RebuildHandleWidgetState<T> extends State<RebuildHandleWidget<T>> {
   @override
   void initState() {
     super.initState();
-    widget.rebuildHandler._rebuild ??= putSetState(setState);
+    widget.rebuildHandler._rebuild ??= setState;
   }
 
   @override

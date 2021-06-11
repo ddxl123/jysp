@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:jysp/tools/Helper.dart';
 
 class LoadingAnimation extends StatefulWidget {
   const LoadingAnimation({required this.loadingController});
@@ -44,7 +45,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
     _animationController.value = 0.0;
     _animationController.repeat(reverse: true);
     _animationController.addListener(() {
-      setState(() {});
+      runSetState(setState);
       if (_animationController.value == 1.0) {
         _animationController.reverse();
       }
@@ -60,7 +61,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
     }
     _stataus = 1;
     _animationController.stop();
-    setState(() {});
+    runSetState(setState);
   }
 
   void _toFail() {
@@ -69,7 +70,7 @@ class _LoadingAnimationState extends State<LoadingAnimation> with SingleTickerPr
     }
     _stataus = 2;
     _animationController.stop();
-    setState(() {});
+    runSetState(setState);
   }
 
   @override

@@ -57,11 +57,11 @@ class PoolNodeSheetCommon extends SheetPage<MMFragmentsAboutPoolNode, int> {
               Text('  节点：${poolNodeMModel.get_name}'),
               Expanded(child: Container()),
               StatefulBuilder(
-                builder: (BuildContext btCtx, SetState setState) {
+                builder: (BuildContext btnCtx, SetState btnSetState) {
                   return TextButton(
                     child: const Icon(Icons.more_horiz),
                     onPressed: () {
-                      showToastRoute(btCtx, NodeMoreCommon(btCtx, mmodel: poolNodeMModel));
+                      showToastRoute(btnCtx, NodeMoreCommon(btnCtx, mmodel: poolNodeMModel));
                     },
                   );
                 },
@@ -128,7 +128,7 @@ class PoolNodeSheetCommon extends SheetPage<MMFragmentsAboutPoolNode, int> {
         (_, int index) {
           return StatefulBuilder(
             builder: (BuildContext context, SetState btnSetState) {
-              return buttonsBuilder(sheetPageController.bodyData[index], context, putSetState(btnSetState));
+              return buttonsBuilder(sheetPageController.bodyData[index], context, btnSetState);
             },
           );
         },

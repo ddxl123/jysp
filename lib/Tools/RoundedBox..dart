@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 
-/// column 类型的圆角框。
-///
-/// 应用于简单弹出框，或简单的非弹出框。
-///
-/// [width] 和 [height] 最大值为屏幕宽\高度值，为 null 时按照子 widget 的宽\高值。
-///
-/// [crossAxisAlignment]：[children] 整体的横轴对齐。
 class RoundedBox extends StatelessWidget {
+  /// column 类型的圆角框。
+  ///
+  /// 应用于简单弹出框，或简单的非弹出框。
   const RoundedBox({
     this.width,
     this.height,
     this.pidding,
     required this.children,
     this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.isScrollale = true,
   });
 
+  /// [width] 和 [height] 最大值为屏幕宽\高度值，为 null 时按照子 widget 的宽\高值。
   final double? width;
+
+  /// [width] 和 [height] 最大值为屏幕宽\高度值，为 null 时按照子 widget 的宽\高值。
   final double? height;
+
   final EdgeInsetsGeometry? pidding;
+
+  /// [crossAxisAlignment]：[children] 整体的横轴对齐。
   final CrossAxisAlignment crossAxisAlignment;
+
+  /// 是否可滚动
+  final bool isScrollale;
+
   final List<Widget> children;
 
   @override
@@ -39,15 +46,25 @@ class RoundedBox extends StatelessWidget {
             BoxShadow(offset: Offset(10, 10), blurRadius: 10, spreadRadius: -10),
           ],
         ),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.zero,
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          child: Column(
-            crossAxisAlignment: crossAxisAlignment,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[...children],
-          ),
-        ),
+        child: () {
+          if (isScrollale) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              child: Column(
+                crossAxisAlignment: crossAxisAlignment,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[...children],
+              ),
+            );
+          } else {
+            return Column(
+              crossAxisAlignment: crossAxisAlignment,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[...children],
+            );
+          }
+        }(),
       ),
     );
   }

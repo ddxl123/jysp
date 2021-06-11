@@ -9,7 +9,7 @@ import 'package:jysp/database/models/MPnPendingPoolNode.dart';
 import 'package:jysp/database/models/MPnRulePoolNode.dart';
 import 'package:jysp/database/models/MUser.dart';
 import 'package:jysp/g/g_http/GHttp.dart';
-import 'package:jysp/mvc/views/init_download_page/Extension.dart';
+import 'package:jysp/mvc/request/download/init_download/Extension.dart';
 import 'package:jysp/tools/TDebug.dart';
 
 class RInitDownload {

@@ -105,7 +105,7 @@ class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStat
     widget.sheetPage.sheetPageController.sheetContext = context;
 
     // 绑定该 [Sheet] Widget 的 [setState]
-    widget.sheetPage.sheetPageController.sheetSetState ??= putSetState(setState);
+    widget.sheetPage.sheetPageController.sheetSetState ??= setState;
 
     widget.sheetPage.sheetPageController.animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
 
@@ -158,8 +158,8 @@ class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStat
   /// [header] 位置的 widget
   Widget headerStateful() {
     return StatefulBuilder(
-      builder: (_, SetState rebuild) {
-        widget.sheetPage.sheetPageController.headerSetState ??= putSetState(rebuild);
+      builder: (_, SetState hsfSetState) {
+        widget.sheetPage.sheetPageController.headerSetState ??= hsfSetState;
         return widget.sheetPage.header();
       },
     );
@@ -168,8 +168,8 @@ class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStat
   /// [body] 位置的 widget
   Widget bodyStateful() {
     return StatefulBuilder(
-      builder: (_, SetState rebuild) {
-        widget.sheetPage.sheetPageController.bodySetState ??= putSetState(rebuild);
+      builder: (_, SetState bsfSetState) {
+        widget.sheetPage.sheetPageController.bodySetState ??= bsfSetState;
         return widget.sheetPage.body();
       },
     );
@@ -178,8 +178,8 @@ class _SheetState<T, M> extends State<Sheet<T, M>> with SingleTickerProviderStat
   /// [loadArea] 位置的 widget
   Widget loadArea() {
     return StatefulBuilder(
-      builder: (_, SetState rebuild) {
-        widget.sheetPage.sheetPageController.loadAreaSetState ??= putSetState(rebuild);
+      builder: (_, SetState laSetState) {
+        widget.sheetPage.sheetPageController.loadAreaSetState ??= laSetState;
         return SheetLoadArea<T, M>(sheetPageController: widget.sheetPage.sheetPageController);
       },
     );

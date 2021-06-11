@@ -5,6 +5,7 @@ import 'package:jysp/tools/toast/ToastRoute.dart';
 Toast<T> showToast<T>({required String text, required T returnValue}) {
   final OverlayState? overlayState = Overlay.of(globalKey.currentContext!);
   final OverlayEntry entry = OverlayEntry(
+    maintainState: true,
     builder: (BuildContext context) {
       return ToastWidget(text: text);
     },
