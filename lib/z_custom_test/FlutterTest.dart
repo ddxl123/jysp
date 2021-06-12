@@ -103,12 +103,6 @@ class _TwoWidgetState extends State<TwoWidget> {
 //   }
 
 //   @override
-//   void init() {}
-
-//   @override
-//   void rebuild() {}
-
-//   @override
 //   Future<Toast<bool>> Function(PopResult? result) get whenPop {
 //     return (PopResult? result) async {
 //       return showToast<bool>(text: 'ddd', returnValue: true);

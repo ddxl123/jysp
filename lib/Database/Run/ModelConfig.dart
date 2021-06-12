@@ -97,8 +97,6 @@ class _uploads extends CreateModelBase {
 
   String table_name = 'table_name';
   String row_id = 'row_id';
-  String row_aiid = 'row_aiid';
-  String row_uuid = 'row_uuid';
   String updated_columns = 'updated_columns';
   String curd_status = 'curd_status';
   String upload_status = 'upload_status';
@@ -116,8 +114,6 @@ class _uploads extends CreateModelBase {
   List<Map<String, List<Object>>> get createFields => <Map<String, List<Object>>>[
         setField_normal(fieldName: table_name, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_x_any_integer(fieldName: row_id, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
-        setField_x_aiid_integer(fieldName: row_aiid, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
-        setField_x_uuid_text(fieldName: row_uuid, foreignKeyColumnNameWithTableName: null, isDeleteForeignKeyFollowCurrent: false, isDeleteCurrentFollowForeignKey: false),
         setField_normal(fieldName: updated_columns, sqliteFieldTypes: <SqliteType>[SqliteType.TEXT], dartFieldType: 'String'),
         setField_normal(fieldName: curd_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'CurdStatus'),
         setField_normal(fieldName: upload_status, sqliteFieldTypes: <SqliteType>[SqliteType.INTEGER], dartFieldType: 'UploadStatus'),

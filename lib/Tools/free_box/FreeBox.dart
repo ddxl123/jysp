@@ -56,6 +56,13 @@ class _FreeBox extends State<FreeBox> with TickerProviderStateMixin {
     initSliding();
   }
 
+  @override
+  void dispose() {
+    widget.freeBoxController.inertialSlideAnimationController.dispose();
+    widget.freeBoxController.targetSlideAnimationController.dispose();
+    super.dispose();
+  }
+
   void initSliding() {
     dLog(() => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     widget.freeBoxController.inertialSlideAnimationController = AnimationController(vsync: this);

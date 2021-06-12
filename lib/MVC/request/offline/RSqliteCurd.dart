@@ -9,24 +9,29 @@ import 'package:sqflite/sqflite.dart';
 
 // ============================================================================
 //
-// 事务中可以进行 txn.query，可以查询未提交的事务。
+// 事务中可以进行 txn.query，即可以查询已修改但未提交的事务。
 //
 // 事务失败的原因是事务内部 throw 异常，因此不能在事务内部进行 try 异常，否则就算 err 也会提交事务。
 //
-// 事务中每条 sql 语句都必须 await
+// 需要中途取消事务，则直接在内部 throw 即可。
+//
+// 事务中每条 sql 语句都必须 await。
 //
 // ============================================================================
 
 ///
 ///
 ///
-/// 每当我们每次 CURD 时，都依赖于事务，因此上传队列的每行之间都存在着事务关联，要上传到云端，就必须让云端方也遵循相应的事务关联。
 ///
-/// [mark]：让上传队列中所有属于同一事务的行做相同标记 [mark]。[mark] 由时间戳标记，以便每个 [TransactionMark] 具有唯一性。
 ///
-/// [transaction]：每次 CURD 都有且仅有一个 [transaction] 对象进行连接。
+
+/// 我们每次 CURD 都会依赖于事务，因此上传队列的每行之间都存在着事务关联，
+/// 若要上传到云端，就必须让云端方也遵循相应的事务关联。
 ///
-/// 有 [transaction] 则必须同时有 [mark]。
+/// 每次 CURD 都有且仅有一个 [transaction] 对象进行连接。
+/// 同时，有 [transaction] 则必须同时有 [mark]。
+/// 上传队列中所有属于同一事务的行需要做相同标记 [mark]，
+/// [mark] 使用时间戳来标记，以便每个 [TransactionMark] 具有唯一性。
 class TransactionMark {
   TransactionMark(this.transaction) {
     mark = createCurrentTimestamp();
@@ -38,10 +43,13 @@ class TransactionMark {
 ///
 ///
 ///
-///! Sqlite 专属表（没有对应可匹配的 mysql 表）不可用当前类
+///
+///
+
 class RSqliteCurd<T extends MBase> {
   ///
 
+  ///! 只有存储至本地后，需要待上传至后端数据库进行存储的数据，才可使用这个方法。
   RSqliteCurd.byModel(this.model) {
     if (MBase.modelCategory(tableName: model.getTableName) == ModelCategory.onlySqlite) {
       throw 'ModelCategory can not be onlySqlite';
@@ -51,20 +59,22 @@ class RSqliteCurd<T extends MBase> {
   /// 需要被 CURD 的 [model]。
   T model;
 
-  /// 需要被 CURD 的 [model] 对应的 [uploadModel]。
+  /// 当前 [model] 对应的 [uploadModel]。
   late MUpload uploadModel;
 
-  /// 返回被插入的 model，且该模型的 id 被赋值
   ///
-  /// 返回 null 时，代表捕获到异常，即插入失败
   ///
-  /// [transactionMark] 不为空时，需在外部进行异常捕获
-  Future<T?> toInsertRow({required TransactionMark? transactionMark}) async {
+  ///
+  ///
+  ///
+
+  /// {@macro RSqliteCurd.insertRow}
+  Future<T?> insertRow({required TransactionMark? transactionMark}) async {
     if (transactionMark == null) {
       try {
         return await db.transaction<T>(
           (Transaction txn) async {
-            return await _insertRow(transactionMark: TransactionMark(txn));
+            return await _toInsertRow(transactionMark: TransactionMark(txn));
           },
         );
       } catch (e) {
@@ -73,16 +83,17 @@ class RSqliteCurd<T extends MBase> {
       }
     } else {
       // 这里不能捕获异常，而必须在事务的外部捕获异常
-      return await _insertRow(transactionMark: transactionMark);
+      return await _toInsertRow(transactionMark: transactionMark);
     }
   }
 
-  Future<T?> toUpdateRow({required Map<String, Object?> updateContent, required bool isReturnNewModel, required TransactionMark? transactionMark}) async {
+  /// {@macro RSqliteCurd.updateRow}
+  Future<T?> updateRow({required Map<String, Object?> updateContent, required bool isReturnNewModel, required TransactionMark? transactionMark}) async {
     if (transactionMark == null) {
       try {
         return await db.transaction<T?>(
           (Transaction txn) async {
-            return await _updateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, transactionMark: TransactionMark(txn));
+            return await _toUpdateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, transactionMark: TransactionMark(txn));
           },
         );
       } catch (e) {
@@ -91,17 +102,19 @@ class RSqliteCurd<T extends MBase> {
       }
     } else {
       // 这里不能捕获异常，而必须在事务的外部捕获异常
-      return await _updateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, transactionMark: transactionMark);
+      return await _toUpdateRow(updateContent: updateContent, isReturnNewModel: isReturnNewModel, transactionMark: transactionMark);
     }
   }
 
+  /// {@macro RSqliteCurd.deleteRow}
+  ///
   /// 返回是否删除成功，捕获到异常返回 false
-  Future<bool> toDeleteRow({required TransactionMark? transactionMark}) async {
+  Future<bool> deleteRow({required TransactionMark? transactionMark}) async {
     if (transactionMark == null) {
       try {
         await db.transaction<void>(
           (Transaction txn) async {
-            await _deleteRow(transactionMark: TransactionMark(txn));
+            await _toDeleteRow(transactionMark: TransactionMark(txn));
           },
         );
         return true;
@@ -111,7 +124,7 @@ class RSqliteCurd<T extends MBase> {
       }
     } else {
       // 这里不能捕获异常，而必须在事务的外部捕获异常
-      await _deleteRow(transactionMark: transactionMark);
+      await _toDeleteRow(transactionMark: transactionMark);
       return true;
     }
   }
@@ -122,9 +135,7 @@ class RSqliteCurd<T extends MBase> {
   ///
   ///
 
-  /// 当 sqlite 应该存在 model 时，
-  ///
-  /// 检验 current model
+  /// 检验当前 [model]。
   Future<void> _checkCurrentModel({required TransactionMark transactionMark}) async {
     //
     // 只检查 model 的 aiid/uuid ,而不用再检查 sqlite，因为 model get_xx 是只读的。
@@ -148,9 +159,7 @@ class RSqliteCurd<T extends MBase> {
     }
   }
 
-  /// 当 sqlite 应该存在 model 时，
-  ///
-  /// 获取并检验 MUpload
+  /// 获取并检验当前 [model] 对应的 [MUpload]。
   Future<void> _getMUploadAndcheck({required TransactionMark transactionMark}) async {
     // 通过 MUpload 的 row_id 进行 find
     final List<MUpload> uploadModels = await MBase.queryRowsAsModels<MUpload, MMBase, MUpload>(
@@ -169,8 +178,6 @@ class RSqliteCurd<T extends MBase> {
         uuid_v: null,
         table_name_v: model.getTableName,
         row_id_v: model.get_id,
-        row_aiid_v: model.get_aiid,
-        row_uuid_v: model.get_uuid,
         updated_columns_v: null,
         curd_status_v: CurdStatus.R, // 主要是要配置这个选项
         upload_status_v: UploadStatus.uploaded,
@@ -182,9 +189,9 @@ class RSqliteCurd<T extends MBase> {
       uploadModel = uploadModels.first;
 
       // 当前 model 的 aiid/uuid 与对应 MUpload 的不匹配
-      if (uploadModel.get_row_aiid != model.get_aiid || uploadModel.get_row_uuid != model.get_uuid) {
-        throw 'aiid/uuid err: ${uploadModel.get_row_aiid}-${model.get_aiid}-${uploadModel.get_row_uuid}-${model.get_uuid}';
-      }
+      // if (uploadModel.get_row_aiid != model.get_aiid || uploadModel.get_row_uuid != model.get_uuid) {
+      //   throw 'aiid/uuid err: ${uploadModel.get_row_aiid}-${model.get_aiid}-${uploadModel.get_row_uuid}-${model.get_uuid}';
+      // }
       // 当前 model 的 table_name 与对应的 MUpload 的不匹配
       if (uploadModel.get_table_name != model.getTableName) {
         throw 'table_name err: ${uploadModel.get_table_name}-${model.getTableName}';
@@ -198,24 +205,34 @@ class RSqliteCurd<T extends MBase> {
       throw '${uploadModel.get_upload_status}';
     } else if (uploadModel.get_upload_status == UploadStatus.uploading) {
       //TODO: 从 mysql 中对照是否 upload 成功过，若成功过则设为 uploaded，若未成功过则进行 upload 后再设为 uploaded
+      throw '${uploadModel.get_upload_status}';
     }
   }
 
-  /// 当 sqlite 应该存在 model 时，
-  ///
-  /// 查询并检验当前 model 以及对应的 MUpload
+  /// 当 sqlite 应该存在当前 [model] 时，获取并检验当前 [model] 以及对应的 [MUpload]
   Future<void> _haveModelAndMUpload({required TransactionMark transactionMark}) async {
     // 必须按照这个顺序
     await _checkCurrentModel(transactionMark: transactionMark);
     await _getMUploadAndcheck(transactionMark: transactionMark);
   }
 
-  /// 对 [model] 的 [insert] 操作。
   ///
-  /// [return]：插入的模型（带有插入后 sqlite 生成的 id），未插入前的 model 不带有 id。
   ///
-  /// 若已存在，则抛异常.
-  Future<T> _insertRow({required TransactionMark transactionMark}) async {
+  ///
+  ///
+  ///
+
+  /// {@template RSqliteCurd.insertRow}
+  ///
+  /// 对当前 [model] 执行 [insert] 操作。
+  ///
+  /// 返回插入的模型（带有插入后 sqlite 生成的 id），未插入前的 [model] 不带有 id。
+  /// 返回 null 时，代表捕获到异常，即插入失败。若插入的 [model] 已存在，则会抛异常。
+  ///
+  /// - [transactionMark] 不为空时，需在外部进行异常捕获。
+  ///
+  /// {@endtemplate}
+  Future<T> _toInsertRow({required TransactionMark transactionMark}) async {
     // 插入时只存在 uuid
     if (model.get_uuid == null || model.get_aiid != null) {
       throw '${model.get_uuid}.${model.get_aiid}';
@@ -241,8 +258,6 @@ class RSqliteCurd<T extends MBase> {
         uuid_v: null,
         table_name_v: model.getTableName,
         row_id_v: rowId,
-        row_aiid_v: model.get_aiid,
-        row_uuid_v: model.get_uuid,
         updated_columns_v: null,
         curd_status_v: CurdStatus.C,
         upload_status_v: UploadStatus.notUploaded,
@@ -254,25 +269,23 @@ class RSqliteCurd<T extends MBase> {
     return model;
   }
 
+  /// {@template RSqliteCurd.updateRow}
   ///
-  ///
-  ///
-  ///
-  ///
-
   /// 对 [model] 的 [update] 操作。
   ///
+  /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
+  /// 但 [_haveModelAndMUpload] 函数已经让被更新的 row 必然存在，不存在则会抛异常。
+  ///
+  /// 当 { xx:null } 时，会将数据会覆盖成 null; 而 { 不存在xx } 时，则并不进行覆盖。
+  ///
   /// - [updateContent]：更新的内容。
+  ///
   /// - [isReturnNewModel]：是否返回新模型，为 false 时返回 null。
   ///
-  /// 当将被 update 的 row 不存在时，会进行 create，这是 update 本身的特性。
+  /// - [transactionMark] 不为空时，需在外部进行异常捕获。
   ///
-  /// 但 [_haveModel] 函数已经让 [_updateRow] 函数的 row 必然存在。
-  ///
-  /// 当 {xx:null} 时，会将数据会覆盖成 null; 而 {不存在xx} 时，则并不进行覆盖。
-  ///
-  /// [return]：
-  Future<T?> _updateRow({required Map<String, Object?> updateContent, required TransactionMark transactionMark, required bool isReturnNewModel}) async {
+  /// {@endtemplate}
+  Future<T?> _toUpdateRow({required Map<String, Object?> updateContent, required TransactionMark transactionMark, required bool isReturnNewModel}) async {
     await _haveModelAndMUpload(transactionMark: transactionMark);
 
     // 新增的 UpdatedColumns 和原来的 UpdatedColumns 合并
@@ -310,8 +323,6 @@ class RSqliteCurd<T extends MBase> {
           uuid_v: null,
           table_name_v: model.getTableName,
           row_id_v: model.get_id,
-          row_aiid_v: model.get_aiid,
-          row_uuid_v: model.get_uuid,
           updated_columns_v: allUpdatedColumns,
           curd_status_v: CurdStatus.U,
           upload_status_v: UploadStatus.notUploaded,
@@ -324,28 +335,24 @@ class RSqliteCurd<T extends MBase> {
 
     // C
     else if (uploadModel.get_curd_status == CurdStatus.C) {
-      await transactionMark.transaction.update(
-        MUpload.tableName,
-        <String, Object?>{
+      _toUpdateMUpload(
+        transactionMark: transactionMark,
+        updateContent: <String, Object?>{
           MUpload.mark: transactionMark.mark,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     }
 
     // U
     else if (uploadModel.get_curd_status == CurdStatus.U) {
-      await transactionMark.transaction.update(
-        MUpload.tableName,
-        <String, Object?>{
+      _toUpdateMUpload(
+        transactionMark: transactionMark,
+        updateContent: <String, Object?>{
           MUpload.updated_columns: allUpdatedColumns,
           MUpload.mark: transactionMark.mark,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     } else {
       throw 'unkown currentCurdStatus: ${uploadModel.get_curd_status}';
@@ -354,10 +361,15 @@ class RSqliteCurd<T extends MBase> {
     return newModel;
   }
 
+  /// {@template RSqliteCurd.deleteRow}
+  ///
   /// 对 [model] 的 [delete] 操作。
   ///
   /// 当将被 delete 的 row 不存在时，并不会抛异常，这是 delete 本身的特性。
-  Future<void> _deleteRow({required TransactionMark transactionMark}) async {
+  /// 但 [_haveModelAndMUpload] 函数已经让被删除的 row 必然存在，不存在则会抛异常。
+  ///
+  /// {@endtemplate}
+  Future<void> _toDeleteRow({required TransactionMark transactionMark}) async {
     await _haveModelAndMUpload(transactionMark: transactionMark);
 
     // 无论 CURD 都需要删除本体
@@ -376,15 +388,13 @@ class RSqliteCurd<T extends MBase> {
     // U
     else if (uploadModel.get_curd_status == CurdStatus.U) {
       // 将本体对应的 MUpload 的 curd_status 置为 D
-      await transactionMark.transaction.update(
-        MUpload.tableName,
-        <String, Object?>{
+      _toUpdateMUpload(
+        transactionMark: transactionMark,
+        updateContent: <String, Object?>{
           MUpload.curd_status: CurdStatus.D.index,
           MUpload.mark: transactionMark.mark,
           MUpload.updated_at: DateTime.now().millisecondsSinceEpoch,
         },
-        where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
-        whereArgs: <Object?>[model.get_id, model.getTableName],
       );
     }
 
@@ -399,8 +409,6 @@ class RSqliteCurd<T extends MBase> {
           uuid_v: uploadModel.get_uuid,
           table_name_v: uploadModel.get_table_name, // 注意这里不是 getTableName, 而是 get_table_name
           row_id_v: uploadModel.get_row_id,
-          row_aiid_v: uploadModel.get_row_aiid,
-          row_uuid_v: uploadModel.get_row_uuid,
           updated_columns_v: uploadModel.get_updated_columns,
           curd_status_v: CurdStatus.D,
           upload_status_v: UploadStatus.notUploaded,
@@ -421,9 +429,34 @@ class RSqliteCurd<T extends MBase> {
     await _toDeleteForeignKeyHaveMany(transactionMark: transactionMark);
   }
 
-  /// 筛选出需要同时删除的外键 row
   ///
-  /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
+  ///
+  ///
+  ///
+  ///
+
+  /// 对当前 [MUpload] 进行删除操作。
+  Future<void> _toDeleteMUpload({required TransactionMark transactionMark}) async {
+    await transactionMark.transaction.delete(
+      MUpload.tableName,
+      where: '${MUpload.row_id} = ? AND ${MUpload.table_name} = ?',
+      whereArgs: <Object?>[model.get_id, model.getTableName],
+    );
+  }
+
+  /// 对当前 [MUpload] 进行更新操作。
+  Future<void> _toUpdateMUpload({required TransactionMark transactionMark, required Map<String, Object?> updateContent}) async {
+    await _toDeleteMUpload(transactionMark: transactionMark);
+
+    // 防止插入到原先的 id 上。
+    uploadModel.getRowJson.remove(MUpload.id);
+    for (int i = 0; i < updateContent.length; i++) {
+      uploadModel.getRowJson[updateContent.keys.elementAt(i)] = updateContent.values.elementAt(i);
+    }
+    await transactionMark.transaction.insert(MUpload.tableName, uploadModel.getRowJson);
+  }
+
+  /// 筛选出需要同时删除的 foreginKey-row。
   Future<void> _toDeleteForeignKeyBelongsTo({required TransactionMark transactionMark}) async {
     // for single
     for (int i = 0; i < model.getDeleteForeignKeyFollowCurrentForSingle.length; i++) {
@@ -495,9 +528,7 @@ class RSqliteCurd<T extends MBase> {
     }
   }
 
-  /// 筛选出需要同时删除其他关联该表中的外键的 row
-  ///
-  /// 这个函数（含内调用的函数）不会牵扯 MUpload 表，除了递归调用后。
+  /// 筛选出需要同时删除的 关联该表的其他表对应的 row。
   Future<void> _toDeleteForeignKeyHaveMany({required TransactionMark transactionMark}) async {
     // for single
     for (int i = 0; i < model.getDeleteManyForeignKeyForSingle.length; i++) {
@@ -563,7 +594,7 @@ class RSqliteCurd<T extends MBase> {
     }
   }
 
-  /// 对每个被筛选出来的外键所对应的 row 进行递归 delete
+  /// 对每个被筛选出来的 row 进行递归 delete。
   Future<void> _recursionDelete({required String tableName, required String columnName, required Object columnNameValue, required TransactionMark transactionMark}) async {
     // 查询外键对应的 row 模型
     final List<MBase> queryResult = await MBase.queryRowsAsModels<MBase, MMBase, MBase>(
@@ -578,7 +609,7 @@ class RSqliteCurd<T extends MBase> {
     // 把查询到的进行递归 delete
     if (queryResult.isNotEmpty) {
       for (int i = 0; i < queryResult.length; i++) {
-        await RSqliteCurd<MBase>.byModel(queryResult[i])._deleteRow(transactionMark: transactionMark);
+        await RSqliteCurd<MBase>.byModel(queryResult[i])._toDeleteRow(transactionMark: transactionMark);
       }
     }
   }

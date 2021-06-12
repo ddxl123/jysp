@@ -52,7 +52,7 @@ class _CreateFragmentPageState extends State<CreateFragmentPage> {
                   created_at_v: createCurrentTimestamp(),
                   updated_at_v: createCurrentTimestamp(),
                 );
-                final MFragmentsAboutPendingPoolNode? result = await RSqliteCurd<MFragmentsAboutPendingPoolNode>.byModel(newModel).toInsertRow(transactionMark: null);
+                final MFragmentsAboutPendingPoolNode? result = await RSqliteCurd<MFragmentsAboutPendingPoolNode>.byModel(newModel).insertRow(transactionMark: null);
                 if (result == null) {
                   dLog(() => '插入失败');
                 } else {

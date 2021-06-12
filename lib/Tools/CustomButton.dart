@@ -6,7 +6,7 @@ import 'package:jysp/tools/Helper.dart';
 
 enum OnStatus { none, up, down, moving }
 
-/// 当 [CustomButton] 被触发 setState，并不会 rebuild child，因为 child 是一个对象
+/// 当 [CustomButton] 被触发 setState，并不会 setState child，因为 child 是一个对象
 ///
 /// [isAlwaysOnDown]\[isAlwaysOnUp]\[isAlwaysOnLongPressed]：是否总是触发该 Listener，若为 false，则只会触发底层 widget 的 Listener
 ///

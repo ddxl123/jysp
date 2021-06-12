@@ -19,7 +19,7 @@ enum LoadingBarrierHandlerEnum {
 ///
 ///
 ///
-/// rebuild 处理模块
+/// setState 处理模块
 ///
 class RebuildHandler<T> {
   /// [_handleCode]：默认值。

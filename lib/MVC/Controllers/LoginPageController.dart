@@ -11,7 +11,7 @@ mixin _Root on _Init, RByEmail {
   TextEditingController emailTextEditingController = TextEditingController(text: '1033839760@qq.com');
   TextEditingController codeTextEditingController = TextEditingController();
 
-  /// 触发 [rebuild], 同时返回代码, 根据代码进行处理。
+  /// 触发 [setState], 同时返回代码, 根据代码进行处理。
   RebuildHandler<SendEmailButtonHandlerEnum> sendEmailButtonRebuildHandler = RebuildHandler<SendEmailButtonHandlerEnum>(SendEmailButtonHandlerEnum.unSent);
 
   @override
@@ -20,6 +20,8 @@ mixin _Root on _Init, RByEmail {
     if (timer is Timer) {
       timer.cancel();
     }
+    emailTextEditingController.dispose();
+    codeTextEditingController.dispose();
     super.dispose();
   }
 }

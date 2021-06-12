@@ -35,12 +35,6 @@ class NodeMoreCommon extends ToastRoute {
   }
 
   @override
-  void init() {}
-
-  @override
-  void rebuild() {}
-
-  @override
   Future<Toast<bool>> whenPop(PopResult? popResult) async {
     try {
       if (popResult == null || popResult.popResultSelect == PopResultSelect.clickBackground) {

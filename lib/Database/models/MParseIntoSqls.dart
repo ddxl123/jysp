@@ -3,7 +3,7 @@ class MParseIntoSqls {
   'version_infos': 'CREATE TABLE version_infos (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,saved_version TEXT,created_at INTEGER,updated_at INTEGER)',
   'tokens': 'CREATE TABLE tokens (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,access_token TEXT,refresh_token TEXT,created_at INTEGER,updated_at INTEGER)',
   'users': 'CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,username TEXT,email TEXT,created_at INTEGER,updated_at INTEGER)',
-  'uploads': 'CREATE TABLE uploads (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,table_name TEXT,row_id INTEGER,row_aiid INTEGER,row_uuid TEXT,updated_columns TEXT,curd_status INTEGER,upload_status INTEGER,mark INTEGER,created_at INTEGER,updated_at INTEGER)',
+  'uploads': 'CREATE TABLE uploads (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,table_name TEXT,row_id INTEGER,updated_columns TEXT,curd_status INTEGER,upload_status INTEGER,mark INTEGER,created_at INTEGER,updated_at INTEGER)',
   'download_modules': 'CREATE TABLE download_modules (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,module_name TEXT,download_status INTEGER,created_at INTEGER,updated_at INTEGER)',
   'pn_pending_pool_nodes': 'CREATE TABLE pn_pending_pool_nodes (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,recommend_rule_aiid INTEGER,recommend_rule_uuid TEXT,type INTEGER,name TEXT,box_position TEXT,created_at INTEGER,updated_at INTEGER)',
   'pn_memory_pool_nodes': 'CREATE TABLE pn_memory_pool_nodes (id INTEGER PRIMARY KEY AUTOINCREMENT,aiid INTEGER,uuid TEXT,using_rule_aiid INTEGER,using_rule_uuid TEXT,type INTEGER,name TEXT,box_position TEXT,created_at INTEGER,updated_at INTEGER)',

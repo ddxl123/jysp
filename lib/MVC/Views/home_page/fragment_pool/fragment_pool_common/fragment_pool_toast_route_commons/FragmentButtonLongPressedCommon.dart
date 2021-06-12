@@ -3,6 +3,7 @@ import 'package:jysp/database/g_sqlite/GSqlite.dart';
 import 'package:jysp/database/merge_models/MMFragmentsAboutPoolNode.dart';
 import 'package:jysp/database/models/MBase.dart';
 import 'package:jysp/mvc/request/offline/RSqliteCurd.dart';
+import 'package:jysp/mvc/views/home_page/fragment_pool/fragment_pool_common/fragment_pool_toast_route_commons/RenameCommon.dart';
 import 'package:jysp/tools/RoundedBox..dart';
 import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/toast/ShowToast.dart';
@@ -32,6 +33,22 @@ class FragmentButtonLongPressedCommon extends ToastRoute {
                 Navigator.pop(context, PopResult(popResultSelect: PopResultSelect.one, value: null));
               },
             ),
+            TextButton(
+              child: const Text('修改名称'),
+              onPressed: () {
+                Navigator.pop(context, PopResult(popResultSelect: PopResultSelect.two, value: null));
+                Navigator.push(
+                  context,
+                  RenameCommon(
+                    context,
+                    oldName: mmFragmentsAboutPoolNode.title,
+                    model: mmFragmentsAboutPoolNode.model,
+                    nameKey: mmFragmentsAboutPoolNode.title,
+                    updatedAtKey: mmFragmentsAboutPoolNode.updated_at,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -39,17 +56,13 @@ class FragmentButtonLongPressedCommon extends ToastRoute {
   }
 
   @override
-  void init() {}
-
-  @override
-  void rebuild() {}
-
-  @override
   Future<Toast<bool>> whenPop(PopResult? popResult) async {
     try {
       if (popResult == null || popResult.popResultSelect == PopResultSelect.clickBackground) {
         return showToast<bool>(text: '未选择', returnValue: true);
-      } else if (popResult.popResultSelect == PopResultSelect.one) {
+      }
+      //
+      else if (popResult.popResultSelect == PopResultSelect.one) {
         // 上层只获取了显示在 sheet 外观上的字段，而这里还需要 aiid/uuid 等字段，因此需要再次 query 获取 aiid/uuid 等字段。
         final bool result = await db.transaction<bool>(
           (Transaction txn) async {
@@ -71,7 +84,7 @@ class FragmentButtonLongPressedCommon extends ToastRoute {
             if (mmFragmentsAboutPoolNodes.isEmpty) {
               throw 'mmFragmentsAboutPoolNodes is empty';
             }
-            final bool deleteResult = await RSqliteCurd<MBase>.byModel(mmFragmentsAboutPoolNodes.first.model).toDeleteRow(transactionMark: TransactionMark(txn));
+            final bool deleteResult = await RSqliteCurd<MBase>.byModel(mmFragmentsAboutPoolNodes.first.model).deleteRow(transactionMark: TransactionMark(txn));
             return deleteResult;
           },
         );
@@ -81,7 +94,11 @@ class FragmentButtonLongPressedCommon extends ToastRoute {
         } else {
           return showToast<bool>(text: '删除失败', returnValue: false);
         }
-      } else {
+      } else if (popResult.popResultSelect == PopResultSelect.two) {
+        return showToast<bool>(text: '选择修改名称', returnValue: true);
+      }
+      //
+      else {
         throw 'unknown result: $popResult';
       }
     } catch (e, r) {

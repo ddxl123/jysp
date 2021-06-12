@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:jysp/database/merge_models/MMPoolNode.dart';
 import 'package:jysp/tools/Helper.dart';
-import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/free_box/FreeBoxController.dart';
 
 class FragmentPoolController extends ChangeNotifier {
@@ -25,12 +24,6 @@ class FragmentPoolController extends ChangeNotifier {
   final List<MMPoolNode> poolNodes = <MMPoolNode>[];
 
   final FreeBoxController freeBoxController = FreeBoxController();
-
-  @override
-  void dispose() {
-    dLog(() => 'FragmentPoolController dispose');
-    super.dispose();
-  }
 
   ///
 }

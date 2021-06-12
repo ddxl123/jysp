@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jysp/database/models/MUpload.dart';
 import 'package:jysp/global_floating_ball/FloatingBallBase.dart';
+import 'package:jysp/global_floating_ball/common_page/DataTableCommon.dart';
 import 'package:jysp/tools/RoundedBox..dart';
 import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/toast/ShowToast.dart';
@@ -39,6 +41,7 @@ class First extends ToastRoute {
             width: MediaQuery.of(context).size.width * 2 / 3,
             height: MediaQuery.of(context).size.height * 2 / 3,
             children: <Widget>[
+              const Text('存在刷新频率'),
               Row(
                 children: <Widget>[
                   Expanded(
@@ -49,7 +52,12 @@ class First extends ToastRoute {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextButton(onPressed: () {}, child: const Text('查看全部需要上传的数据')),
+                    child: TextButton(
+                      child: const Text('查看全部需要上传的数据'),
+                      onPressed: () {
+                        Navigator.push(context, DataTableCommon(context, MUpload.tableName));
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -59,12 +67,6 @@ class First extends ToastRoute {
       ),
     ];
   }
-
-  @override
-  void init() {}
-
-  @override
-  void rebuild() {}
 
   @override
   Future<Toast<bool>> whenPop(PopResult? popResult) async {

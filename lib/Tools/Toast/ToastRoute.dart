@@ -53,15 +53,15 @@ abstract class ToastRoute extends OverlayRoute<PopResult> {
   Future<Toast<bool>> whenPop(PopResult? popResult);
 
   ///初始化
-  void init();
+  void init() {}
 
   /// 初始化结束
   void initDone() {}
 
-  /// rebuild
+  /// build
   ///
-  /// 会先执行 [rebuild] 函数，后对 widget 执行 rebuild
-  void rebuild();
+  /// 会先执行 [build] 函数，后返回 widget。
+  void buildCallBack() {}
 
   /// body
   ///
@@ -174,7 +174,7 @@ class _ToastRouteWidgetState extends State<ToastRouteWidget> {
 
   @override
   Widget build(BuildContext context) {
-    widget.toastRoute.rebuild();
+    widget.toastRoute.buildCallBack();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -284,6 +284,7 @@ class Toast<T> {
 ///
 ///
 ///
+
 /// 自动设置 child 在屏幕中的位置
 ///
 /// 要注意 child 高度不能大于屏幕高度的一半，否则溢出部分无法显示

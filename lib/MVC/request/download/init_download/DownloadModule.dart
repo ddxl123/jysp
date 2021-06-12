@@ -39,8 +39,8 @@ class DownloadModule {
 
   Widget _setWidget() {
     return StatefulBuilder(
-      builder: (BuildContext context, SetState rebuild) {
-        downloadModuleSetState ??= rebuild;
+      builder: (BuildContext context, SetState swSetState) {
+        downloadModuleSetState ??= swSetState;
         switch (downloadStatus) {
           case DownloadStatus.waiting:
             return _row(moduleName, const Text('等待中...'));

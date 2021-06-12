@@ -10,7 +10,6 @@ import 'package:jysp/mvc/views/home_page/fragment_pool/fragment_pool_common/Pool
 import 'package:jysp/mvc/views/home_page/fragment_pool/fragment_pool_common/PoolNodeSheetCommon.dart';
 import 'package:jysp/mvc/views/home_page/fragment_pool/fragment_pool_common/fragment_pool_toast_route_commons/NodeJustCreatedCommon.dart';
 import 'package:jysp/tools/Helper.dart';
-import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/free_box/FreeBoxController.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
@@ -21,18 +20,6 @@ class PendingPoolFreeBox extends StatefulWidget {
 }
 
 class _PendingPoolFreeBoxState extends State<PendingPoolFreeBox> {
-  @override
-  void dispose() {
-    dLog(() => 'PendingPoolFreeBox dispose');
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    dLog(() => 'iPendingPoolFreeBox init');
-  }
-
   @override
   Widget build(BuildContext context) {
     const PoolType thisPoolType = PoolType.pendingPool;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jysp/database/merge_models/MMPoolNode.dart';
 import 'package:jysp/database/models/MBase.dart';
 import 'package:jysp/mvc/request/offline/RSqliteCurd.dart';
+import 'package:jysp/mvc/views/home_page/fragment_pool/fragment_pool_common/fragment_pool_toast_route_commons/RenameCommon.dart';
 import 'package:jysp/tools/RoundedBox..dart';
 import 'package:jysp/tools/TDebug.dart';
 import 'package:jysp/tools/toast/ShowToast.dart';
@@ -25,7 +26,18 @@ class NodeLongPressedCommon extends ToastRoute {
           children: <Widget>[
             TextButton(
               child: const Text('修改名称'),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  RenameCommon(
+                    context,
+                    model: mmPoolNode.model,
+                    oldName: mmPoolNode.name,
+                    nameKey: mmPoolNode.name,
+                    updatedAtKey: mmPoolNode.updated_at,
+                  ),
+                );
+              },
             ),
             TextButton(
               child: const Text('删除节点'),
@@ -40,24 +52,22 @@ class NodeLongPressedCommon extends ToastRoute {
   }
 
   @override
-  void init() {}
-
-  @override
-  void rebuild() {}
-
-  @override
   Future<Toast<bool>> whenPop(PopResult? popResult) async {
     try {
       if (popResult == null || popResult.popResultSelect == PopResultSelect.clickBackground) {
         return showToast(text: '未选择', returnValue: true);
-      } else if (popResult.popResultSelect == PopResultSelect.one) {
-        final bool deleteResult = await RSqliteCurd<MBase>.byModel(mmPoolNode.model).toDeleteRow(transactionMark: null);
+      }
+      //
+      else if (popResult.popResultSelect == PopResultSelect.one) {
+        final bool deleteResult = await RSqliteCurd<MBase>.byModel(mmPoolNode.model).deleteRow(transactionMark: null);
         if (deleteResult) {
           return showToast(text: '删除成功', returnValue: true);
         } else {
           return showToast(text: '删除失败', returnValue: false);
         }
-      } else {
+      }
+      //
+      else {
         throw 'unknown popResult: $popResult';
       }
     } catch (e, r) {

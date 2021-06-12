@@ -47,7 +47,7 @@ class NodeJustCreatedCommon extends ToastRoute {
   }
 
   @override
-  void rebuild() {
+  void buildCallBack() {
     // 自动升起键盘
     FocusScope.of(context).requestFocus(_focusNode);
   }
@@ -55,6 +55,7 @@ class NodeJustCreatedCommon extends ToastRoute {
   @override
   void dispose() {
     _focusNode.dispose();
+    _txtEditingController.dispose();
     super.dispose();
   }
 
@@ -128,7 +129,7 @@ class NodeJustCreatedCommon extends ToastRoute {
       final MBase newNodeModel = newNodeModelCallback(_fragmentPoolController.freeBoxController.screenToBoxTransform(screenPosition), name);
 
       // 插入 new node
-      final MBase? insertReuslt = await RSqliteCurd<MBase>.byModel(newNodeModel).toInsertRow(transactionMark: null);
+      final MBase? insertReuslt = await RSqliteCurd<MBase>.byModel(newNodeModel).insertRow(transactionMark: null);
 
       // 让 state 变化
       if (insertReuslt != null) {
