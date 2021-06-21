@@ -6,10 +6,27 @@
     "created_at|updated_at": "dart:int, sqlite:INTEGER, mysql:TIMESTAMP",
   },
   "/全部类型": {
-    "/类型": "空               整型            浮点型           字符串           时间戳",
-    dart: "null             int            num             String           int",
-    sqlite: "NULL         INTEGER          REAL             TEXT            INTEGER",
-    mysql: "NULL    TINYINT INT BIGINT     FLOAT      CHAR(M) VARCHAR(M)    TIMESTAMP",
+    "/类型": "  空                       整型                                             浮点型                       字符串                             时间戳",
+    dart: "    null               int(-2^53,2^53)                                        num                          String                             int",
+    sqlite: "  NULL              INTEGER(-2^63,2^63-1)                                   REAL                         TEXT                              INTEGER",
+    java: "    null       Integer(-2^31,2^31-1) Long(-2^63,2^63-1) BigInteger(+∞)        Double                       String                            Timestamp",
+    mysql: "   NULL       TINYINT(-128,127) INT(-2^32,2^32) BIGINT(-2^63,2^63-1)         FLOAT        CHAR(utf8字符集255) VARCHAR(utf8字符集21831)       TIMESTAMP",
+    "/约束": {
+      "/整型约束": [
+        "值[-100,100] ——> java-Integer, mysql-TINYINT",
+        "值[-20亿,20亿] ——> java-Integer, mysql-INT",
+        "aiid ——> 若超过 9千万亿 则需采取其他方法，因为 dart int 装不下",
+      ],
+      "/字符串类型约束": [
+        "字符数<=20 ——> mysql-CHAR(25)",
+        "字符数<=250 ——> mysql-CHAR(255)",
+        "字符数<=500 ——> mysql-VARCHAR(550)"
+        "字符数<=1000 ——> mysql-VARCHAR(1050)",
+        "字符数<=5000 ——> mysql-VARCHAR(5050)",
+        "字符数<=10000 ——> mysql-VARCHAR(10050)",
+      ],
+    },
+
     mysql_option: "主键 PRIMARY KEY    不为空 NOT NULL    唯一 UNIQUE    无符号 UNSIGNED     自增 AUTO INCREMENT    默认值 DEFAULT",
   },
   "/类型详解": {
